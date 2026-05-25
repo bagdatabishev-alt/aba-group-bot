@@ -1,5 +1,6 @@
 import logging
 from datetime import time
+from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
 
 TOKEN = "8715610432:AAF0ZQRWgL0YiMhcIxdwrlNlygOkP0cbD3M"
@@ -19,6 +20,7 @@ WORDS = [
 ]
 
 logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 day_counter = {"index": 0}
 
 def get_three_words():
@@ -35,10 +37,14 @@ async def send_daily_words(context: ContextTypes.DEFAULT_TYPE):
     message += "💪 Осы сөздерді бүгін қолданып көріңіз!"
     await context.bot.send_message(chat_id=CHAT_ID, text=message, parse_mode="Markdown")
 
-async def start(update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("👋 Сәлем! Мен *ABA Group* боты!\n/words командасымен сөздер алыңыз!", parse_mode="Markdown")
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    chat_id = update.effective_chat.id
+    await update.message.reply_text(
+        f"👋 Сәлем! Мен *ABA Group* боты!\n/words командасымен сөздер алыңыз!\n\nChat ID: `{chat_id}`",
+        parse_mode="Markdown"
+    )
 
-async def words_now(update, context: ContextTypes.DEFAULT_TYPE):
+async def words_now(update: Update, context: ContextTypes.DEFAULT_TYPE):
     words = get_three_words()
     message = "🌟 *ABA Group — Күнделікті ағылшын сөздері*\n\n"
     for i, w in enumerate(words, 1):
