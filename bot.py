@@ -1,8 +1,6 @@
 import logging
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from telegram import Bot
+from datetime import time
 from telegram.ext import Application, CommandHandler, ContextTypes
-import asyncio
 
 TOKEN = "8715610432:AAF0ZQRWgL0YiMhcIxdwrlNlygOkP0cbD3M"
 CHAT_ID = 590951027
@@ -22,7 +20,6 @@ WORDS = [
 
 logging.basicConfig(level=logging.INFO)
 day_counter = {"index": 0}
-bot = Bot(token=TOKEN)
 
 def get_three_words():
     idx = day_counter["index"] % (len(WORDS) // 3)
@@ -30,13 +27,13 @@ def get_three_words():
     day_counter["index"] += 1
     return trio
 
-async def send_daily_words():
+async def send_daily_words(context: ContextTypes.DEFAULT_TYPE):
     words = get_three_words()
     message = "🌟 *ABA Group — Күнделікті ағылшын сөздері*\n\n"
     for i, w in enumerate(words, 1):
         message += f"*{i}. {w['word']}* — _{w['translation']}_\n📝 {w['example']}\n\n"
     message += "💪 Осы сөздерді бүгін қолданып көріңіз!"
-    await bot.send_message(chat_id=CHAT_ID, text=message, parse_mode="Markdown")
+    await context.bot.send_message(chat_id=CHAT_ID, text=message, parse_mode="Markdown")
 
 async def start(update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("👋 Сәлем! Мен *ABA Group* боты!\n/words командасымен сөздер алыңыз!", parse_mode="Markdown")
@@ -48,16 +45,12 @@ async def words_now(update, context: ContextTypes.DEFAULT_TYPE):
         message += f"*{i}. {w['word']}* — _{w['translation']}_\n📝 {w['example']}\n\n"
     await update.message.reply_text(message, parse_mode="Markdown")
 
-async def main():
+def main():
     app = Application.builder().token(TOKEN).build()
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("words", words_now))
-    
-    scheduler = AsyncIOScheduler()
-    scheduler.add_job(send_daily_words, 'cron', hour=4, minute=0)
-    scheduler.start()
-    
-    await app.run_polling()
+    app.job_queue.run_daily(send_daily_words, time=time(hour=4, minute=0))
+    app.run_polling()
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
