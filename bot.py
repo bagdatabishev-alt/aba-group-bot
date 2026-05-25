@@ -1,7 +1,8 @@
+import asyncio
 import logging
 from datetime import time
-from telegram import Update
-from telegram.ext import Updater, CommandHandler, CallbackContext, JobQueue
+from telegram import Bot
+from telegram.ext import Application, CommandHandler, ContextTypes
 
 TOKEN = "8715610432:AAF0ZQRWgL0YiMhcIxdwrlNlygOkP0cbD3M"
 CHAT_ID = 590951027
@@ -31,32 +32,30 @@ def get_three_words():
     day_counter["index"] += 1
     return trio
 
-def send_daily_words(context: CallbackContext):
+async def send_daily_words(context: ContextTypes.DEFAULT_TYPE):
     words = get_three_words()
     message = "🌟 *ABA Group — Күнделікті ағылшын сөздері*\n\n"
     for i, w in enumerate(words, 1):
         message += f"*{i}. {w['word']}* — _{w['translation']}_\n📝 {w['example']}\n\n"
     message += "💪 Осы сөздерді бүгін қолданып көріңіз!"
-    context.bot.send_message(chat_id=CHAT_ID, text=message, parse_mode="Markdown")
+    await context.bot.send_message(chat_id=CHAT_ID, text=message, parse_mode="Markdown")
 
-def start(update: Update, context: CallbackContext):
-    update.message.reply_text("👋 Сәлем! Мен *ABA Group* боты!\nКүн сайын таңертең 3 ағылшын сөзін жіберемін.\n/words командасымен бірден алыңыз!", parse_mode="Markdown")
+async def start(update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("👋 Сәлем! Мен *ABA Group* боты!\nКүн сайын таңертең 3 ағылшын сөзін жіберемін.\n/words командасымен бірден алыңыз!", parse_mode="Markdown")
 
-def words_now(update: Update, context: CallbackContext):
+async def words_now(update, context: ContextTypes.DEFAULT_TYPE):
     words = get_three_words()
     message = "🌟 *ABA Group — Күнделікті ағылшын сөздері*\n\n"
     for i, w in enumerate(words, 1):
         message += f"*{i}. {w['word']}* — _{w['translation']}_\n📝 {w['example']}\n\n"
-    update.message.reply_text(message, parse_mode="Markdown")
+    await update.message.reply_text(message, parse_mode="Markdown")
 
 def main():
-    updater = Updater(TOKEN)
-    dp = updater.dispatcher
-    dp.add_handler(CommandHandler("start", start))
-    dp.add_handler(CommandHandler("words", words_now))
-    updater.job_queue.run_daily(send_daily_words, time=time(hour=SEND_HOUR, minute=SEND_MINUTE))
-    updater.start_polling()
-    updater.idle()
+    app = Application.builder().token(TOKEN).build()
+    app.add_handler(CommandHandler("start", start))
+    app.add_handler(CommandHandler("words", words_now))
+    app.job_queue.run_daily(send_daily_words, time=time(hour=SEND_HOUR, minute=SEND_MINUTE))
+    app.run_polling()
 
 if __name__ == "__main__":
     main()
