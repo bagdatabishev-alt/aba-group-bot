@@ -4,7 +4,8 @@ from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
 
 TOKEN = "8715610432:AAF0ZQRWgL0YiMhcIxdwrlNlygOkP0cbD3M"
-CHAT_ID = 590951027
+CHAT_ID = -5250749325
+
 
 WORDS = [
     {"word": "Resilience", "translation": "Төзімділік", "example": "She showed great resilience."},
