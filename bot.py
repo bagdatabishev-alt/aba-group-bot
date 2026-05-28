@@ -316,13 +316,25 @@ async def level_info(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
     await update.message.reply_text(message, parse_mode="Markdown")
 
+async def send_personal_words(context: ContextTypes.DEFAULT_TYPE):
+    words = get_three_words()
+    message = "🌟 *ABA Group — Жеке сөздер (Pittsburgh)*\n\n"
+    for i, w in enumerate(words, 1):
+        message += f"*{i}. {w['word']}* {w['transcription']} — _{w['translation']}_\n"
+        message += f"📝 {w['example']}\n"
+        message += f"🔊 forvo.com/word/{w['word'].lower()}\n\n"
+    message += "💪 Осы сөздерді бүгін қолданып көріңіз!"
+    await context.bot.send_message(chat_id=590951027, text=message, parse_mode="Markdown")
+
 def main():
     app = Application.builder().token(TOKEN).build()
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("words", words_now))
     app.add_handler(CommandHandler("level", level_info))
     app.job_queue.run_daily(send_daily_words, time=time(hour=4, minute=0))
+    app.job_queue.run_daily(send_personal_words, time=time(hour=12, minute=0))
     app.run_polling()
+
 
 if __name__ == "__main__":
     main()
