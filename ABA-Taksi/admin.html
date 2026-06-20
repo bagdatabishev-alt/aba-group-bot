@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>ABA TAKSI GO — Админ</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--gold:#f5c518;--dark:#0a0a0f;--dark2:#111118;--dark3:#1a1a25;--dark4:#22222f;--text:#f0f0f5;--muted:#7a7a90;--success:#22d47a;--danger:#ff4d6d;--radius:14px}
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Manrope',sans-serif;background:var(--dark);color:var(--text);min-height:100vh}
+    #login-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px}
+    .login-logo{font-family:'Bebas Neue',sans-serif;font-size:42px;color:var(--gold);letter-spacing:3px;text-align:center;margin-bottom:8px}
+    .login-sub{font-size:13px;color:var(--muted);margin-bottom:32px;text-align:center}
+    .login-box{background:var(--dark2);border-radius:var(--radius);padding:28px;width:100%;max-width:360px;border:1px solid var(--dark4)}
+    .login-box label{font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:6px}
+    .login-box input{width:100%;background:var(--dark3);border:1.5px solid var(--dark4);border-radius:8px;padding:13px 15px;color:var(--text);font-size:15px;font-family:'Manrope',sans-serif;outline:none;margin-bottom:16px}
+    .login-box input:focus{border-color:var(--gold)}
+    .btn-gold{width:100%;background:var(--gold);color:var(--dark);font-family:'Manrope',sans-serif;font-weight:800;font-size:15px;padding:14px;border-radius:8px;border:none;cursor:pointer}
+    .login-err{color:var(--danger);font-size:13px;margin-bottom:12px;display:none;text-align:center}
+    #admin-screen{display:none}
+    .admin-header{background:var(--dark2);border-bottom:1px solid var(--dark3);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
+    .admin-logo{font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--gold);letter-spacing:2px}
+    .btn-sm{padding:7px 13px;border-radius:6px;font-family:'Manrope',sans-serif;font-weight:700;font-size:12px;border:none;cursor:pointer}
+    .btn-logout{background:var(--dark3);color:var(--muted)}
+    .stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding:16px}
+    @media(min-width:600px){.stats-grid{grid-template-columns:repeat(4,1fr)}}
+    .stat-card{background:var(--dark2);border-radius:var(--radius);padding:16px;border:1px solid var(--dark4)}
+    .stat-card-val{font-size:26px;font-weight:800;color:var(--gold)}
+    .stat-card-lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:4px}
+    .stat-card-icon{font-size:22px;margin-bottom:8px}
+    /* ACTION BAR */
+    .action-bar{display:flex;gap:8px;padding:0 16px 16px;flex-wrap:wrap}
+    .btn-action{padding:10px 16px;border-radius:8px;font-family:'Manrope',sans-serif;font-weight:700;font-size:13px;border:none;cursor:pointer;display:flex;align-items:center;gap:6px}
+    .btn-excel{background:rgba(34,212,122,.15);color:var(--success)}
+    .btn-close-month{background:rgba(245,197,24,.15);color:var(--gold)}
+    .btn-archive{background:rgba(122,122,144,.15);color:var(--muted)}
+    .tabs{display:flex;background:var(--dark2);border-bottom:1px solid var(--dark3);padding:0 16px;overflow-x:auto}
+    .tab{padding:13px 16px;font-size:13px;font-weight:700;color:var(--muted);border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap}
+    .tab.active{color:var(--gold);border-bottom-color:var(--gold)}
+    .section{padding:16px}
+    .search-bar{width:100%;background:var(--dark2);border:1.5px solid var(--dark4);border-radius:8px;padding:10px 14px;color:var(--text);font-family:'Manrope',sans-serif;font-size:14px;outline:none;margin-bottom:12px}
+    .search-bar:focus{border-color:var(--gold)}
+    .card{background:var(--dark2);border-radius:var(--radius);border:1px solid var(--dark4);margin-bottom:10px;overflow:hidden}
+    .card-header{display:flex;align-items:center;gap:12px;padding:14px}
+    .card-avatar{width:44px;height:44px;border-radius:50%;background:var(--gold);color:var(--dark);font-size:15px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden}
+    .card-info{flex:1;min-width:0}
+    .card-name{font-size:14px;font-weight:700}
+    .card-sub{font-size:12px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .card-actions{display:flex;gap:6px;flex-shrink:0}
+    .btn-block{background:rgba(255,77,109,.15);color:var(--danger)}
+    .btn-unblock{background:rgba(34,212,122,.15);color:var(--success)}
+    .btn-delete{background:rgba(255,77,109,.08);color:var(--danger)}
+    .card-details{padding:0 14px 14px;border-top:1px solid var(--dark3)}
+    .detail-row{display:flex;justify-content:space-between;padding:6px 0;font-size:13px;border-bottom:1px solid var(--dark4)}
+    .detail-row:last-child{border-bottom:none}
+    .detail-label{color:var(--muted)}.detail-val{font-weight:600}
+    .badge{padding:3px 8px;border-radius:10px;font-size:10px;font-weight:700}
+    .badge-online{background:rgba(34,212,122,.15);color:var(--success)}
+    .badge-offline{background:rgba(122,122,144,.15);color:var(--muted)}
+    .badge-blocked{background:rgba(255,77,109,.15);color:var(--danger)}
+    .badge-waiting{background:rgba(245,197,24,.15);color:var(--gold)}
+    .badge-completed{background:rgba(122,122,144,.15);color:var(--muted)}
+    .badge-cancelled{background:rgba(255,77,109,.15);color:var(--danger)}
+    .empty{text-align:center;color:var(--muted);padding:40px 20px;font-size:14px}
+    .tab-content{display:none}.tab-content.active{display:block}
+    .order-card{background:var(--dark2);border-radius:var(--radius);border:1px solid var(--dark4);margin-bottom:10px;padding:14px}
+    .order-route{font-size:14px;font-weight:700}
+    .order-meta{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
+    .order-meta-item{font-size:12px;color:var(--muted)}
+    .order-price{font-size:18px;font-weight:800;color:var(--gold)}
+    /* STATISTICS */
+    .period-selector{display:flex;background:var(--dark3);border-radius:30px;padding:4px;margin:16px;gap:4px}
+    .period-btn{flex:1;padding:10px;border-radius:26px;border:none;background:none;color:var(--muted);font-family:'Manrope',sans-serif;font-weight:700;font-size:13px;cursor:pointer;transition:all .2s;text-align:center}
+    .period-btn.active{background:var(--gold);color:var(--dark)}
+    .chart-nav{display:flex;align-items:center;justify-content:space-between;padding:0 16px;margin-bottom:8px}
+    .chart-nav-btn{background:var(--dark3);border:none;border-radius:20px;padding:8px 16px;color:var(--text);font-family:'Manrope',sans-serif;font-weight:700;font-size:13px;cursor:pointer}
+    .chart-period-label{font-size:16px;font-weight:800;color:var(--text)}
+    .chart-total{text-align:center;padding:16px 16px 8px}
+    .chart-total-val{font-family:'Bebas Neue',sans-serif;font-size:52px;color:var(--text);letter-spacing:2px}
+    .chart-total-sub{font-size:13px;color:var(--muted);margin-top:4px}
+    .chart-wrap{padding:8px 16px 20px;overflow-x:auto}
+    .chart-bars{display:flex;align-items:flex-end;gap:8px;min-height:160px;padding:0 4px}
+    .chart-bar-col{display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;min-width:36px}
+    .chart-bar-val{font-size:11px;font-weight:700;color:var(--gold);text-align:center;white-space:nowrap}
+    .chart-bar{width:100%;border-radius:8px 8px 0 0;background:var(--gold);transition:height .4s ease;min-height:4px;position:relative;cursor:pointer}
+    .chart-bar.dim{background:var(--dark4)}
+    .chart-bar-label{font-size:11px;color:var(--muted);font-weight:600;text-align:center}
+    .driver-stats-list{padding:0 16px}
+    .driver-stat-item{background:var(--dark2);border-radius:10px;padding:13px;margin-bottom:8px;border:1px solid var(--dark4);display:flex;align-items:center;gap:12px}
+    .driver-stat-rank{font-size:18px;font-weight:800;color:var(--gold);width:28px;text-align:center;flex-shrink:0}
+    .driver-stat-info{flex:1}
+    .driver-stat-name{font-size:14px;font-weight:700}
+    .driver-stat-sub{font-size:12px;color:var(--muted);margin-top:2px}
+    .driver-stat-earn{font-size:16px;font-weight:800;color:var(--gold)}
+    .archive-month{background:var(--dark2);border-radius:var(--radius);border:1px solid var(--dark4);margin-bottom:10px;padding:14px;cursor:pointer}
+    .archive-month-title{font-size:15px;font-weight:700;display:flex;justify-content:space-between;align-items:center}
+    .archive-month-sub{font-size:12px;color:var(--muted);margin-top:4px}
+    /* CHAT */
+    .chat-user-item{display:flex;align-items:center;gap:12px;padding:12px;background:var(--dark2);border-radius:10px;margin-bottom:8px;cursor:pointer;border:1px solid var(--dark4)}
+    .chat-user-item.active{border-color:var(--gold)}
+    .chat-box{background:var(--dark2);border-radius:var(--radius);border:1px solid var(--dark4);overflow:hidden}
+    .chat-messages{height:280px;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
+    .chat-msg{max-width:75%}
+    .chat-msg.admin{align-self:flex-end}.chat-msg.user{align-self:flex-start}
+    .chat-bubble{padding:10px 14px;border-radius:14px;font-size:13px;line-height:1.4}
+    .chat-msg.admin .chat-bubble{background:var(--gold);color:var(--dark);font-weight:600}
+    .chat-msg.user .chat-bubble{background:var(--dark3);color:var(--text)}
+    .chat-time{font-size:10px;color:var(--muted);margin-top:3px;text-align:right}
+    .chat-input-row{display:flex;gap:8px;padding:12px;border-top:1px solid var(--dark3)}
+    .chat-input{flex:1;background:var(--dark3);border:1.5px solid var(--dark4);border-radius:8px;padding:10px 13px;color:var(--text);font-family:'Manrope',sans-serif;font-size:13px;outline:none}
+    .chat-input:focus{border-color:var(--gold)}
+    .btn-send{background:var(--gold);color:var(--dark);border:none;border-radius:8px;padding:10px 16px;font-weight:800;cursor:pointer;font-size:14px}
+    /* MODAL */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;z-index:100;padding:20px}
+    .modal-box{background:var(--dark2);border-radius:20px;padding:28px;width:100%;max-width:400px}
+    .modal-title{font-size:18px;font-weight:800;margin-bottom:16px}
+    .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--dark4);color:var(--text);padding:10px 18px;border-radius:20px;font-size:13px;font-weight:600;opacity:0;transition:all .3s;z-index:200;white-space:nowrap;border:1px solid var(--dark3)}
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  </style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-logo">🚕 ABA TAKSI GO</div>
+  <div class="login-sub">Әкімші панелі</div>
+  <div class="login-box">
+    <label>Логин</label>
+    <input type="text" id="admin-login" placeholder="abaadmin" onkeydown="if(event.key==='Enter')doLogin()"/>
+    <label>Құпия сөз</label>
+    <input type="password" id="admin-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"/>
+    <div class="login-err" id="login-err">Логин немесе пароль қате!</div>
+    <button class="btn-gold" onclick="doLogin()">🔐 Кіру</button>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<div id="admin-screen">
+  <div class="admin-header">
+    <div>
+      <div class="admin-logo">⚙️ ADMIN PANEL</div>
+      <div style="font-size:11px;color:var(--muted)">ABA Group TAKSI GO</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <span style="background:rgba(245,197,24,.15);color:var(--gold);font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px">👑 Әкімші</span>
+      <button class="btn-sm btn-logout" onclick="adminLogout()">Шығу</button>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-card-icon">🚗</div><div class="stat-card-val" id="stat-drivers">0</div><div class="stat-card-lbl">Жүргізушілер</div></div>
+    <div class="stat-card"><div class="stat-card-icon">🙋</div><div class="stat-card-val" id="stat-passengers">0</div><div class="stat-card-lbl">Жолаушылар</div></div>
+    <div class="stat-card"><div class="stat-card-icon">📋</div><div class="stat-card-val" id="stat-orders">0</div><div class="stat-card-lbl">Тапсырыстар</div></div>
+    <div class="stat-card"><div class="stat-card-icon">💰</div><div class="stat-card-val" id="stat-revenue">0 ₸</div><div class="stat-card-lbl">Ай табысы</div></div>
+  </div>
+
+  <!-- ACTION BAR -->
+  <div class="action-bar">
+    <button class="btn-action btn-excel" onclick="exportExcel()">📊 Excel жүктеу</button>
+    <button class="btn-action btn-close-month" onclick="confirmCloseMonth()">🔄 Айды жабу</button>
+    <button class="btn-action btn-archive" onclick="switchTab('archive')">📁 Архив</button>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('stats')">📊 Статистика</button>
+    <button class="tab" onclick="switchTab('cities')">🌍 Қалалар</button>
+    <button class="tab" onclick="switchTab('drivers')">🚗 Жүргізушілер</button>
+    <button class="tab" onclick="switchTab('passengers')">🙋 Жолаушылар</button>
+    <button class="tab" onclick="switchTab('orders')">📋 Тапсырыстар</button>
+    <button class="tab" onclick="switchTab('archive')">📁 Архив</button>
+    <button class="tab" onclick="switchTab('chat')">💬 Чат</button>
+  </div>
+
+  <!-- STATISTICS -->
+  <div id="tab-stats" class="tab-content active">
+    <!-- Period selector -->
+    <div class="period-selector">
+      <button class="period-btn active" id="period-day" onclick="setPeriod('day')">Күн</button>
+      <button class="period-btn" id="period-week" onclick="setPeriod('week')">Апта</button>
+      <button class="period-btn" id="period-month" onclick="setPeriod('month')">Ай</button>
+      <button class="period-btn" id="period-year" onclick="setPeriod('year')">Жыл</button>
+    </div>
+    <!-- Nav -->
+    <div class="chart-nav">
+      <button class="chart-nav-btn" onclick="navChart(-1)">‹ Алдыңғы</button>
+      <div class="chart-period-label" id="chart-period-label">—</div>
+      <button class="chart-nav-btn" onclick="navChart(1)">Келесі ›</button>
+    </div>
+    <!-- Total -->
+    <div class="chart-total">
+      <div class="chart-total-val" id="chart-total-val">0 ₸</div>
+      <div class="chart-total-sub" id="chart-total-sub">Жалпы табыс</div>
+    </div>
+    <!-- Chart -->
+    <div class="chart-wrap">
+      <div class="chart-bars" id="chart-bars"></div>
+    </div>
+    <!-- Driver breakdown -->
+    <div style="padding:0 16px;margin-bottom:8px">
+      <div style="font-size:13px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:1px">🏆 Жүргізушілер рейтингі</div>
+    </div>
+    <div class="driver-stats-list" id="driver-stats-list"></div>
+  </div>
+
+  <!-- CITIES -->
+  <div id="tab-cities" class="tab-content">
+    <div class="section">
+      <div style="font-size:14px;font-weight:800;margin-bottom:4px">🌍 Қала басқару</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:16px">Белсенді қалаларды қосыңыз немесе өшіріңіз. Тек белсенді қалалар қолданушыларға көрінеді.</div>
+      <div id="cities-list"></div>
+    </div>
+  </div>
+
+  <!-- DRIVERS -->
+  <div id="tab-drivers" class="tab-content active">
+    <div class="section">
+      <input class="search-bar" placeholder="🔍 Жүргізуші іздеу..." oninput="filterDrivers(this.value)"/>
+      <div id="drivers-list"><div class="empty">Жүктелуде...</div></div>
+    </div>
+  </div>
+
+  <!-- PASSENGERS -->
+  <div id="tab-passengers" class="tab-content">
+    <div class="section">
+      <input class="search-bar" placeholder="🔍 Жолаушы іздеу..." oninput="filterPassengers(this.value)"/>
+      <div id="passengers-list"><div class="empty">Жүктелуде...</div></div>
+    </div>
+  </div>
+
+  <!-- ORDERS -->
+  <div id="tab-orders" class="tab-content">
+    <div class="section">
+      <div style="display:flex;gap:8px;margin-bottom:12px;overflow-x:auto;padding-bottom:4px">
+        <button class="btn-sm" style="background:var(--dark3);color:var(--text);white-space:nowrap" onclick="filterOrders('all')">Барлығы</button>
+        <button class="btn-sm" style="background:rgba(245,197,24,.15);color:var(--gold);white-space:nowrap" onclick="filterOrders('waiting')">⏳ Күту</button>
+        <button class="btn-sm" style="background:rgba(34,212,122,.15);color:var(--success);white-space:nowrap" onclick="filterOrders('accepted')">🚗 Орындалуда</button>
+        <button class="btn-sm" style="background:rgba(122,122,144,.15);color:var(--muted);white-space:nowrap" onclick="filterOrders('completed')">✅ Аяқталды</button>
+        <button class="btn-sm" style="background:rgba(255,77,109,.15);color:var(--danger);white-space:nowrap" onclick="filterOrders('cancelled')">❌ Бас тартылды</button>
+      </div>
+      <div id="orders-list"><div class="empty">Жүктелуде...</div></div>
+    </div>
+  </div>
+
+  <!-- ARCHIVE -->
+  <div id="tab-archive" class="tab-content">
+    <div class="section">
+      <div style="font-size:14px;font-weight:800;margin-bottom:12px">📁 Архив — өткен айлар</div>
+      <div id="archive-list"><div class="empty">Архив жоқ</div></div>
+    </div>
+  </div>
+
+  <!-- CHAT -->
+  <div id="tab-chat" class="tab-content">
+    <div class="section">
+      <div style="font-size:14px;font-weight:800;margin-bottom:12px">💬 Қолданушылармен чат</div>
+      <div id="chat-user-list"><div class="empty">Қолданушылар жоқ</div></div>
+      <div id="chat-box-wrap" style="display:none;margin-top:12px">
+        <div class="chat-box">
+          <div style="padding:12px 16px;border-bottom:1px solid var(--dark3);font-size:14px;font-weight:700" id="chat-box-title">— чат</div>
+          <div class="chat-messages" id="chat-messages"></div>
+          <div class="chat-input-row">
+            <input class="chat-input" id="chat-input" placeholder="Хабар жазыңыз..." onkeydown="if(event.key==='Enter')sendAdminMsg()"/>
+            <button class="btn-send" onclick="sendAdminMsg()">➤</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM MODAL -->
+<div class="modal-overlay" id="confirm-modal" style="display:none">
+  <div class="modal-box">
+    <div class="modal-title" id="modal-title-text">Айды жабу</div>
+    <div id="modal-body" style="font-size:14px;color:var(--muted);margin-bottom:20px;line-height:1.6"></div>
+    <div style="display:flex;gap:10px">
+      <button id="modal-confirm-btn" style="flex:1;background:var(--gold);border:none;border-radius:8px;padding:13px;font-family:Manrope,sans-serif;font-weight:800;font-size:14px;color:var(--dark);cursor:pointer">✓ Иә</button>
+      <button onclick="document.getElementById('confirm-modal').style.display='none'" style="flex:1;background:var(--dark3);border:none;border-radius:8px;padding:13px;font-family:Manrope,sans-serif;font-weight:700;font-size:14px;color:var(--muted);cursor:pointer">Жоқ</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+var ADMIN={login:'abaadmin',pass:'ABA@taksi2024'};
+var allUsers={},allOrders={},curFilter='all',curChatUser=null;
+var DB=null;
+
+// ── FIREBASE LOAD ──
+function loadFirebase(){
+  var s1=document.createElement('script');
+  s1.src='https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js';
+  s1.onload=function(){
+    var s2=document.createElement('script');
+    s2.src='https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js';
+    s2.onload=function(){
+      try{
+        if(!firebase.apps.length)firebase.initializeApp({apiKey:"AIzaSyC-1odJDeZBGSMClhe9sN7lJ-8wYZkyzVw",authDomain:"aba-group-taksi-go.firebaseapp.com",databaseURL:"https://aba-group-taksi-go-default-rtdb.firebaseio.com",projectId:"aba-group-taksi-go",storageBucket:"aba-group-taksi-go.firebasestorage.app",messagingSenderId:"734948093057",appId:"1:734948093057:web:866c74d8857a6938eb7180"});
+        DB=firebase.database();
+        console.log('Firebase OK');
+        if(localStorage.getItem('aba_admin_auth')==='1'){showAdmin();initAdmin()}
+      }catch(e){console.error('FB error:',e)}
+    };
+    document.head.appendChild(s2);
+  };
+  document.head.appendChild(s1);
+}
+window.onload=function(){loadFirebase()};
+
+// ── AUTH ──
+function doLogin(){
+  var login=document.getElementById('admin-login').value.trim();
+  var pass=document.getElementById('admin-pass').value.trim();
+  if(login===ADMIN.login&&pass===ADMIN.pass){
+    localStorage.setItem('aba_admin_auth','1');
+    showAdmin();initAdmin();
+  }else document.getElementById('login-err').style.display='block';
+}
+function adminLogout(){localStorage.removeItem('aba_admin_auth');document.getElementById('login-screen').style.display='flex';document.getElementById('admin-screen').style.display='none'}
+function showAdmin(){document.getElementById('login-screen').style.display='none';document.getElementById('admin-screen').style.display='block'}
+
+// ── INIT ──
+function initAdmin(){
+  loadUsers();loadOrders();loadArchive();
+  setTimeout(function(){renderStats()},1200);
+}
+
+// ── USERS ──
+function loadUsers(){
+  DB.ref('users').on('value',function(snap){
+    allUsers={};var drv=0,pass=0;
+    snap.forEach(function(c){
+      var u=c.val();
+      // Normalize role - user might have switched roles
+      allUsers[c.key]=u;
+      if(u.role==='driver')drv++;
+      else pass++;
+    });
+    document.getElementById('stat-drivers').textContent=drv;
+    document.getElementById('stat-passengers').textContent=pass;
+    renderDrivers(Object.values(allUsers).filter(function(u){return u.role==='driver'}));
+    renderPassengers(Object.values(allUsers).filter(function(u){return u.role!=='driver'}));
+    renderChatUsers();
+    renderStats();
+  });
+}
+
+function renderDrivers(drivers){
+  var el=document.getElementById('drivers-list');
+  if(!drivers.length){
+    el.innerHTML='<div class="empty">Жүргізушілер жоқ<br><span style="font-size:12px;color:var(--muted)">Firebase-те жүргізуші тіркелмеген</span></div>';
+    return;
+  }
+  // Sort: online first, then offline
+  drivers.sort(function(a,b){return (b.online?1:0)-(a.online?1:0)});
+  el.innerHTML=drivers.map(function(u){
+    var statusClass=u.blocked?'badge-blocked':u.online?'badge-online':'badge-offline';
+    var statusText=u.blocked?'🚫 Блок':u.online?'🟢 Онлайн':'⚫ Офлайн';
+    return '<div class="card">'+
+      '<div class="card-header">'+
+        '<div class="card-avatar">'+(u.photo?'<img src="'+u.photo+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">':u.name.slice(0,2).toUpperCase())+'</div>'+
+        '<div class="card-info">'+
+          '<div class="card-name">'+u.name+' <span class="badge '+statusClass+'">'+statusText+'</span></div>'+
+          '<div class="card-sub">📞 '+u.phone+(u.carModel?' | 🚗 '+u.carModel:'')+(u.plate?' | '+u.plate:'')+'</div>'+
+        '</div>'+
+        '<div class="card-actions">'+
+          '<button class="btn-sm '+(u.blocked?'btn-unblock':'btn-block')+'" onclick="toggleBlock(\''+u.id+'\','+(!!u.blocked)+')">'+(u.blocked?'✅ Ашу':'🚫 Блок')+'</button>'+
+          '<button class="btn-sm btn-delete" onclick="delUser(\''+u.id+'\',\''+u.name+'\')">🗑️</button>'+
+        '</div>'+
+      '</div>'+
+      '<div class="card-details">'+
+        '<div class="detail-row"><span class="detail-label">Телефон</span><span class="detail-val">'+u.phone+'</span></div>'+
+        '<div class="detail-row"><span class="detail-label">Сапарлар (ай)</span><span class="detail-val">'+(u.trips||0)+'</span></div>'+
+        '<div class="detail-row"><span class="detail-label">Табыс (ай)</span><span class="detail-val" style="color:var(--gold)">'+(u.earn||0).toLocaleString()+' ₸</span></div>'+
+        '<div class="detail-row"><span class="detail-label">Жалпы сапар</span><span class="detail-val">'+(u.totalTrips||u.trips||0)+'</span></div>'+
+        '<div class="detail-row"><span class="detail-label">Рейтинг</span><span class="detail-val">⭐ '+(u.rating||5.0)+'</span></div>'+
+        (u.carModel?'<div class="detail-row"><span class="detail-label">Машина</span><span class="detail-val">'+(u.carModel||'')+(u.carColor?', '+u.carColor:'')+'</span></div>':'')+
+        (u.plate?'<div class="detail-row"><span class="detail-label">Номер</span><span class="detail-val">'+u.plate+'</span></div>':'')+
+        (u.license?'<div class="detail-row"><span class="detail-label">Куәлік №</span><span class="detail-val">'+u.license+'</span></div>':'')+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+
+function filterDrivers(q){
+  var all=Object.values(allUsers).filter(function(u){return u.role==='driver'});
+  if(!q){renderDrivers(all);return}
+  q=q.toLowerCase();
+  renderDrivers(all.filter(function(u){
+    return u.name.toLowerCase().indexOf(q)>=0||
+           (u.phone||'').replace(/\D/g,'').indexOf(q.replace(/\D/g,''))>=0||
+           (u.carModel||'').toLowerCase().indexOf(q)>=0||
+           (u.plate||'').toLowerCase().indexOf(q)>=0;
+  }));
+}
+
+function filterPassengers(q){
+  var all=Object.values(allUsers).filter(function(u){return u.role!=='driver'});
+  if(!q){renderPassengers(all);return}
+  q=q.toLowerCase();
+  renderPassengers(all.filter(function(u){
+    return u.name.toLowerCase().indexOf(q)>=0||
+           (u.phone||'').replace(/\D/g,'').indexOf(q.replace(/\D/g,''))>=0;
+  }));
+}
+function loadOrders(){
+  DB.ref('orders').on('value',function(snap){
+    allOrders={};var total=0,rev=0;
+    snap.forEach(function(c){allOrders[c.key]={key:c.key,...c.val()};total++;if(c.val().status==='completed')rev+=c.val().price||0});
+    document.getElementById('stat-orders').textContent=total;
+    document.getElementById('stat-revenue').textContent=rev.toLocaleString()+' ₸';
+    renderOrders(curFilter);
+  });
+}
+
+function renderOrders(filter){
+  curFilter=filter;
+  var el=document.getElementById('orders-list');
+  var orders=Object.values(allOrders);
+  if(filter!=='all')orders=orders.filter(function(o){return o.status===filter});
+  orders.sort(function(a,b){return(b.createdAt||0)-(a.createdAt||0)});
+  if(!orders.length){el.innerHTML='<div class="empty">Тапсырыстар жоқ</div>';return}
+  el.innerHTML=orders.map(function(o){
+    return '<div class="order-card"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div><div class="order-route">📍 '+(o.from||'—')+' → 🏁 '+(o.to||'—')+'</div><div class="order-meta"><span class="badge badge-'+(o.status||'')+'">'+statusLabel(o.status)+'</span><span class="order-meta-item">👤 '+(o.passengerName||'—')+'</span>'+(o.driverName?'<span class="order-meta-item">🚗 '+o.driverName+'</span>':'')+'</div></div><div class="order-price">'+(o.price||0)+' ₸</div></div><div style="font-size:11px;color:var(--muted);margin-top:6px">'+(o.createdAt?new Date(o.createdAt).toLocaleString('ru-RU'):'')+'</div></div>';
+  }).join('');
+}
+
+function statusLabel(s){return s==='waiting'?'⏳ Күту':s==='accepted'?'🚗 Орындалуда':s==='completed'?'✅ Аяқталды':s==='cancelled'?'❌ Бас тартылды':'—'}
+function filterOrders(f){renderOrders(f)}
+function filterDrivers(q){renderDrivers(Object.values(allUsers).filter(function(u){return u.role==='driver'&&(u.name.toLowerCase().indexOf(q.toLowerCase())>=0||(u.phone||'').indexOf(q)>=0||(u.carModel||'').toLowerCase().indexOf(q.toLowerCase())>=0)}))}
+function filterPassengers(q){renderPassengers(Object.values(allUsers).filter(function(u){return u.role!=='driver'&&(u.name.toLowerCase().indexOf(q.toLowerCase())>=0||(u.phone||'').indexOf(q)>=0)}))}
+
+// ── BLOCK / DELETE ──
+function toggleBlock(userId,isBlocked){DB.ref('users/'+userId).update({blocked:!isBlocked});toast(isBlocked?'✅ Блоктан шығарылды':'🚫 Блокталды')}
+function delUser(userId,name){if(confirm(name+' — өшіру керек пе?')){DB.ref('users/'+userId).remove();toast('🗑️ Өшірілді: '+name)}}
+
+// ── EXCEL EXPORT ──
+function exportExcel(){
+  var drivers=Object.values(allUsers).filter(function(u){return u.role==='driver'});
+  if(!drivers.length){toast('Жүргізушілер жоқ');return}
+
+  var now=new Date();
+  var monthName=now.toLocaleString('ru-RU',{month:'long',year:'numeric'});
+
+  // Build CSV
+  var rows=[['Аты-жөні','Телефон','Машина','Номер','Ай сапарлары','Ай табысы (₸)','Жалпы сапар','Рейтинг','Статус']];
+  drivers.forEach(function(u){
+    rows.push([
+      u.name,u.phone,
+      (u.carModel||'')+(u.carColor?', '+u.carColor:''),
+      u.plate||'',
+      u.trips||0,
+      u.earn||0,
+      u.totalTrips||u.trips||0,
+      u.rating||5.0,
+      u.blocked?'Блокталған':u.online?'Онлайн':'Офлайн'
+    ]);
+  });
+
+  // Add total row
+  var totalTrips=drivers.reduce(function(s,u){return s+(u.trips||0)},0);
+  var totalEarn=drivers.reduce(function(s,u){return s+(u.earn||0)},0);
+  rows.push(['','','','','БАРЛЫҒЫ',totalEarn,'','','']);
+
+  var csv='\uFEFF'+rows.map(function(r){return r.map(function(c){return '"'+String(c).replace(/"/g,'""')+'"'}).join(',')}).join('\n');
+  var blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;
+  a.download='ABA_Taksi_'+monthName.replace(/ /g,'_')+'.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('📊 Excel жүктелді!');
+}
+
+// ── CLOSE MONTH ──
+function confirmCloseMonth(){
+  var drivers=Object.values(allUsers).filter(function(u){return u.role==='driver'});
+  var total=drivers.reduce(function(s,u){return s+(u.earn||0)},0);
+  var now=new Date();
+  var monthName=now.toLocaleString('ru-RU',{month:'long',year:'numeric'});
+
+  document.getElementById('modal-title-text').textContent='🔄 Айды жабу — '+monthName;
+  document.getElementById('modal-body').innerHTML=
+    '<b>'+monthName+'</b> айының деректері архивке сақталады.<br><br>'+
+    '📊 Жүргізушілер: '+drivers.length+'<br>'+
+    '💰 Жалпы табыс: '+total.toLocaleString()+' ₸<br>'+
+    '📋 Тапсырыстар: '+Object.values(allOrders).filter(function(o){return o.status==='completed'}).length+'<br><br>'+
+    '<span style="color:var(--danger)">⚠️ Барлық жүргізушілердің ай сапарлары мен табысы нолге түседі!</span>';
+
+  document.getElementById('modal-confirm-btn').onclick=function(){closeMonth(monthName,drivers,total)};
+  document.getElementById('confirm-modal').style.display='flex';
+}
+
+function closeMonth(monthName,drivers,totalEarn){
+  document.getElementById('confirm-modal').style.display='none';
+
+  // First export to Excel automatically
+  exportExcel();
+
+  // Save to archive
+  var now=new Date();
+  var archiveKey=now.getFullYear()+'_'+(now.getMonth()+1).toString().padStart(2,'0');
+  var orders=Object.values(allOrders).filter(function(o){return o.status==='completed'});
+
+  var archiveData={
+    month:monthName,
+    date:now.toISOString(),
+    totalEarn:totalEarn,
+    totalTrips:orders.length,
+    driverCount:drivers.length,
+    drivers:drivers.map(function(u){return {id:u.id,name:u.name,phone:u.phone,car:(u.carModel||'')+(u.carColor?', '+u.carColor:''),plate:u.plate||'',trips:u.trips||0,earn:u.earn||0,rating:u.rating||5.0}}),
+  };
+
+  DB.ref('archive/'+archiveKey).set(archiveData).then(function(){
+    // Reset all drivers trips and earn
+    var updates={};
+    drivers.forEach(function(u){
+      updates['users/'+u.id+'/trips']=0;
+      updates['users/'+u.id+'/earn']=0;
+      // Save total trips
+      updates['users/'+u.id+'/totalTrips']=(u.totalTrips||0)+(u.trips||0);
+    });
+    DB.ref().update(updates).then(function(){
+      toast('✅ Ай жабылды! Деректер архивке сақталды.');
+      loadArchive();
+    });
+  });
+}
+
+// ── ARCHIVE ──
+function loadArchive(){
+  DB.ref('archive').once('value',function(snap){
+    var el=document.getElementById('archive-list');
+    if(!snap.exists()){el.innerHTML='<div class="empty">Архив жоқ</div>';return}
+    var months=[];snap.forEach(function(c){months.unshift({key:c.key,...c.val()})});
+    el.innerHTML=months.map(function(m){
+      return '<div class="archive-month" onclick="showArchiveDetail(\''+m.key+'\')"><div class="archive-month-title"><span>📅 '+m.month+'</span><button class="btn-sm btn-excel" onclick="event.stopPropagation();downloadArchive(\''+m.key+'\')">📊 Excel</button></div><div class="archive-month-sub">'+m.driverCount+' жүргізуші • '+m.totalTrips+' сапар • '+(m.totalEarn||0).toLocaleString()+' ₸</div></div>';
+    }).join('');
+  });
+}
+
+function showArchiveDetail(key){
+  DB.ref('archive/'+key).get().then(function(snap){
+    if(!snap.exists())return;
+    var m=snap.val();
+    var drivers=m.drivers||[];
+    var info='📅 '+m.month+'\n\n';
+    drivers.forEach(function(d){info+=d.name+' — '+d.trips+' сапар, '+(d.earn||0).toLocaleString()+' ₸\n'});
+    info+='\nЖалпы: '+(m.totalEarn||0).toLocaleString()+' ₸';
+    alert(info);
+  });
+}
+
+function downloadArchive(key){
+  DB.ref('archive/'+key).get().then(function(snap){
+    if(!snap.exists())return;
+    var m=snap.val();
+    var drivers=m.drivers||[];
+    var rows=[['Аты-жөні','Телефон','Машина','Номер','Сапарлар','Табыс (₸)','Рейтинг']];
+    drivers.forEach(function(d){rows.push([d.name,d.phone,d.car||'',d.plate||'',d.trips||0,d.earn||0,d.rating||5.0])});
+    rows.push(['','','','','БАРЛЫҒЫ',(m.totalEarn||0),'']);
+    var csv='\uFEFF'+rows.map(function(r){return r.map(function(c){return '"'+String(c).replace(/"/g,'""')+'"'}).join(',')}).join('\n');
+    var blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement('a');
+    a.href=url;a.download='Архив_'+m.month.replace(/ /g,'_')+'.csv';a.click();
+    URL.revokeObjectURL(url);
+    toast('📊 Архив жүктелді!');
+  });
+}
+
+// ── CHAT ──
+function renderChatUsers(){
+  var el=document.getElementById('chat-user-list');
+  // If allUsers is empty, load from DB directly
+  if(!Object.keys(allUsers).length){
+    if(!DB){el.innerHTML='<div class="empty">Firebase жүктелуде...</div>';return}
+    DB.ref('users').once('value',function(snap){
+      snap.forEach(function(c){allUsers[c.key]=c.val()});
+      renderChatUsers();
+    });
+    return;
+  }
+  var users=Object.values(allUsers);
+  if(!users.length){el.innerHTML='<div class="empty">Қолданушылар жоқ</div>';return}
+  el.innerHTML=users.map(function(u){
+    return '<div class="chat-user-item '+(curChatUser===u.id?'active':'')+'" onclick="openChat(\''+u.id+'\',\''+u.name.replace(/'/g,"\\'")+'\')">'+
+      (u.photo?'<img src="'+u.photo+'" style="width:38px;height:38px;object-fit:cover;border-radius:50%">':
+        '<div style="width:38px;height:38px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--dark);font-weight:800;font-size:13px">'+u.name.slice(0,2).toUpperCase()+'</div>')+
+      '<div>'+
+        '<div style="font-size:13px;font-weight:700">'+u.name+'</div>'+
+        '<div style="font-size:11px;color:var(--muted)">'+(u.role==='driver'?'🚗 Жүргізуші':'🙋 Жолаушы')+' • '+u.phone+'</div>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+
+function openChat(userId,userName){
+  curChatUser=userId;
+  document.getElementById('chat-box-wrap').style.display='block';
+  document.getElementById('chat-box-title').textContent='💬 '+userName;
+  renderChatUsers();
+  // Use 'admin_chats/userId' path - separate from order chats
+  DB.ref('admin_chats/'+userId).on('value',function(snap){
+    var el=document.getElementById('chat-messages');
+    var msgs=[];snap.forEach(function(c){msgs.push(c.val())});
+    if(!msgs.length){el.innerHTML='<div style="text-align:center;color:var(--muted);font-size:13px;padding:20px">Хабар жоқ</div>';return}
+    el.innerHTML=msgs.map(function(m){
+      var isAdmin=m.from==='admin';
+      return '<div class="chat-msg '+(isAdmin?'admin':'user')+'">'+'<div class="chat-bubble">'+m.text+'</div>'+'<div class="chat-time">'+(isAdmin?'👑 Админ':'👤 '+m.senderName)+' • '+new Date(m.time).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})+'</div></div>';
+    }).join('');
+    el.scrollTop=el.scrollHeight;
+  });
+}
+
+function sendAdminMsg(){
+  if(!curChatUser)return;
+  var inp=document.getElementById('chat-input');
+  var text=inp.value.trim();if(!text)return;
+  // Write to admin_chats path
+  DB.ref('admin_chats/'+curChatUser).push({
+    text:text,from:'admin',senderName:'Админ',time:Date.now()
+  });
+  inp.value='';
+}
+
+// ── TABS ──
+function switchTab(name){
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active')});
+  document.querySelectorAll('.tab-content').forEach(function(t){t.classList.remove('active')});
+  event.target.classList.add('active');
+  document.getElementById('tab-'+name).classList.add('active');
+  if(name==='archive')loadArchive();
+  if(name==='stats')renderStats();
+  if(name==='chat')renderChatUsers();
+  if(name==='cities')loadCities();
+}
+
+function initAdmin(){
+  loadUsers();loadOrders();loadArchive();loadCities();
+  setTimeout(function(){renderStats()},1200);
+}
+
+// ── STATISTICS ──
+var curPeriod='day';
+var curOffset=0;
+
+function setPeriod(p){
+  curPeriod=p;curOffset=0;
+  document.querySelectorAll('.period-btn').forEach(function(b){b.classList.remove('active')});
+  document.getElementById('period-'+p).classList.add('active');
+  renderStats();
+}
+
+function navChart(dir){
+  curOffset+=dir;
+  renderStats();
+}
+
+function renderStats(){
+  var orders=Object.values(allOrders).filter(function(o){return o.status==='completed'});
+  var now=new Date();
+  var bars=[],total=0,periodLabel='';
+
+  if(curPeriod==='day'){
+    var d=new Date(now);d.setDate(d.getDate()+curOffset);
+    periodLabel=d.toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'});
+    // 24 hours
+    bars=Array.from({length:24},function(_,h){
+      var earn=orders.filter(function(o){
+        var od=new Date(o.createdAt);
+        return od.getFullYear()===d.getFullYear()&&od.getMonth()===d.getMonth()&&od.getDate()===d.getDate()&&od.getHours()===h;
+      }).reduce(function(s,o){return s+(o.price||0)},0);
+      return {label:(h<10?'0':'')+h+':00',val:earn,highlight:h===now.getHours()&&curOffset===0};
+    });
+    total=bars.reduce(function(s,b){return s+b.val},0);
+  }
+
+  else if(curPeriod==='week'){
+    var weekStart=new Date(now);
+    var day=weekStart.getDay()||7;
+    weekStart.setDate(weekStart.getDate()-day+1+curOffset*7);
+    var weekEnd=new Date(weekStart);weekEnd.setDate(weekEnd.getDate()+6);
+    periodLabel=weekStart.toLocaleDateString('ru-RU',{day:'numeric',month:'short'})+' – '+weekEnd.toLocaleDateString('ru-RU',{day:'numeric',month:'short'});
+    var dayNames=['Дс','Сс','Ср','Бс','Жм','Сб','Жс'];
+    bars=Array.from({length:7},function(_,i){
+      var dd=new Date(weekStart);dd.setDate(dd.getDate()+i);
+      var earn=orders.filter(function(o){
+        var od=new Date(o.createdAt);
+        return od.getFullYear()===dd.getFullYear()&&od.getMonth()===dd.getMonth()&&od.getDate()===dd.getDate();
+      }).reduce(function(s,o){return s+(o.price||0)},0);
+      var isToday=dd.toDateString()===now.toDateString();
+      return {label:dayNames[i],val:earn,highlight:isToday&&curOffset===0};
+    });
+    total=bars.reduce(function(s,b){return s+b.val},0);
+  }
+
+  else if(curPeriod==='month'){
+    var mo=new Date(now.getFullYear(),now.getMonth()+curOffset,1);
+    periodLabel=mo.toLocaleDateString('ru-RU',{month:'long',year:'numeric'});
+    var daysInMonth=new Date(mo.getFullYear(),mo.getMonth()+1,0).getDate();
+    // Show by weeks
+    var weeks=[];
+    for(var w=0;w<4;w++){
+      var wStart=w*7+1;var wEnd=Math.min(wStart+6,daysInMonth);
+      var earn=orders.filter(function(o){
+        var od=new Date(o.createdAt);
+        var wS=wStart,wE=wEnd;
+        return od.getFullYear()===mo.getFullYear()&&od.getMonth()===mo.getMonth()&&od.getDate()>=wS&&od.getDate()<=wE;
+      }).reduce(function(s,o){return s+(o.price||0)},0);
+      weeks.push({label:(mo.getMonth()+1)+'/'+wStart,val:earn,highlight:false});
+    }
+    bars=weeks;
+    total=bars.reduce(function(s,b){return s+b.val},0);
+  }
+
+  else if(curPeriod==='year'){
+    var yr=now.getFullYear()+curOffset;
+    periodLabel=yr+' жыл';
+    var monthNames=['Қаң','Ақп','Нау','Сәу','Мам','Мау','Шіл','Там','Қыр','Қаз','Қар','Жел'];
+    bars=Array.from({length:12},function(_,m){
+      var earn=orders.filter(function(o){
+        var od=new Date(o.createdAt);
+        return od.getFullYear()===yr&&od.getMonth()===m;
+      }).reduce(function(s,o){return s+(o.price||0)},0);
+      return {label:monthNames[m],val:earn,highlight:m===now.getMonth()&&yr===now.getFullYear()};
+    });
+    total=bars.reduce(function(s,b){return s+b.val},0);
+  }
+
+  document.getElementById('chart-period-label').textContent=periodLabel;
+  document.getElementById('chart-total-val').textContent=total.toLocaleString()+' ₸';
+  document.getElementById('chart-total-sub').textContent='Жалпы табыс • '+bars.filter(function(b){return b.val>0}).length+' белсенді кезең';
+
+  // Draw bars
+  var maxVal=Math.max.apply(null,bars.map(function(b){return b.val}));if(!maxVal)maxVal=1;
+  var barsEl=document.getElementById('chart-bars');
+  barsEl.innerHTML=bars.map(function(b){
+    var h=Math.max(Math.round((b.val/maxVal)*140),b.val>0?8:2);
+    return '<div class="chart-bar-col">'+(b.val>0?'<div class="chart-bar-val">'+b.val.toLocaleString()+'</div>':'<div class="chart-bar-val" style="opacity:0">0</div>')+'<div class="chart-bar '+(b.highlight?'':'')+(b.val===0?'dim':'')+'" style="height:'+h+'px;'+(b.highlight?'background:var(--gold);box-shadow:0 0 12px rgba(245,197,24,.4)':b.val>0?'background:rgba(245,197,24,.7)':'')+'"></div><div class="chart-bar-label">'+b.label+'</div></div>';
+  }).join('');
+
+  // Driver breakdown
+  renderDriverStats();
+}
+
+function renderDriverStats(){
+  var el=document.getElementById('driver-stats-list');
+  var drivers=Object.values(allUsers).filter(function(u){return u.role==='driver'});
+  drivers.sort(function(a,b){return(b.earn||0)-(a.earn||0)});
+  if(!drivers.length){el.innerHTML='<div class="empty">Жүргізушілер жоқ</div>';return}
+  var medals=['🥇','🥈','🥉'];
+  el.innerHTML=drivers.map(function(u,i){
+    return '<div class="driver-stat-item"><div class="driver-stat-rank">'+(medals[i]||'#'+(i+1))+'</div>'+(u.photo?'<img src="'+u.photo+'" style="width:40px;height:40px;object-fit:cover;border-radius:50%">':'<div style="width:40px;height:40px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--dark);font-weight:800;font-size:14px">'+u.name.slice(0,2).toUpperCase()+'</div>')+'<div class="driver-stat-info"><div class="driver-stat-name">'+u.name+'</div><div class="driver-stat-sub">'+(u.trips||0)+' сапар • ⭐'+(u.rating||5.0)+(u.carModel?' • '+u.carModel:'')+'</div></div><div class="driver-stat-earn">'+(u.earn||0).toLocaleString()+' ₸</div></div>';
+  }).join('');
+}
+// ── CITIES ──
+var ALL_CITIES={'kabanbay':{name:'Қабанбай ауылы',country:'🇰🇿 Қазақстан'},'zharbulak':{name:'Жарбулақ',country:'🇰🇿 Қазақстан'},'makhanshi':{name:'Мақаншы',country:'🇰🇿 Қазақстан'},'urdzhar':{name:'Үржар',country:'🇰🇿 Қазақстан'},'almaty':{name:'Алматы',country:'🇰🇿 Қазақстан'},'astana':{name:'Астана',country:'🇰🇿 Қазақстан'},'karaganda':{name:'Қарағанды',country:'🇰🇿 Қазақстан'},'semey':{name:'Семей',country:'🇰🇿 Қазақстан'},'oskemen':{name:'Өскемен',country:'🇰🇿 Қазақстан'},'taldykorgan':{name:'Талдықорған',country:'🇰🇿 Қазақстан'},'shymkent':{name:'Шымкент',country:'🇰🇿 Қазақстан'},'atyrau':{name:'Атырау',country:'🇰🇿 Қазақстан'},'pittsburgh':{name:'Pittsburgh',country:'🇺🇸 АҚШ'},'bishkek':{name:'Бішкек',country:'🇰🇬 Қырғызстан'},'tashkent':{name:'Ташкент',country:'🇺🇿 Өзбекстан'}};
+var activeCitiesAdmin={};
+
+function loadCities(){
+  DB.ref('active_cities').on('value',function(snap){
+    activeCitiesAdmin=snap.exists()?snap.val():{};
+    renderCitiesAdmin();
+  });
+}
+
+function renderCitiesAdmin(){
+  var el=document.getElementById('cities-list');if(!el)return;
+  var html='';
+  var groups={};
+  Object.keys(ALL_CITIES).forEach(function(key){
+    var c=ALL_CITIES[key];
+    if(!groups[c.country])groups[c.country]=[];
+    groups[c.country].push({key:key,city:c});
+  });
+  Object.keys(groups).forEach(function(country){
+    html+='<div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin:16px 0 8px">'+country+'</div>';
+    groups[country].forEach(function(item){
+      var isActive=!!activeCitiesAdmin[item.key];
+      html+='<div style="display:flex;align-items:center;gap:12px;padding:14px;background:var(--dark2);border-radius:12px;margin-bottom:8px;border:2px solid '+(isActive?'var(--success)':'var(--dark4)')+'"><div style="font-size:22px">🏙️</div><div style="flex:1"><div style="font-size:14px;font-weight:700">'+item.city.name+'</div><div style="font-size:11px;color:var(--muted)">'+item.city.country+'</div></div><span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:10px;background:'+(isActive?'rgba(34,212,122,.15)':'rgba(122,122,144,.15)')+';color:'+(isActive?'var(--success)':'var(--muted)')+'margin-right:8px">'+(isActive?'🟢 Белсенді':'⚫ Өшірулі')+'</span><button onclick="toggleCity(\''+item.key+'\','+isActive+')" style="background:'+(isActive?'rgba(255,77,109,.15)':'rgba(34,212,122,.15)')+';color:'+(isActive?'var(--danger)':'var(--success)')+';border:none;border-radius:8px;padding:8px 14px;font-family:Manrope,sans-serif;font-weight:700;font-size:12px;cursor:pointer">'+(isActive?'🚫 Өшіру':'✅ Қосу')+'</button></div>';
+    });
+  });
+  el.innerHTML=html;
+}
+
+function toggleCity(cityKey,isActive){
+  if(isActive){DB.ref('active_cities/'+cityKey).remove();toast('🚫 '+ALL_CITIES[cityKey].name+' өшірілді')}
+  else{DB.ref('active_cities/'+cityKey).set(true);toast('✅ '+ALL_CITIES[cityKey].name+' қосылды')}
+}
+
+function toast(msg){var el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(function(){el.classList.remove('show')},3500)}
+</script>
+</body>
+</html>
