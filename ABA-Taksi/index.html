@@ -284,6 +284,8 @@
       <div class="action-row">
         <button class="btn-icon" onclick="callDriver()">📞<span>Қоңырау</span></button>
         <button class="btn-icon" onclick="toggleChat()">💬<span>Чат</span></button>
+        <button class="btn-icon" id="share-ride-btn" style="display:none" onclick="shareRideNow()">📍<span>Бөлісу</span></button>
+        <button class="btn-icon" id="sos-btn" style="display:none;background:rgba(255,77,109,.2)" onclick="activateSOS()">🆘<span>SOS</span></button>
         <button class="btn-icon btn-danger" onclick="cancelOrder()">✕<span>Бас тарту</span></button>
       </div>
     </div>
@@ -330,7 +332,12 @@
   </div>
   <div class="profile-list">
     <div class="profile-item" onclick="openAdminChat()"><span class="profile-item-icon">💬</span><span class="profile-item-text">Админмен чат <span id="admin-chat-badge" style="background:var(--danger);color:white;border-radius:10px;padding:2px 7px;font-size:11px;font-weight:700;display:none">жаңа</span></span><span>›</span></div>
-    <div class="profile-item" onclick="toast('Kaspi QR жақын арада')"><span class="profile-item-icon">💳</span><span class="profile-item-text">Төлем әдістері</span><span>›</span></div>
+    <div class="profile-item" id="kaspi-btn" style="display:none" onclick="toast('Kaspi QR жақын арада')"><span class="profile-item-icon">💳</span><span class="profile-item-text">Kaspi QR төлем</span><span>›</span></div>
+    <div class="profile-item" id="share-trip-btn" style="display:none" onclick="shareTrip()"><span class="profile-item-icon">📍</span><span class="profile-item-text">Сапарды бөлісу</span><span>›</span></div>
+    <div class="profile-item" id="commission-btn" style="display:none"><span class="profile-item-icon">💰</span><span class="profile-item-text">Комиссия: <span id="commission-info" style="color:var(--gold)">10%</span></span><span>›</span></div>
+    <div class="profile-item" id="receipt-btn" style="display:none" onclick="toast('Чек email-ге жіберіледі')"><span class="profile-item-icon">🧾</span><span class="profile-item-text">Чек алу</span><span>›</span></div>
+    <div class="profile-item" id="promo-btn" style="display:none" onclick="toast('Промокод жақын арада')"><span class="profile-item-icon">⭐</span><span class="profile-item-text">Промокод енгізу</span><span>›</span></div>
+    <div class="profile-item" id="referral-btn" style="display:none" onclick="shareReferral()"><span class="profile-item-icon">👥</span><span class="profile-item-text">Достарды шақыру</span><span>›</span></div>
     <div class="profile-item" onclick="toast('support@abagroup.kz')"><span class="profile-item-icon">❓</span><span class="profile-item-text">Қолдау қызметі</span><span>›</span></div>
   </div>
   <div class="bottom-nav">
@@ -415,6 +422,39 @@
     <div style="display:flex;gap:8px">
       <input id="admin-chat-inp" style="flex:1;background:var(--dark3);border:1px solid var(--dark4);border-radius:8px;padding:10px 12px;color:var(--text);font-family:Manrope,sans-serif;font-size:13px;outline:none" placeholder="Хабар жазыңыз..." onkeydown="if(event.key==='Enter')sendToAdmin()"/>
       <button onclick="sendToAdmin()" style="background:var(--gold);border:none;border-radius:8px;padding:10px 14px;font-weight:800;cursor:pointer;font-size:14px">➤</button>
+    </div>
+  </div>
+</div>
+
+<!-- RECEIPT MODAL -->
+<div class="modal-overlay" id="receipt-modal" onclick="if(event.target.id==='receipt-modal')document.getElementById('receipt-modal').classList.remove('open')">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div id="receipt-content" style="background:white;border-radius:16px;padding:24px;color:#111;font-family:Manrope,sans-serif">
+      <div style="text-align:center;margin-bottom:16px">
+        <div style="font-size:32px">🚕</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:#f5c518;letter-spacing:2px">ABA GROUP TAKSI GO</div>
+        <div style="font-size:11px;color:#888;margin-top:2px">Ресми чек / Official Receipt</div>
+      </div>
+      <div style="border-top:2px dashed #eee;border-bottom:2px dashed #eee;padding:14px 0;margin-bottom:14px">
+        <div id="receipt-from" style="display:flex;justify-content:space-between;padding:5px 0;font-size:13px"><span style="color:#888">📍 Қайдан</span><span id="r-from" style="font-weight:700;text-align:right;max-width:60%"></span></div>
+        <div style="display:flex;justify-content:space-between;padding:5px 0;font-size:13px"><span style="color:#888">🏁 Қайда</span><span id="r-to" style="font-weight:700;text-align:right;max-width:60%"></span></div>
+        <div style="display:flex;justify-content:space-between;padding:5px 0;font-size:13px"><span style="color:#888">🚗 Жүргізуші</span><span id="r-driver" style="font-weight:700"></span></div>
+        <div style="display:flex;justify-content:space-between;padding:5px 0;font-size:13px"><span style="color:#888">🏷️ Тариф</span><span id="r-tariff" style="font-weight:700"></span></div>
+        <div style="display:flex;justify-content:space-between;padding:5px 0;font-size:13px"><span style="color:#888">📅 Күні</span><span id="r-date" style="font-weight:700"></span></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <div style="font-size:15px;font-weight:700;color:#111">Жалпы сомасы</div>
+        <div id="r-price" style="font-size:26px;font-weight:800;color:#f5c518"></div>
+      </div>
+      <div style="text-align:center;font-size:11px;color:#aaa;border-top:1px solid #eee;padding-top:12px">
+        ABA Group • aba-taksi.vercel.app<br/>
+        <span id="r-id" style="font-size:10px"></span>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <button onclick="shareReceipt()" style="flex:1;background:var(--gold);border:none;border-radius:10px;padding:13px;font-family:Manrope,sans-serif;font-weight:800;font-size:14px;color:var(--dark);cursor:pointer">📤 Бөлісу</button>
+      <button onclick="document.getElementById('receipt-modal').classList.remove('open')" style="flex:1;background:var(--dark3);border:none;border-radius:10px;padding:13px;font-family:Manrope,sans-serif;font-weight:700;font-size:14px;color:var(--text);cursor:pointer">✕ Жабу</button>
     </div>
   </div>
 </div>
@@ -604,10 +644,15 @@ function loadFirebase(){
 }
 
 function onFBReady(){
+  // Restore city
+  var savedCity=localStorage.getItem('aba_city');
+  if(savedCity&&CITIES[savedCity]){
+    CUR_CITY=savedCity;
+    LOCS=CITIES[savedCity].locs;
+  }
   var s=getSess();
   if(s){
-    U=s;ROLE=s.role;CUR_CITY=s.city||'kabanbay';
-    LOCS=CITIES[CUR_CITY]?CITIES[CUR_CITY].locs:CITIES['kabanbay'].locs;
+    U=s;ROLE=s.role;
     enterApp();
   } else {
     loadActiveCities(function(){show('city')});
@@ -673,17 +718,33 @@ function filterCities(q){
 function selectCity(cityKey){
   CUR_CITY=cityKey;
   LOCS=CITIES[cityKey]?CITIES[cityKey].locs:CITIES['kabanbay'].locs;
-  // Save city in session
-  var s=getSess();
-  if(s){s.city=cityKey;saveSess(s)}
+  // Save city to localStorage
+  localStorage.setItem('aba_city',cityKey);
   show('auth');
 }
 
-// Add city to session when logging in
 function enterApp(){
-  if(!U.city)U.city=CUR_CITY;
+  var savedCity=localStorage.getItem('aba_city');
+  if(savedCity&&CITIES[savedCity]){CUR_CITY=savedCity;LOCS=CITIES[savedCity].locs}
+  loadAppSettings();
   if(ROLE==='driver'){setupDriver();show('driver')}
   else{setupHome();show('home')}
+}
+
+function activateSOS(){
+  if(confirm('🆘 SOS сигналын жіберу керек пе?\n\n112 қоңырау шалынады және орныңыз Админге жіберіледі!')){
+    // Call 112
+    window.location.href='tel:112';
+    // Send alert to admin
+    if(U&&window.DB){
+      window.DB.ref('sos_alerts').push({
+        userId:U.id,userName:U.name,phone:U.phone,
+        orderId:ORDER_ID||null,time:Date.now(),
+        message:'🆘 ШҰҒЫЛ! '+U.name+' ('+U.phone+') SOS сигналын жіберді!'
+      });
+    }
+    toast('🆘 SOS жіберілді! 112 қоңырауланды');
+  }
 }
 
 window.onload=function(){
@@ -693,7 +754,135 @@ window.onload=function(){
 
 // ── UTILS ──
 function show(id){document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active')});document.getElementById('screen-'+id).classList.add('active')}
-// ── ADMIN CHAT ──
+// ── APP SETTINGS ──
+var APP_SETTINGS={};
+
+function loadAppSettings(){
+  var tryLoad=function(){
+    if(!window.DB){setTimeout(tryLoad,300);return}
+    window.DB.ref('app_settings').on('value',function(snap){
+      APP_SETTINGS=snap.exists()?snap.val():{};
+      applySettings();
+    });
+  };
+  tryLoad();
+}
+
+function applySettings(){
+  function show(id){var el=document.getElementById(id);if(el)el.style.display='flex'}
+  function hide(id){var el=document.getElementById(id);if(el)el.style.display='none'}
+
+  // SOS button — сапар кезінде
+  var sosBtn=document.getElementById('sos-btn');
+  if(sosBtn)sosBtn.style.display=APP_SETTINGS.sos_button?'flex':'none';
+
+  // Kaspi QR
+  APP_SETTINGS.kaspi_qr?show('kaspi-btn'):hide('kaspi-btn');
+
+  // Сапарды бөлісу — riding экранында + профильде
+  var shareRideBtn=document.getElementById('share-ride-btn');
+  if(shareRideBtn)shareRideBtn.style.display=APP_SETTINGS.share_trip?'flex':'none';
+  APP_SETTINGS.share_trip?show('share-trip-btn'):hide('share-trip-btn');
+
+  // Комиссия
+  APP_SETTINGS.commission?show('commission-btn'):hide('commission-btn');
+
+  // Чек
+  APP_SETTINGS.receipt?show('receipt-btn'):hide('receipt-btn');
+
+  // Промокод
+  APP_SETTINGS.promo_code?show('promo-btn'):hide('promo-btn');
+
+  // Реферал
+  APP_SETTINGS.referral?show('referral-btn'):hide('referral-btn');
+
+  // Privacy Policy
+  if(APP_SETTINGS.privacy_policy&&!localStorage.getItem('aba_privacy_ok')){
+    showPrivacyModal();
+  }
+}
+
+// ── RECEIPT ──
+function showReceipt(orderData){
+  if(!APP_SETTINGS.receipt)return;
+  document.getElementById('r-from').textContent=orderData.from||'—';
+  document.getElementById('r-to').textContent=orderData.to||'—';
+  document.getElementById('r-driver').textContent=orderData.driverName||'—';
+  document.getElementById('r-tariff').textContent=orderData.tariff||'—';
+  document.getElementById('r-date').textContent=new Date(orderData.createdAt||Date.now()).toLocaleString('ru-RU');
+  document.getElementById('r-price').textContent=(orderData.price||0)+' '+(orderData.currency||'₸');
+  document.getElementById('r-id').textContent='Тапсырыс №: '+(orderData.key||'—').slice(-8).toUpperCase();
+  document.getElementById('receipt-modal').classList.add('open');
+}
+
+function shareReceipt(){
+  var content=document.getElementById('receipt-content');
+  // Share as text
+  var text='🚕 ABA GROUP TAKSI GO — Чек\n\n'+
+    '📍 '+document.getElementById('r-from').textContent+'\n'+
+    '🏁 '+document.getElementById('r-to').textContent+'\n'+
+    '🚗 '+document.getElementById('r-driver').textContent+'\n'+
+    '💰 '+document.getElementById('r-price').textContent+'\n'+
+    '📅 '+document.getElementById('r-date').textContent+'\n\n'+
+    'aba-taksi.vercel.app';
+  if(navigator.share){
+    navigator.share({title:'ABA TAKSI GO Чек',text:text});
+  } else {
+    navigator.clipboard.writeText(text).then(function(){toast('📋 Чек көшірілді!')});
+  }
+}
+  if(!ORDER_ID){toast('Белсенді сапар жоқ');return}
+  var text='Менің сапарымды қадағалаңыз!\nABA TAKSI GO: https://aba-taksi.vercel.app';
+  if(navigator.share){navigator.share({title:'ABA TAKSI GO',text:text})}
+  else{toast('Сапар сілтемесі көшірілді!')}
+}
+
+function shareReferral(){
+  var code='ABA'+(U?U.id.slice(-4).toUpperCase():'0000');
+  if(navigator.share){navigator.share({title:'ABA TAKSI GO',text:'ABA TAKSI GO қосымшасын қолданыңыз! Промокод: '+code,url:'https://aba-taksi.vercel.app'})}
+  else{toast('Промокодыңыз: '+code)}
+}
+
+function shareTrip(){shareRideNow()}
+
+function shareRideNow(){
+  var driverName=document.getElementById('ride-name')?document.getElementById('ride-name').textContent:'—';
+  var driverCar=document.getElementById('ride-car')?document.getElementById('ride-car').textContent:'—';
+  var driverPlate=document.getElementById('ride-plate')?document.getElementById('ride-plate').textContent:'—';
+  var eta=document.getElementById('ride-eta')?document.getElementById('ride-eta').textContent:'—';
+  var text='🚕 Мен қазір такси ұстадым!\n\n'+
+    '📍 Қайдан: '+(FROM||'—')+'\n'+
+    '🏁 Қайда: '+(TO||'—')+'\n'+
+    '🚗 Жүргізуші: '+driverName+'\n'+
+    '🚙 Машина: '+driverCar+' ('+driverPlate+')\n'+
+    '⏱️ Келу уақыты: '+eta+'\n\n'+
+    '📱 ABA TAKSI GO — aba-taksi.vercel.app';
+  if(navigator.share){navigator.share({title:'Менің сапарым — ABA TAKSI GO',text:text})}
+  else if(navigator.clipboard){navigator.clipboard.writeText(text).then(function(){toast('📋 Ақпарат көшірілді!')})}
+  else{toast('Бөлісу мүмкін емес')}
+}
+
+function showPrivacyModal(){
+  var m=document.createElement('div');
+  m.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.9);display:flex;align-items:center;justify-content:center;z-index:500;padding:20px';
+  m.innerHTML='<div style="background:var(--dark2);border-radius:20px;padding:26px;width:100%;max-width:340px;text-align:center">'+
+    '<div style="font-size:32px;margin-bottom:12px">📜</div>'+
+    '<div style="font-size:17px;font-weight:800;margin-bottom:8px">Пайдаланушы келісімі</div>'+
+    '<div style="font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.6">'+
+      'ABA Group TAKSI GO қызметін пайдалану арқылы сіз біздің '+
+      '<span style="color:var(--gold)">Пайдалану шарттары</span> мен '+
+      '<span style="color:var(--gold)">Конфиденциалдылық саясатымызға</span> келісесіз.'+
+    '</div>'+
+    '<button onclick="acceptPrivacy(this)" style="width:100%;background:var(--gold);border:none;border-radius:10px;padding:14px;font-family:Manrope,sans-serif;font-weight:800;font-size:14px;color:var(--dark);cursor:pointer;margin-bottom:8px">✓ Келісемін</button>'+
+    '<button onclick="logout()" style="width:100%;background:none;border:1px solid var(--dark4);border-radius:10px;padding:12px;font-family:Manrope,sans-serif;font-weight:600;font-size:13px;color:var(--muted);cursor:pointer">Бас тарту</button>'+
+  '</div>';
+  document.body.appendChild(m);
+}
+
+function acceptPrivacy(btn){
+  localStorage.setItem('aba_privacy_ok','1');
+  btn.closest('div').parentNode.remove();
+}
 function openAdminChat(){
   if(!U)return;
   document.getElementById('admin-chat-modal').classList.add('open');
@@ -838,20 +1027,156 @@ function loadOnlineCount(){
 function showTab(tab){
   if(tab==='home'){setupHome();show('home')}
   else if(tab==='history'){loadHistory();show('history')}
-  else if(tab==='profile'){setupHome();show('profile')}
+  else if(tab==='profile'){
+    setupHome();
+    show('profile');
+    // Reload settings from Firebase each time
+    if(window.DB){
+      window.DB.ref('app_settings').once('value',function(snap){
+        APP_SETTINGS=snap.exists()?snap.val():{};
+        applySettings();
+      });
+    }
+  }
 }
 
 // ── TARIFF ──
 function setTariff(el,price,name){
   document.querySelectorAll('.tariff-card').forEach(function(c){c.classList.remove('active')});
-  el.classList.add('active');TARIFF={name:name,price:price};updatePrice();
+  el.classList.add('active');
+  TARIFF={name:name,price:price};
+  updatePrice();
 }
+
+function renderTariffs(){
+  var tariffs=getTariffs();
+  var sym=getCurrencySymbol();
+  var isDistCity=DISTANCE_CITIES.indexOf(CUR_CITY)>=0;
+  var el=document.querySelector('.tariff-cards');
+  if(!el)return;
+  el.innerHTML=tariffs.map(function(t,i){
+    // Қашықтық қалаларда баға жасырын — маршрут таңдалғанда ғана шығады
+    var priceHtml=isDistCity
+      ?'<div class="tariff-price" id="tariff-price-'+i+'" style="color:var(--muted);font-size:11px">Маршрут таңдаңыз</div>'
+      :'<div class="tariff-price">'+t.price+' '+sym+'</div>';
+    return '<div class="tariff-card'+(i===0?' active':'')+'" onclick="setTariff(this,'+t.price+',\''+t.name+'\')">'
+      +'<div class="tariff-icon">'+t.icon+'</div>'
+      +'<div class="tariff-name">'+t.name+'</div>'
+      +priceHtml
+      +'<div class="tariff-time">'+t.time+'</div>'
+      +'</div>';
+  }).join('');
+  TARIFF={name:tariffs[0].name,price:tariffs[0].price};
+  updatePrice();
+}
+
+// Қашықтық бойынша баға — тек үлкен қалалар
+var DISTANCE_CITIES=['almaty','astana','karaganda','semey','oskemen','taldykorgan','shymkent','atyrau','urdzhar','makhanshi','pittsburgh','bishkek','tashkent'];
+
+// Әр қала тарифтері: базалық + км бойынша
+var CITY_RATES={
+  'almaty':     {'Эконом':{base:300,perKm:150,min:500},'Комфорт':{base:500,perKm:220,min:800},'Бизнес':{base:800,perKm:350,min:1500},'Жүк':{base:400,perKm:180,min:700}},
+  'astana':     {'Эконом':{base:300,perKm:140,min:500},'Комфорт':{base:450,perKm:200,min:750},'Бизнес':{base:750,perKm:320,min:1400},'Жүк':{base:350,perKm:160,min:650}},
+  'karaganda':  {'Эконом':{base:200,perKm:120,min:400},'Комфорт':{base:350,perKm:180,min:600},'Бизнес':{base:600,perKm:280,min:1200},'Жүк':{base:300,perKm:140,min:550}},
+  'semey':      {'Эконом':{base:200,perKm:110,min:400},'Комфорт':{base:320,perKm:170,min:580},'Бизнес':{base:550,perKm:260,min:1100},'Жүк':{base:280,perKm:130,min:500}},
+  'oskemen':    {'Эконом':{base:200,perKm:110,min:400},'Комфорт':{base:320,perKm:170,min:580},'Бизнес':{base:550,perKm:260,min:1100},'Жүк':{base:280,perKm:130,min:500}},
+  'taldykorgan':{'Эконом':{base:220,perKm:120,min:420},'Комфорт':{base:340,perKm:180,min:600},'Бизнес':{base:580,perKm:270,min:1150},'Жүк':{base:290,perKm:140,min:520}},
+  'shymkent':   {'Эконом':{base:250,perKm:130,min:450},'Комфорт':{base:380,perKm:190,min:650},'Бизнес':{base:650,perKm:300,min:1300},'Жүк':{base:320,perKm:150,min:580}},
+  'atyrau':     {'Эконом':{base:250,perKm:130,min:450},'Комфорт':{base:380,perKm:190,min:650},'Бизнес':{base:650,perKm:300,min:1300},'Жүк':{base:320,perKm:150,min:580}},
+  'urdzhar':    {'Эконом':{base:150,perKm:100,min:350},'Комфорт':{base:280,perKm:160,min:550},'Бизнес':{base:500,perKm:240,min:1000},'Жүк':{base:250,perKm:120,min:450}},
+  'makhanshi':  {'Эконом':{base:150,perKm:100,min:350},'Комфорт':{base:280,perKm:160,min:550},'Бизнес':{base:500,perKm:240,min:1000},'Жүк':{base:250,perKm:120,min:450}},
+  'pittsburgh': {'Economy':{base:2.50,perKm:1.50,min:5},'Comfort':{base:3.50,perKm:2.00,min:8},'Business':{base:5.00,perKm:3.00,min:15},'Cargo':{base:4.00,perKm:1.80,min:8}},
+  'bishkek':    {'Эконом':{base:50,perKm:30,min:100},'Комфорт':{base:80,perKm:45,min:160},'Бизнес':{base:130,perKm:70,min:280},'Груз':{base:60,perKm:35,min:120}},
+  'tashkent':   {'Эконом':{base:3000,perKm:2000,min:8000},'Комфорт':{base:5000,perKm:3000,min:12000},'Бизнес':{base:8000,perKm:5000,min:20000},'Груз':{base:4000,perKm:2500,min:10000}},
+};
+
+function calcDistancePrice(from,to,tariffName){
+  var R=6371;
+  var dLat=(to.lat-from.lat)*Math.PI/180;
+  var dLng=(to.lng-from.lng)*Math.PI/180;
+  var a=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(from.lat*Math.PI/180)*Math.cos(to.lat*Math.PI/180)*Math.sin(dLng/2)*Math.sin(dLng/2);
+  var distKm=R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+  var timeMin=Math.round(distKm/30*60);
+  var rates=CITY_RATES[CUR_CITY];
+  if(!rates)return null;
+  var tName=tariffName||TARIFF.name;
+  // Find matching rate key (case insensitive, partial match)
+  var rateKey=Object.keys(rates).find(function(k){
+    return k===tName||k.toLowerCase()===tName.toLowerCase()||
+           tName.toLowerCase().indexOf(k.toLowerCase())>=0||
+           k.toLowerCase().indexOf(tName.toLowerCase())>=0;
+  });
+  // If no match, use index from tariffs array
+  if(!rateKey){
+    var tariffs=getTariffs();
+    var idx=tariffs.findIndex(function(t){return t.name===tName});
+    if(idx>=0)rateKey=Object.keys(rates)[idx];
+    else rateKey=Object.keys(rates)[0];
+  }
+  var rate=rates[rateKey];
+  var price=rate.base+(distKm*rate.perKm);
+  price=Math.max(price,rate.min);
+  var sym=getCurrencySymbol();
+  if(sym==='$')price=Math.round(price*100)/100;
+  else price=Math.round(price/10)*10;
+  return {price:price,distKm:distKm.toFixed(1),timeMin:timeMin,sym:sym};
+}
+
 function updatePrice(){
   var sym=getCurrencySymbol();
-  if(!FROM||!TO){document.getElementById('total-price').textContent='— '+sym;document.getElementById('price-note').textContent='Маршрут таңдалмаған';return}
+  var isDistCity=DISTANCE_CITIES.indexOf(CUR_CITY)>=0;
+
+  if(!FROM||!TO){
+    document.getElementById('total-price').textContent='— '+sym;
+    document.getElementById('price-note').textContent='Маршрут таңдаңыз';
+    if(isDistCity){
+      document.querySelectorAll('.tariff-price').forEach(function(el){
+        el.textContent='Маршрут таңдаңыз';
+        el.style.color='var(--muted)';
+        el.style.fontSize='11px';
+      });
+    }
+    return;
+  }
+
+  // Үлкен қалалар — қашықтық бойынша
+  if(isDistCity&&FROM_GEO&&TO_GEO){
+    var tariffs=getTariffs();
+    var savedTariff={name:TARIFF.name,price:TARIFF.price};
+    // Show price on each tariff card
+    tariffs.forEach(function(t,i){
+      var result=calcDistancePrice(FROM_GEO,TO_GEO,t.name);
+      if(result){
+        var cards=document.querySelectorAll('.tariff-card');
+        if(cards[i]){
+          var priceEl=cards[i].querySelector('.tariff-price');
+          if(priceEl){
+            priceEl.textContent=result.price+' '+sym;
+            priceEl.style.color='var(--gold)';
+            priceEl.style.fontSize='14px';
+            priceEl.style.fontWeight='800';
+          }
+          cards[i].setAttribute('onclick','setTariff(this,'+result.price+',\''+t.name+'\')');
+        }
+      }
+    });
+    // Calculate for selected tariff
+    TARIFF=savedTariff;
+    var finalResult=calcDistancePrice(FROM_GEO,TO_GEO,TARIFF.name);
+    if(finalResult){
+      TARIFF.price=finalResult.price;
+      document.getElementById('total-price').textContent=finalResult.price+' '+sym;
+      document.getElementById('price-note').textContent=TARIFF.name+' • '+finalResult.distKm+' км • ~'+finalResult.timeMin+' мин';
+    }
+    return;
+  }
+
+  // Қабанбай, Жарбулақ — стандарт баға
   document.getElementById('total-price').textContent=TARIFF.price+' '+sym;
   document.getElementById('price-note').textContent=TARIFF.name+' тарифі';
 }
+
+function calcPittsburghPrice(){}
 
 // ── LOCATION ──
 var locTimer=null;
@@ -915,7 +1240,7 @@ function placeOrder(){
   var toC=TO_GEO?TO_GEO.lat+','+TO_GEO.lng:TO;
   var ref=DB.ref('orders').push();
   ORDER_ID=ref.key;
-  ref.set({passengerId:U.id,passengerName:U.name,passengerPhone:U.phone,from:FROM,to:TO,fromCoord:fromC,toCoord:toC,tariff:TARIFF.name,price:TARIFF.price,status:'waiting',createdAt:Date.now()});
+  ref.set({passengerId:U.id,passengerName:U.name,passengerPhone:U.phone,from:FROM,to:TO,fromCoord:fromC,toCoord:toC,tariff:TARIFF.name,price:TARIFF.price,currency:getCurrencySymbol(),city:CUR_CITY,status:'waiting',createdAt:Date.now()});
   DB.ref('orders/'+ORDER_ID).on('value',function(snap){
     var d=snap.val();if(!d)return;
     if(d.status==='accepted'){
@@ -928,13 +1253,18 @@ function placeOrder(){
       document.getElementById('ride-plate').textContent=d.driverPlate||'—';
       document.getElementById('ride-rating').textContent=d.driverRating||'5.0';
       document.getElementById('ride-eta').textContent=(d.eta||5)+' мин';
-      document.getElementById('ride-price2').textContent=d.price+' ₸';
+      document.getElementById('ride-price2').textContent=d.price+' '+(d.currency||'₸');
       CHAT_KEY=ORDER_ID;loadChat('passenger');
       show('riding');
     }
     if(d.status==='completed'){
-      var oid=ORDER_ID;resetHome();show('home');
-      setTimeout(function(){showRating(oid)},600);
+      var oid=ORDER_ID;
+      var orderData=Object.assign({},d,{key:oid});
+      resetHome();show('home');
+      setTimeout(function(){
+        showRating(oid);
+        if(APP_SETTINGS.receipt)setTimeout(function(){showReceipt(orderData)},3000);
+      },600);
       toast('Сапар аяқталды! Рахмет 🙏');
     }
     if(d.status==='cancelled'){toast('Тапсырыс бас тартылды');resetHome();show('home')}
@@ -1014,7 +1344,7 @@ function loadHistory(){
   DB.ref('orders').orderByChild(field).equalTo(U.id).once('value',function(snap){
     var items=[];snap.forEach(function(c){var v=c.val();if(v.status==='completed')items.unshift(v)});
     if(!items.length){el.innerHTML='<div style="text-align:center;color:var(--muted);padding:60px 20px;font-size:14px">Сапар тарихы жоқ</div>';return}
-    el.innerHTML=items.map(function(item){return '<div class="history-item"><div class="history-row"><div class="history-route">'+(item.from||'—')+' → '+(item.to||'—')+'</div><div class="history-price">'+(item.price||0)+' ₸</div></div><div class="history-meta"><span class="history-tag">'+(ROLE==='driver'?'🙋 '+(item.passengerName||'—'):'🚗 '+(item.driverName||'—'))+'</span><span class="history-tag">•</span><span class="history-tag">'+(item.tariff||'—')+'</span><span class="history-tag">•</span><span class="history-tag">'+(item.createdAt?new Date(item.createdAt).toLocaleDateString('ru-RU'):'—')+'</span></div></div>'}).join('');
+    el.innerHTML=items.map(function(item){return '<div class="history-item"><div class="history-row"><div class="history-route">'+(item.from||'—')+' → '+(item.to||'—')+'</div><div class="history-price">'+(item.price||0)+' '+(item.currency||'₸')+'</div></div><div class="history-meta"><span class="history-tag">'+(ROLE==='driver'?'🙋 '+(item.passengerName||'—'):'🚗 '+(item.driverName||'—'))+'</span><span class="history-tag">•</span><span class="history-tag">'+(item.tariff||'—')+'</span><span class="history-tag">•</span><span class="history-tag">'+(item.createdAt?new Date(item.createdAt).toLocaleDateString('ru-RU'):'—')+'</span></div></div>'}).join('');
   });
 }
 
@@ -1047,7 +1377,7 @@ function uploadPhoto(input,who){
 function setupDriver(){
   if(!U)return;
   document.getElementById('d-trips').textContent=U.trips||0;
-  document.getElementById('d-earn').textContent=(U.earn||0)+' ₸';
+  document.getElementById('d-earn').textContent=(U.earn||0)+' '+(getCurrencySymbol()||'₸');
   document.getElementById('d-rating').textContent=U.rating?Number(U.rating).toFixed(1):'5.0';
   document.getElementById('drv-name').textContent=U.name;
   var av=document.getElementById('drv-avatar');
@@ -1083,7 +1413,7 @@ function showOrder(order){
   var isC=function(s){return /^-?\d+\./.test(s)};
   var fF=isC(fc)?fc:fc+', Қазақстан';var tF=isC(tc)?tc:tc+', Қазақстан';
   var mu='https://www.google.com/maps/dir/?api=1&origin='+encodeURIComponent(fF)+'&destination='+encodeURIComponent(tF)+'&travelmode=driving';
-  document.getElementById('drv-area').innerHTML='<div class="order-request"><div class="order-request-title">🔔 Жаңа тапсырыс!</div><div style="margin-bottom:11px"><div class="order-route-item"><div class="order-route-dot" style="background:var(--gold)"></div><div class="order-route-text">'+order.from+'</div></div><div style="width:2px;height:11px;background:var(--dark4);margin-left:4px;margin-bottom:2px"></div><div class="order-route-item"><div class="order-route-dot" style="background:var(--danger)"></div><div class="order-route-text">'+order.to+'</div></div></div><div class="order-meta"><div class="order-meta-item"><div class="order-meta-val">'+order.price+' ₸</div><div class="order-meta-lbl">Баға</div></div><div class="order-meta-item"><div class="order-meta-val">'+order.tariff+'</div><div class="order-meta-lbl">Тариф</div></div><div class="order-meta-item"><div class="order-meta-val">'+(order.passengerName||'').split(' ')[0]+'</div><div class="order-meta-lbl">Жолаушы</div></div></div><a href="'+mu+'" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:8px;background:rgba(66,133,244,.15);border:1px solid rgba(66,133,244,.3);border-radius:8px;padding:10px;margin-bottom:10px;color:#4285f4;font-weight:700;font-size:13px;text-decoration:none">🗺️ Google Maps-та маршрутты ашу</a><div class="accept-row"><button class="btn-accept" onclick="acceptOrder(\''+order.key+'\','+order.price+',\''+encodeURIComponent(fc)+'\',\''+encodeURIComponent(tc)+'\')">✓ Қабылдау</button><button class="btn-reject" onclick="rejectOrder(\''+order.key+'\')">✗ Өткізу</button></div></div>';
+  document.getElementById('drv-area').innerHTML='<div class="order-request"><div class="order-request-title">🔔 Жаңа тапсырыс!</div><div style="margin-bottom:11px"><div class="order-route-item"><div class="order-route-dot" style="background:var(--gold)"></div><div class="order-route-text">'+order.from+'</div></div><div style="width:2px;height:11px;background:var(--dark4);margin-left:4px;margin-bottom:2px"></div><div class="order-route-item"><div class="order-route-dot" style="background:var(--danger)"></div><div class="order-route-text">'+order.to+'</div></div></div><div class="order-meta"><div class="order-meta-item"><div class="order-meta-val">'+order.price+' '+(order.currency||'₸')+'</div><div class="order-meta-lbl">Баға</div></div><div class="order-meta-item"><div class="order-meta-val">'+order.tariff+'</div><div class="order-meta-lbl">Тариф</div></div><div class="order-meta-item"><div class="order-meta-val">'+(order.passengerName||'').split(' ')[0]+'</div><div class="order-meta-lbl">Жолаушы</div></div></div><a href="'+mu+'" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:8px;background:rgba(66,133,244,.15);border:1px solid rgba(66,133,244,.3);border-radius:8px;padding:10px;margin-bottom:10px;color:#4285f4;font-weight:700;font-size:13px;text-decoration:none">🗺️ Google Maps-та маршрутты ашу</a><div class="accept-row"><button class="btn-accept" onclick="acceptOrder(\''+order.key+'\','+order.price+',\''+encodeURIComponent(fc)+'\',\''+encodeURIComponent(tc)+'\')">✓ Қабылдау</button><button class="btn-reject" onclick="rejectOrder(\''+order.key+'\')">✗ Өткізу</button></div></div>';
   // Listen for cancel
   DB.ref('orders/'+order.key).on('value',function(snap){
     var d=snap.val();
@@ -1097,12 +1427,12 @@ function acceptOrder(orderKey,price,fromEnc,toEnc){
   var isC=function(s){return /^-?\d+\./.test(s)};
   var fF=isC(from)?from:from+', Қазақстан';var tF=isC(to)?to:to+', Қазақстан';
   var mu='https://www.google.com/maps/dir/?api=1&origin='+encodeURIComponent(fF)+'&destination='+encodeURIComponent(tF)+'&travelmode=driving';
-  DB.ref('orders/'+orderKey).update({status:'accepted',driverId:U.id,driverName:U.name,driverPhone:U.phone,driverCar:(U.carModel||'Автомобиль')+(U.carColor?', '+U.carColor:''),driverPlate:U.plate||'—',driverRating:U.rating||5.0,driverPhoto:U.photo||null,eta:eta});
+  DB.ref('orders/'+orderKey).update({status:'accepted',driverId:U.id,driverName:U.name,driverPhone:U.phone,driverCar:(U.carModel||'Автомобиль')+(U.carColor?', '+U.carColor:''),driverPlate:U.plate||'—',driverRating:U.rating||5.0,driverPhoto:U.photo||null,eta:eta,currency:getCurrencySymbol(),city:CUR_CITY});
   var nt=(U.trips||0)+1;var ne=(U.earn||0)+price;
-  DB.ref('users/'+U.id).update({trips:nt,earn:ne});
+  DB.ref('users/'+U.id).update({trips:nt,earn:ne,earnCurrency:getCurrencySymbol()});
   U.trips=nt;U.earn=ne;saveSess(U);
   document.getElementById('d-trips').textContent=nt;
-  document.getElementById('d-earn').textContent=ne+' ₸';
+  document.getElementById('d-earn').textContent=ne+' '+(getCurrencySymbol()||'₸');
   CHAT_KEY=orderKey;
   toast('✅ Қабылданды!');
   setTimeout(function(){window.open(mu,'_blank')},800);
@@ -1114,7 +1444,7 @@ function completeTrip(orderKey,price){
   DB.ref('orders/'+orderKey).update({status:'completed'});
   if(CHAT_KEY)DB.ref('chats/'+CHAT_KEY).off();
   CHAT_KEY=null;
-  toast('Сапар аяқталды! +'+price+' ₸');
+  toast('Сапар аяқталды! +'+price+' '+(getCurrencySymbol()||'₸'));
   showWaiting();
 }
 

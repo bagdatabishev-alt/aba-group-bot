@@ -93,6 +93,16 @@
     .driver-stat-name{font-size:14px;font-weight:700}
     .driver-stat-sub{font-size:12px;color:var(--muted);margin-top:2px}
     .driver-stat-earn{font-size:16px;font-weight:800;color:var(--gold)}
+    .setting-item{background:var(--dark2);border-radius:var(--radius);border:1px solid var(--dark4);padding:16px;margin-bottom:10px;display:flex;align-items:center;gap:14px}
+    .setting-icon{font-size:26px;width:42px;text-align:center;flex-shrink:0}
+    .setting-info{flex:1}
+    .setting-name{font-size:14px;font-weight:700}
+    .setting-desc{font-size:12px;color:var(--muted);margin-top:3px;line-height:1.4}
+    .s-toggle{width:50px;height:26px;border-radius:13px;background:var(--dark4);position:relative;cursor:pointer;transition:background .3s;border:none;display:block}
+    .s-toggle.on{background:var(--success)}
+    .s-toggle-thumb{position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:white;transition:left .3s;pointer-events:none}
+    .s-toggle.on .s-toggle-thumb{left:27px}
+    .setting-group{font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin:16px 0 8px;padding:0 2px}
     .archive-month{background:var(--dark2);border-radius:var(--radius);border:1px solid var(--dark4);margin-bottom:10px;padding:14px;cursor:pointer}
     .archive-month-title{font-size:15px;font-weight:700;display:flex;justify-content:space-between;align-items:center}
     .archive-month-sub{font-size:12px;color:var(--muted);margin-top:4px}
@@ -153,7 +163,7 @@
     <div class="stat-card"><div class="stat-card-icon">🚗</div><div class="stat-card-val" id="stat-drivers">0</div><div class="stat-card-lbl">Жүргізушілер</div></div>
     <div class="stat-card"><div class="stat-card-icon">🙋</div><div class="stat-card-val" id="stat-passengers">0</div><div class="stat-card-lbl">Жолаушылар</div></div>
     <div class="stat-card"><div class="stat-card-icon">📋</div><div class="stat-card-val" id="stat-orders">0</div><div class="stat-card-lbl">Тапсырыстар</div></div>
-    <div class="stat-card"><div class="stat-card-icon">💰</div><div class="stat-card-val" id="stat-revenue">0 ₸</div><div class="stat-card-lbl">Ай табысы</div></div>
+    <div class="stat-card"><div class="stat-card-icon">💰</div><div class="stat-card-val" id="stat-revenue" style="font-size:14px;line-height:1.6">0 ₸</div><div class="stat-card-lbl">Ай табысы</div></div>
   </div>
 
   <!-- ACTION BAR -->
@@ -172,6 +182,7 @@
     <button class="tab" onclick="switchTab('orders')">📋 Тапсырыстар</button>
     <button class="tab" onclick="switchTab('archive')">📁 Архив</button>
     <button class="tab" onclick="switchTab('chat')">💬 Чат</button>
+    <button class="tab" onclick="switchTab('settings')">⚙️ Баптаулар</button>
   </div>
 
   <!-- STATISTICS -->
@@ -203,6 +214,15 @@
       <div style="font-size:13px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:1px">🏆 Жүргізушілер рейтингі</div>
     </div>
     <div class="driver-stats-list" id="driver-stats-list"></div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div id="tab-settings" class="tab-content">
+    <div class="section">
+      <div style="font-size:14px;font-weight:800;margin-bottom:4px">⚙️ Жүйе баптаулары</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:20px">Функцияларды қосыңыз немесе өшіріңіз. Өзгерістер бірден барлық қолданушыларға қолданылады.</div>
+      <div id="settings-list"></div>
+    </div>
   </div>
 
   <!-- CITIES -->
@@ -375,7 +395,7 @@ function renderDrivers(drivers){
       '<div class="card-details">'+
         '<div class="detail-row"><span class="detail-label">Телефон</span><span class="detail-val">'+u.phone+'</span></div>'+
         '<div class="detail-row"><span class="detail-label">Сапарлар (ай)</span><span class="detail-val">'+(u.trips||0)+'</span></div>'+
-        '<div class="detail-row"><span class="detail-label">Табыс (ай)</span><span class="detail-val" style="color:var(--gold)">'+(u.earn||0).toLocaleString()+' ₸</span></div>'+
+        '<div class="detail-row"><span class="detail-label">Табыс (ай)</span><span class="detail-val" style="color:var(--gold)">'+(u.earn||0).toLocaleString()+' '+(u.earnCurrency||'₸')+'</span></div>'+
         '<div class="detail-row"><span class="detail-label">Жалпы сапар</span><span class="detail-val">'+(u.totalTrips||u.trips||0)+'</span></div>'+
         '<div class="detail-row"><span class="detail-label">Рейтинг</span><span class="detail-val">⭐ '+(u.rating||5.0)+'</span></div>'+
         (u.carModel?'<div class="detail-row"><span class="detail-label">Машина</span><span class="detail-val">'+(u.carModel||'')+(u.carColor?', '+u.carColor:'')+'</span></div>':'')+
@@ -409,10 +429,26 @@ function filterPassengers(q){
 }
 function loadOrders(){
   DB.ref('orders').on('value',function(snap){
-    allOrders={};var total=0,rev=0;
-    snap.forEach(function(c){allOrders[c.key]={key:c.key,...c.val()};total++;if(c.val().status==='completed')rev+=c.val().price||0});
+    allOrders={};var total=0;
+    var revByCurrency={};
+    snap.forEach(function(c){
+      var o=c.val();
+      allOrders[c.key]={key:c.key,...o};
+      total++;
+      if(o.status==='completed'){
+        var sym=o.currency||'₸';
+        revByCurrency[sym]=(revByCurrency[sym]||0)+(o.price||0);
+      }
+    });
     document.getElementById('stat-orders').textContent=total;
-    document.getElementById('stat-revenue').textContent=rev.toLocaleString()+' ₸';
+    // Show revenue by currency
+    var revText=Object.keys(revByCurrency).length?
+      Object.keys(revByCurrency).map(function(sym){
+        var flag=sym==='$'?'🇺🇸':sym==='с'?'🇰🇬':sym==='сўм'?'🇺🇿':'🇰🇿';
+        return flag+' '+revByCurrency[sym].toLocaleString()+' '+sym;
+      }).join(' | ')
+      :'0 ₸';
+    document.getElementById('stat-revenue').textContent=revText;
     renderOrders(curFilter);
   });
 }
@@ -425,7 +461,7 @@ function renderOrders(filter){
   orders.sort(function(a,b){return(b.createdAt||0)-(a.createdAt||0)});
   if(!orders.length){el.innerHTML='<div class="empty">Тапсырыстар жоқ</div>';return}
   el.innerHTML=orders.map(function(o){
-    return '<div class="order-card"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div><div class="order-route">📍 '+(o.from||'—')+' → 🏁 '+(o.to||'—')+'</div><div class="order-meta"><span class="badge badge-'+(o.status||'')+'">'+statusLabel(o.status)+'</span><span class="order-meta-item">👤 '+(o.passengerName||'—')+'</span>'+(o.driverName?'<span class="order-meta-item">🚗 '+o.driverName+'</span>':'')+'</div></div><div class="order-price">'+(o.price||0)+' ₸</div></div><div style="font-size:11px;color:var(--muted);margin-top:6px">'+(o.createdAt?new Date(o.createdAt).toLocaleString('ru-RU'):'')+'</div></div>';
+    return '<div class="order-card"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div><div class="order-route">📍 '+(o.from||'—')+' → 🏁 '+(o.to||'—')+'</div><div class="order-meta"><span class="badge badge-'+(o.status||'')+'">'+statusLabel(o.status)+'</span><span class="order-meta-item">👤 '+(o.passengerName||'—')+'</span>'+(o.driverName?'<span class="order-meta-item">🚗 '+o.driverName+'</span>':'')+'</div></div><div class="order-price">'+(o.price||0)+' '+(o.currency||'₸')+'</div></div><div style="font-size:11px;color:var(--muted);margin-top:6px">'+(o.createdAt?new Date(o.createdAt).toLocaleString('ru-RU'):'')+'</div></div>';
   }).join('');
 }
 
@@ -639,11 +675,34 @@ function switchTab(name){
   if(name==='stats')renderStats();
   if(name==='chat')renderChatUsers();
   if(name==='cities')loadCities();
+  if(name==='settings')loadSettings();
 }
 
 function initAdmin(){
-  loadUsers();loadOrders();loadArchive();loadCities();
+  loadUsers();loadOrders();loadArchive();loadCities();loadSettings();
+  listenSOS();
   setTimeout(function(){renderStats()},1200);
+}
+
+function listenSOS(){
+  DB.ref('sos_alerts').orderByChild('time').limitToLast(10).on('value',function(snap){
+    if(!snap.exists())return;
+    var alerts=[];snap.forEach(function(c){alerts.unshift(c.val())});
+    var latest=alerts[0];
+    if(latest&&Date.now()-latest.time<30000){
+      // Show SOS alert banner
+      var existing=document.getElementById('sos-alert-banner');
+      if(!existing){
+        var banner=document.createElement('div');
+        banner.id='sos-alert-banner';
+        banner.style.cssText='position:fixed;top:0;left:0;right:0;background:var(--danger);color:white;padding:14px 20px;z-index:200;display:flex;align-items:center;gap:12px;font-weight:700;font-size:14px;animation:pulse 1s infinite';
+        banner.innerHTML='🆘 ШҰҒЫЛ! '+latest.userName+' ('+latest.phone+') SOS сигналын жіберді! <button onclick="this.parentNode.remove()" style="margin-left:auto;background:rgba(255,255,255,.2);border:none;border-radius:6px;padding:4px 10px;color:white;cursor:pointer;font-weight:700">✕</button>';
+        document.body.prepend(banner);
+        // Play alert sound
+        try{var ctx=new AudioContext();var osc=ctx.createOscillator();osc.connect(ctx.destination);osc.frequency.value=880;osc.start();setTimeout(function(){osc.stop()},500)}catch(e){}
+      }
+    }
+  });
 }
 
 // ── STATISTICS ──
@@ -734,7 +793,26 @@ function renderStats(){
   }
 
   document.getElementById('chart-period-label').textContent=periodLabel;
-  document.getElementById('chart-total-val').textContent=total.toLocaleString()+' ₸';
+
+  // Calculate totals by currency
+  var filteredOrders=Object.values(allOrders).filter(function(o){
+    if(o.status!=='completed')return false;
+    var od=new Date(o.createdAt);
+    if(curPeriod==='day'){var d=new Date(now);d.setDate(d.getDate()+curOffset);return od.toDateString()===d.toDateString()}
+    if(curPeriod==='week'){var ws=new Date(now);var dy=ws.getDay()||7;ws.setDate(ws.getDate()-dy+1+curOffset*7);var we=new Date(ws);we.setDate(we.getDate()+6);return od>=ws&&od<=we}
+    if(curPeriod==='month'){var mo=new Date(now.getFullYear(),now.getMonth()+curOffset,1);return od.getFullYear()===mo.getFullYear()&&od.getMonth()===mo.getMonth()}
+    if(curPeriod==='year'){return od.getFullYear()===now.getFullYear()+curOffset}
+    return true;
+  });
+  var byCurrency={};
+  filteredOrders.forEach(function(o){var sym=o.currency||'₸';byCurrency[sym]=(byCurrency[sym]||0)+(o.price||0)});
+  var totalHtml=Object.keys(byCurrency).length?
+    Object.keys(byCurrency).map(function(sym){
+      var flag=sym==='$'?'🇺🇸':sym==='с'?'🇰🇬':sym==='сўм'?'🇺🇿':'🇰🇿';
+      return '<div style="font-size:28px;font-weight:800;font-family:Bebas Neue,sans-serif;letter-spacing:1px">'+flag+' '+byCurrency[sym].toLocaleString()+' '+sym+'</div>';
+    }).join('')
+    :'<div style="font-size:36px;font-weight:800">0 ₸</div>';
+  document.getElementById('chart-total-val').innerHTML=totalHtml;
   document.getElementById('chart-total-sub').textContent='Жалпы табыс • '+bars.filter(function(b){return b.val>0}).length+' белсенді кезең';
 
   // Draw bars
@@ -742,7 +820,7 @@ function renderStats(){
   var barsEl=document.getElementById('chart-bars');
   barsEl.innerHTML=bars.map(function(b){
     var h=Math.max(Math.round((b.val/maxVal)*140),b.val>0?8:2);
-    return '<div class="chart-bar-col">'+(b.val>0?'<div class="chart-bar-val">'+b.val.toLocaleString()+'</div>':'<div class="chart-bar-val" style="opacity:0">0</div>')+'<div class="chart-bar '+(b.highlight?'':'')+(b.val===0?'dim':'')+'" style="height:'+h+'px;'+(b.highlight?'background:var(--gold);box-shadow:0 0 12px rgba(245,197,24,.4)':b.val>0?'background:rgba(245,197,24,.7)':'')+'"></div><div class="chart-bar-label">'+b.label+'</div></div>';
+    return '<div class="chart-bar-col">'+(b.val>0?'<div class="chart-bar-val">'+b.val.toLocaleString()+'</div>':'<div class="chart-bar-val" style="opacity:0">0</div>')+'<div class="chart-bar '+(b.val===0?'dim':'')+'" style="height:'+h+'px;'+(b.highlight?'background:var(--gold);box-shadow:0 0 12px rgba(245,197,24,.4)':b.val>0?'background:rgba(245,197,24,.7)':'')+'"></div><div class="chart-bar-label">'+b.label+'</div></div>';
   }).join('');
 
   // Driver breakdown
@@ -756,7 +834,7 @@ function renderDriverStats(){
   if(!drivers.length){el.innerHTML='<div class="empty">Жүргізушілер жоқ</div>';return}
   var medals=['🥇','🥈','🥉'];
   el.innerHTML=drivers.map(function(u,i){
-    return '<div class="driver-stat-item"><div class="driver-stat-rank">'+(medals[i]||'#'+(i+1))+'</div>'+(u.photo?'<img src="'+u.photo+'" style="width:40px;height:40px;object-fit:cover;border-radius:50%">':'<div style="width:40px;height:40px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--dark);font-weight:800;font-size:14px">'+u.name.slice(0,2).toUpperCase()+'</div>')+'<div class="driver-stat-info"><div class="driver-stat-name">'+u.name+'</div><div class="driver-stat-sub">'+(u.trips||0)+' сапар • ⭐'+(u.rating||5.0)+(u.carModel?' • '+u.carModel:'')+'</div></div><div class="driver-stat-earn">'+(u.earn||0).toLocaleString()+' ₸</div></div>';
+    return '<div class="driver-stat-item"><div class="driver-stat-rank">'+(medals[i]||'#'+(i+1))+'</div>'+(u.photo?'<img src="'+u.photo+'" style="width:40px;height:40px;object-fit:cover;border-radius:50%">':'<div style="width:40px;height:40px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--dark);font-weight:800;font-size:14px">'+u.name.slice(0,2).toUpperCase()+'</div>')+'<div class="driver-stat-info"><div class="driver-stat-name">'+u.name+'</div><div class="driver-stat-sub">'+(u.trips||0)+' сапар • ⭐'+(u.rating||5.0)+(u.carModel?' • '+u.carModel:'')+'</div></div><div class="driver-stat-earn">'+(u.earn||0).toLocaleString()+' '+(u.currency||'₸')+'</div></div>';
   }).join('');
 }
 // ── CITIES ──
@@ -792,6 +870,71 @@ function renderCitiesAdmin(){
 function toggleCity(cityKey,isActive){
   if(isActive){DB.ref('active_cities/'+cityKey).remove();toast('🚫 '+ALL_CITIES[cityKey].name+' өшірілді')}
   else{DB.ref('active_cities/'+cityKey).set(true);toast('✅ '+ALL_CITIES[cityKey].name+' қосылды')}
+}
+
+// ── SETTINGS ──
+var SETTINGS_CONFIG=[
+  {group:'🛡️ Қауіпсіздік'},
+  {key:'sos_button',icon:'🆘',name:'SOS батырмасы',desc:'Жолаушы қауіп сезгенде 112 қоңырау шалады және админге хабар жіберіледі'},
+  {key:'share_trip',icon:'📍',name:'Сапарды бөлісу',desc:'Жолаушы маршрутты туысқандарына жібере алады'},
+  {group:'💰 Қаржы'},
+  {key:'commission',icon:'💰',name:'Комиссия жүйесі (10%)',desc:'Әр тапсырыстан ABA Group үлесі автоматты есептеледі'},
+  {key:'kaspi_qr',icon:'💳',name:'Kaspi QR төлем',desc:'Жолаушы Kaspi арқылы онлайн төлей алады'},
+  {key:'receipt',icon:'🧾',name:'Чек жіберу',desc:'Сапар аяқталғанда жолаушыға чек жіберіледі'},
+  {group:'🎯 Маркетинг'},
+  {key:'promo_code',icon:'⭐',name:'Промокод жүйесі',desc:'Жаңа жолаушыларға жеңілдік промокодтары'},
+  {key:'referral',icon:'👥',name:'Реферал жүйесі',desc:'Достарды шақырса бонус алады'},
+  {group:'📋 Заңдық'},
+  {key:'privacy_policy',icon:'📜',name:'Privacy Policy',desc:'Кіргенде пайдаланушы келісімін растауы керек'},
+  {key:'driver_verify',icon:'🪪',name:'Жүргізуші верификациясы',desc:'Куәлік пен техпаспорт тексеруден өту міндетті'},
+  {group:'🔔 Хабарландыру'},
+  {key:'push_notify',icon:'🔔',name:'Push хабарландыру',desc:'Жаңа тапсырыс келгенде дыбыс және дірілдеу'},
+  {key:'sms_verify',icon:'📱',name:'SMS верификация',desc:'Телефон нөмірін SMS арқылы растау'},
+];
+
+var appSettings={};
+
+function loadSettings(){
+  DB.ref('app_settings').on('value',function(snap){
+    appSettings=snap.exists()?snap.val():{};
+    renderSettings();
+  });
+}
+
+function renderSettings(){
+  var el=document.getElementById('settings-list');if(!el)return;
+  var html='';
+  SETTINGS_CONFIG.forEach(function(item){
+    if(item.group){
+      html+='<div class="setting-group">'+item.group+'</div>';
+      return;
+    }
+    var isOn=!!appSettings[item.key];
+    html+='<div class="setting-item" style="border-color:'+(isOn?'var(--success)':'var(--dark4)')+'">'+
+      '<div class="setting-icon">'+item.icon+'</div>'+
+      '<div class="setting-info">'+
+        '<div class="setting-name">'+item.name+'</div>'+
+        '<div class="setting-desc">'+item.desc+'</div>'+
+      '</div>'+
+      '<div>'+
+        '<div style="font-size:10px;font-weight:700;color:'+(isOn?'var(--success)':'var(--muted)')+';text-align:center;margin-bottom:4px">'+(isOn?'ҚОСУЛЫ':'ӨШІРУЛІ')+'</div>'+
+        '<button class="s-toggle'+(isOn?' on':'')+'" onclick="toggleSetting(\''+item.key+'\','+isOn+')">'+
+          '<div class="s-toggle-thumb"></div>'+
+        '</button>'+
+      '</div>'+
+    '</div>';
+  });
+  el.innerHTML=html;
+}
+
+function toggleSetting(key,isOn){
+  if(isOn){
+    DB.ref('app_settings/'+key).remove();
+    toast('❌ Өшірілді');
+  } else {
+    DB.ref('app_settings/'+key).set(true);
+    toast('✅ Қосылды');
+  }
 }
 
 function toast(msg){var el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(function(){el.classList.remove('show')},3500)}
