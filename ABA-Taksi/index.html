@@ -1,1492 +1,1081 @@
 <!DOCTYPE html>
-<html lang="kk">
+<html lang="kк">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
-  <meta name="theme-color" content="#f5c518"/>
-  <meta name="apple-mobile-web-app-capable" content="yes"/>
-  <meta name="apple-mobile-web-app-title" content="ABA Group TAKSI GO"/>
-  <link rel="manifest" href="manifest.json"/>
-  <title>ABA Group TAKSI GO</title>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
-  <style>
-    :root{--gold:#f5c518;--gold-dim:#c9a214;--dark:#0a0a0f;--dark2:#111118;--dark3:#1a1a25;--dark4:#22222f;--text:#f0f0f5;--muted:#7a7a90;--success:#22d47a;--danger:#ff4d6d;--radius:18px;--radius-sm:10px}
-    *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-    body{font-family:'Manrope',sans-serif;background:var(--dark);color:var(--text);min-height:100dvh;overflow-x:hidden}
-    .screen{display:none;flex-direction:column;min-height:100dvh}.screen.active{display:flex}
-    #screen-splash{align-items:center;justify-content:center;background:var(--dark);gap:16px}
-    .splash-logo{font-family:'Bebas Neue',sans-serif;font-size:44px;letter-spacing:3px;color:var(--gold);text-align:center}
-    .splash-sub{font-size:13px;color:var(--muted);letter-spacing:2px;text-transform:uppercase}
-    .splash-car{font-size:64px}
-    #screen-auth{background:var(--dark);padding:36px 22px 28px;overflow-y:auto}
-    .auth-title{font-family:'Bebas Neue',sans-serif;font-size:40px;color:var(--gold);letter-spacing:2px;line-height:1}
-    .auth-subtitle{font-size:13px;color:var(--muted);margin-top:6px;margin-bottom:24px}
-    .tabs{display:flex;background:var(--dark3);border-radius:var(--radius-sm);padding:4px;margin-bottom:20px}
-    .tab{flex:1;text-align:center;padding:10px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;color:var(--muted);border:none;background:none}
-    .tab.active{background:var(--gold);color:var(--dark)}
-    .field{margin-bottom:13px}
-    .field label{font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:5px}
-    .field input{width:100%;background:var(--dark3);border:1.5px solid var(--dark4);border-radius:var(--radius-sm);padding:12px 14px;color:var(--text);font-size:16px;font-family:'Manrope',sans-serif;outline:none}
-    .field input:focus{border-color:var(--gold)}
-    .role-selector{display:flex;gap:10px;margin-bottom:16px}
-    .role-btn{flex:1;padding:13px 8px;border-radius:var(--radius-sm);background:var(--dark3);border:2px solid var(--dark4);color:var(--muted);font-size:13px;font-weight:700;cursor:pointer;text-align:center}
-    .role-btn.active{border-color:var(--gold);color:var(--gold);background:rgba(245,197,24,.08)}
-    .role-icon{font-size:24px;display:block;margin-bottom:3px}
-    .btn-primary{width:100%;background:var(--gold);color:var(--dark);font-family:'Manrope',sans-serif;font-weight:800;font-size:15px;padding:14px;border-radius:var(--radius-sm);border:none;cursor:pointer;margin-top:6px}
-    .error-msg{color:var(--danger);font-size:12px;margin-bottom:8px;display:none}
-    .top-bar{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;background:var(--dark2);border-bottom:1px solid var(--dark3)}
-    .top-logo{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--gold);letter-spacing:2px}
-    .avatar{width:34px;height:34px;border-radius:50%;background:var(--gold);color:var(--dark);font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center;overflow:hidden}
-    .map-area{position:relative;overflow:hidden;height:180px;background:var(--dark3);border-bottom:2px solid var(--dark4)}
-    .map-bg{width:100%;height:100%;background:linear-gradient(rgba(245,197,24,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(245,197,24,.03) 1px,transparent 1px);background-size:32px 32px}
-    .moving-car{position:absolute;font-size:18px;animation:carMove 4s linear infinite}
-    @keyframes carMove{0%{left:-30px;top:60px}100%{left:110%;top:60px}}
-    .map-label{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.7);padding:3px 10px;border-radius:20px;font-size:11px;color:var(--muted);white-space:nowrap}
-    .order-panel{flex:1;padding:14px;overflow-y:auto}
-    .section-title{font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:9px}
-    .route-inputs{background:var(--dark2);border-radius:var(--radius);padding:13px;margin-bottom:13px}
-    .route-row{display:flex;align-items:center;gap:10px}
-    .route-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-    .route-dot.from{background:var(--gold)}.route-dot.to{background:var(--danger)}
-    .route-line{width:2px;height:16px;background:var(--dark4);margin-left:4px;margin-right:10px;align-self:center;flex-shrink:0}
-    .route-btn{flex:1;background:var(--dark3);border-radius:8px;padding:11px 12px;font-size:14px;color:var(--muted);cursor:pointer;border:none;text-align:left;font-family:'Manrope',sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .route-btn.selected{color:var(--text)}
-    .tariff-cards{display:flex;gap:8px;margin-bottom:13px;overflow-x:auto;padding-bottom:4px}
-    .tariff-cards::-webkit-scrollbar{display:none}
-    .tariff-card{flex-shrink:0;background:var(--dark2);border-radius:var(--radius-sm);padding:11px 13px;border:2px solid var(--dark4);cursor:pointer;min-width:105px;text-align:center}
-    .tariff-card.active{border-color:var(--gold);background:rgba(245,197,24,.07)}
-    .tariff-icon{font-size:24px}.tariff-name{font-size:11px;font-weight:700;margin-top:3px}
-    .tariff-price{font-size:14px;font-weight:800;color:var(--gold);margin-top:2px}
-    .tariff-time{font-size:10px;color:var(--muted);margin-top:1px}
-    .price-summary{background:var(--dark2);border-radius:var(--radius);padding:13px;margin-bottom:13px;display:flex;justify-content:space-between;align-items:center}
-    .price-label{font-size:12px;color:var(--muted)}.price-value{font-size:22px;font-weight:800;color:var(--gold)}
-    .order-btn{width:100%;background:linear-gradient(135deg,var(--gold),var(--gold-dim));color:var(--dark);font-family:'Manrope',sans-serif;font-weight:800;font-size:16px;padding:15px;border-radius:var(--radius-sm);border:none;cursor:pointer}
-    #screen-searching{align-items:center;justify-content:center;padding:32px 24px}
-    .pulse-ring{position:absolute;inset:0;border-radius:50%;border:3px solid var(--gold);animation:pulse 1.5s ease-out infinite;opacity:0}
-    .pulse-ring:nth-child(2){animation-delay:.5s}.pulse-ring:nth-child(3){animation-delay:1s}
-    @keyframes pulse{0%{transform:scale(.5);opacity:.7}100%{transform:scale(1.5);opacity:0}}
-    .search-title{font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--text);letter-spacing:2px;margin-bottom:8px;text-align:center}
-    .search-sub{font-size:14px;color:var(--muted);text-align:center;line-height:1.5}
-    .cancel-link{margin-top:28px;color:var(--muted);font-size:14px;text-decoration:underline;cursor:pointer}
-    #screen-riding{align-items:center;justify-content:flex-start;padding:16px;overflow-y:auto}
-    .driver-card{background:var(--dark2);border-radius:var(--radius);padding:16px;width:100%;max-width:420px;border:1px solid var(--dark4);margin-bottom:12px}
-    .driver-row{display:flex;align-items:center;gap:12px;margin-bottom:13px}
-    .driver-avatar{width:50px;height:50px;border-radius:50%;background:var(--gold);color:var(--dark);font-size:18px;display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0;overflow:hidden}
-    .driver-name{font-size:16px;font-weight:700}.driver-car{font-size:12px;color:var(--muted);margin-top:2px}
-    .driver-plate{background:var(--dark3);border-radius:6px;padding:5px 10px;font-size:12px;font-weight:700;letter-spacing:2px}
-    .eta-bar{background:var(--dark3);border-radius:var(--radius-sm);padding:12px;display:flex;justify-content:space-between;align-items:center}
-    .eta-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
-    .eta-value{font-size:20px;font-weight:800;color:var(--gold)}
-    .action-row{display:flex;gap:8px;margin-top:13px}
-    .btn-icon{flex:1;background:var(--dark3);border:none;border-radius:var(--radius-sm);padding:12px;font-size:18px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px}
-    .btn-icon span{font-size:10px;color:var(--muted);font-family:'Manrope',sans-serif;font-weight:600}
-    .btn-danger{background:rgba(255,77,109,.12)}
-    #screen-driver{background:var(--dark)}
-    .driver-header{padding:16px;background:var(--dark2);border-bottom:1px solid var(--dark3);display:flex;align-items:center;justify-content:space-between}
-    .toggle-track{width:46px;height:24px;border-radius:12px;background:var(--dark4);position:relative;cursor:pointer;transition:background .3s}
-    .toggle-track.on{background:var(--success)}
-    .toggle-thumb{position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:white;transition:left .3s}
-    .toggle-track.on .toggle-thumb{left:24px}
-    .status-badge{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;background:rgba(255,77,109,.15);color:var(--danger)}
-    .status-badge.online{background:rgba(34,212,122,.15);color:var(--success)}
-    .stats-row{display:flex;border-bottom:1px solid var(--dark3)}
-    .stat-box{flex:1;padding:15px;text-align:center;border-right:1px solid var(--dark3)}
-    .stat-box:last-child{border-right:none}
-    .stat-val{font-size:20px;font-weight:800;color:var(--gold)}
-    .stat-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:2px}
-    .order-request{margin:14px;background:var(--dark2);border-radius:var(--radius);border:2px solid var(--gold);padding:16px}
-    .order-request-title{font-size:11px;color:var(--gold);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px}
-    .order-route-item{display:flex;align-items:flex-start;gap:8px;padding:5px 0}
-    .order-route-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px}
-    .order-route-text{font-size:14px;font-weight:500}
-    .order-meta{display:flex;justify-content:space-between;margin:12px 0}
-    .order-meta-item{text-align:center}
-    .order-meta-val{font-size:16px;font-weight:800}
-    .order-meta-lbl{font-size:10px;color:var(--muted)}
-    .accept-row{display:flex;gap:8px}
-    .btn-accept{flex:2;background:var(--success);color:white;font-family:'Manrope',sans-serif;font-weight:800;font-size:14px;padding:13px;border-radius:var(--radius-sm);border:none;cursor:pointer}
-    .btn-reject{flex:1;background:var(--dark3);color:var(--muted);font-family:'Manrope',sans-serif;font-weight:700;font-size:13px;padding:13px;border-radius:var(--radius-sm);border:none;cursor:pointer}
-    .no-orders{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px;color:var(--muted);text-align:center;gap:12px}
-    .no-orders-icon{font-size:50px}.no-orders-text{font-size:14px;line-height:1.6}
-    .history-list{flex:1;overflow-y:auto;padding:13px}
-    .history-item{background:var(--dark2);border-radius:var(--radius-sm);padding:13px;margin-bottom:8px;border:1px solid var(--dark3)}
-    .history-row{display:flex;justify-content:space-between;align-items:flex-start}
-    .history-route{font-size:13px;font-weight:600;flex:1}
-    .history-price{font-size:15px;font-weight:800;color:var(--gold)}
-    .history-meta{display:flex;gap:8px;margin-top:5px;flex-wrap:wrap}
-    .history-tag{font-size:11px;color:var(--muted)}
-    .profile-header{padding:24px 16px 16px;background:var(--dark2);border-bottom:1px solid var(--dark3);display:flex;align-items:center;gap:14px}
-    .profile-avatar{width:62px;height:62px;border-radius:50%;background:var(--gold);color:var(--dark);font-size:22px;font-weight:800;display:flex;align-items:center;justify-content:center;overflow:hidden}
-    .profile-name{font-size:18px;font-weight:800}.profile-phone{font-size:13px;color:var(--muted);margin-top:2px}
-    .profile-list{padding:13px;overflow-y:auto}
-    .profile-item{display:flex;align-items:center;gap:12px;padding:14px;background:var(--dark2);border-radius:var(--radius-sm);margin-bottom:8px;cursor:pointer}
-    .profile-item-icon{font-size:20px}.profile-item-text{flex:1;font-size:14px;font-weight:600}
-    .bottom-nav{display:flex;background:var(--dark2);border-top:1px solid var(--dark3);padding-bottom:env(safe-area-inset-bottom)}
-    .nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;padding:8px 2px 6px;border:none;background:none;color:var(--muted);font-family:'Manrope',sans-serif;font-size:9px;font-weight:600;cursor:pointer;gap:2px;min-width:0}
-    .nav-btn.active{color:var(--gold)}.nav-icon{font-size:18px}
-    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:flex-end;z-index:100;opacity:0;pointer-events:none;transition:opacity .25s}
-    .modal-overlay.open{opacity:1;pointer-events:all}
-    .modal-sheet{width:100%;background:var(--dark2);border-radius:24px 24px 0 0;padding:16px 16px 28px;transform:translateY(100%);transition:transform .3s ease;max-height:75vh;overflow-y:auto}
-    .modal-overlay.open .modal-sheet{transform:translateY(0)}
-    .modal-handle{width:38px;height:4px;background:var(--dark4);border-radius:2px;margin:0 auto 14px}
-    .modal-title{font-size:17px;font-weight:800;margin-bottom:12px}
-    .location-option{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--dark3);cursor:pointer}
-    .location-option:last-child{border-bottom:none}
-    .loc-icon{font-size:18px;width:30px;text-align:center}
-    .loc-name{font-size:14px;font-weight:600}.loc-addr{font-size:11px;color:var(--muted)}
-    .loc-input{width:100%;background:var(--dark3);border:1.5px solid var(--dark4);border-radius:var(--radius-sm);padding:11px 13px;color:var(--text);font-family:'Manrope',sans-serif;font-size:14px;outline:none;margin-bottom:11px}
-    .loc-input:focus{border-color:var(--gold)}
-    .toast{position:fixed;bottom:74px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--dark4);color:var(--text);padding:10px 18px;border-radius:20px;font-size:13px;font-weight:600;opacity:0;transition:all .3s;z-index:200;white-space:nowrap;border:1px solid var(--dark3)}
-    .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-  </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+<meta name="theme-color" content="#f5c518"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<link rel="manifest" href="manifest.json"/>
+<title>ABA Group TAKSI GO</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+:root{--g:#f5c518;--d:#0a0a0f;--d2:#111118;--d3:#1a1a25;--d4:#22222f;--t:#f0f0f5;--m:#7a7a90;--s:#22d47a;--r:#ff4d6d}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:Manrope,sans-serif;background:var(--d);color:var(--t);min-height:100dvh}
+.sc{display:none;flex-direction:column;min-height:100dvh}.sc.on{display:flex}
+#splash{align-items:center;justify-content:center;gap:14px}
+.logo{font-family:"Bebas Neue",sans-serif;font-size:42px;color:var(--g);letter-spacing:3px;text-align:center}
+.sub{font-size:12px;color:var(--m);letter-spacing:2px;text-transform:uppercase}
+#city-sc{padding:26px 18px;overflow-y:auto}
+.ct{font-family:"Bebas Neue",sans-serif;font-size:34px;color:var(--g);letter-spacing:2px;margin-bottom:4px}
+.cs{font-size:13px;color:var(--m);margin-bottom:16px}
+.ci{width:100%;background:var(--d3);border:1.5px solid var(--d4);border-radius:10px;padding:11px 13px;color:var(--t);font-family:Manrope,sans-serif;font-size:14px;outline:none;margin-bottom:13px}
+.ci:focus{border-color:var(--g)}
+.cg{font-size:10px;color:var(--m);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin:12px 0 7px}
+.city-btn{display:flex;align-items:center;gap:11px;padding:12px;background:var(--d2);border-radius:11px;margin-bottom:7px;cursor:pointer;border:2px solid var(--d4);width:100%;text-align:left}
+.city-btn:active{border-color:var(--g)}
+.cn{font-size:14px;font-weight:700;flex:1}
+.cc{font-size:11px;color:var(--m);margin-top:2px}
+#auth-sc{background:var(--d);padding:30px 18px;overflow-y:auto}
+.at{font-family:"Bebas Neue",sans-serif;font-size:38px;color:var(--g);letter-spacing:2px;line-height:1}
+.as{font-size:13px;color:var(--m);margin-top:5px;margin-bottom:20px}
+.tabs{display:flex;background:var(--d3);border-radius:10px;padding:4px;margin-bottom:16px}
+.tab{flex:1;text-align:center;padding:10px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;color:var(--m);border:none;background:none}
+.tab.on{background:var(--g);color:var(--d)}
+.f{margin-bottom:11px}
+.f label{font-size:10px;color:var(--m);font-weight:700;text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:4px}
+.f input{width:100%;background:var(--d3);border:1.5px solid var(--d4);border-radius:10px;padding:12px 13px;color:var(--t);font-size:16px;font-family:Manrope,sans-serif;outline:none}
+.f input:focus{border-color:var(--g)}
+.rs{display:flex;gap:9px;margin-bottom:13px}
+.rb{flex:1;padding:11px 7px;border-radius:10px;background:var(--d3);border:2px solid var(--d4);color:var(--m);font-size:13px;font-weight:700;cursor:pointer;text-align:center}
+.rb.on{border-color:var(--g);color:var(--g);background:rgba(245,197,24,.08)}
+.ri{font-size:21px;display:block;margin-bottom:3px}
+.bp{width:100%;background:var(--g);color:var(--d);font-family:Manrope,sans-serif;font-weight:800;font-size:15px;padding:13px;border-radius:10px;border:none;cursor:pointer;margin-top:5px}
+.em{color:var(--r);font-size:12px;margin-bottom:7px;display:none}
+.tb{display:flex;align-items:center;justify-content:space-between;padding:11px 15px;background:var(--d2);border-bottom:1px solid var(--d3)}
+.tl{font-family:"Bebas Neue",sans-serif;font-size:19px;color:var(--g);letter-spacing:2px}
+.av{width:32px;height:32px;border-radius:50%;background:var(--g);color:var(--d);font-weight:800;font-size:12px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.ma{position:relative;overflow:hidden;height:155px;background:var(--d3);border-bottom:2px solid var(--d4)}
+.mg{width:100%;height:100%;background:linear-gradient(rgba(245,197,24,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(245,197,24,.03) 1px,transparent 1px);background-size:30px 30px}
+.mc{position:absolute;font-size:17px;animation:cm 4s linear infinite}
+@keyframes cm{0%{left:-30px;top:50px}100%{left:110%;top:50px}}
+.ml{position:absolute;bottom:7px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.7);padding:3px 10px;border-radius:20px;font-size:11px;color:var(--m);white-space:nowrap}
+.op{flex:1;padding:12px;overflow-y:auto}
+.st{font-size:10px;color:var(--m);font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:7px}
+.ri2{background:var(--d2);border-radius:16px;padding:11px;margin-bottom:11px}
+.rr{display:flex;align-items:center;gap:9px}
+.rd{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.rl{width:2px;height:13px;background:var(--d4);margin-left:3px;margin-right:9px;flex-shrink:0}
+.rb2{flex:1;background:var(--d3);border-radius:8px;padding:10px 11px;font-size:14px;color:var(--m);cursor:pointer;border:none;text-align:left;font-family:Manrope,sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rb2.sel{color:var(--t)}
+.tc{display:flex;gap:7px;margin-bottom:11px;overflow-x:auto;padding-bottom:3px}
+.tc::-webkit-scrollbar{display:none}
+.tcard{flex-shrink:0;background:var(--d2);border-radius:10px;padding:10px 12px;border:2px solid var(--d4);cursor:pointer;min-width:92px;text-align:center}
+.tcard.on{border-color:var(--g);background:rgba(245,197,24,.07)}
+.ti{font-size:21px}.tn{font-size:10px;font-weight:700;margin-top:3px}
+.tp{font-size:12px;font-weight:800;color:var(--g);margin-top:2px}
+.tt{font-size:10px;color:var(--m);margin-top:1px}
+.ps{background:var(--d2);border-radius:16px;padding:11px;margin-bottom:11px;display:flex;justify-content:space-between;align-items:center}
+.pl{font-size:11px;color:var(--m)}.pv{font-size:21px;font-weight:800;color:var(--g)}
+.ob{width:100%;background:linear-gradient(135deg,#f5c518,#c9a214);color:var(--d);font-family:Manrope,sans-serif;font-weight:800;font-size:15px;padding:13px;border-radius:10px;border:none;cursor:pointer}
+#search-sc{align-items:center;justify-content:center;padding:30px 22px}
+.pr{position:absolute;inset:0;border-radius:50%;border:3px solid var(--g);animation:pu 1.5s ease-out infinite;opacity:0}
+.pr:nth-child(2){animation-delay:.5s}.pr:nth-child(3){animation-delay:1s}
+@keyframes pu{0%{transform:scale(.5);opacity:.7}100%{transform:scale(1.5);opacity:0}}
+.stt{font-family:"Bebas Neue",sans-serif;font-size:28px;color:var(--t);letter-spacing:2px;margin-bottom:7px;text-align:center}
+.sss{font-size:13px;color:var(--m);text-align:center;line-height:1.5}
+.cl{margin-top:26px;color:var(--m);font-size:13px;text-decoration:underline;cursor:pointer}
+#ride-sc{align-items:center;justify-content:flex-start;padding:13px;overflow-y:auto}
+.dc{background:var(--d2);border-radius:16px;padding:13px;width:100%;max-width:420px;border:1px solid var(--d4);margin-bottom:10px}
+.dr{display:flex;align-items:center;gap:10px;margin-bottom:11px}
+.dav{width:46px;height:46px;border-radius:50%;background:var(--g);color:var(--d);font-size:15px;display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0;overflow:hidden}
+.dn{font-size:14px;font-weight:700}.dc2{font-size:12px;color:var(--m);margin-top:2px}
+.dp{background:var(--d3);border-radius:6px;padding:4px 9px;font-size:11px;font-weight:700;letter-spacing:2px}
+.eb{background:var(--d3);border-radius:10px;padding:10px;display:flex;justify-content:space-between;align-items:center}
+.el{font-size:10px;color:var(--m);text-transform:uppercase;letter-spacing:1px}
+.ev{font-size:18px;font-weight:800;color:var(--g)}
+.ar{display:flex;gap:7px;margin-top:11px}
+.bi{flex:1;background:var(--d3);border:none;border-radius:10px;padding:10px;font-size:17px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px}
+.bi span{font-size:9px;color:var(--m);font-family:Manrope,sans-serif;font-weight:600}
+.bd{background:rgba(255,77,109,.12)}
+.bn{display:flex;background:var(--d2);border-top:1px solid var(--d3);padding-bottom:env(safe-area-inset-bottom)}
+.nb{flex:1;display:flex;flex-direction:column;align-items:center;padding:7px 2px 5px;border:none;background:none;color:var(--m);font-family:Manrope,sans-serif;font-size:9px;font-weight:600;cursor:pointer;gap:2px;min-width:0}
+.nb.on{color:var(--g)}.ni{font-size:17px}
+.hl{flex:1;overflow-y:auto;padding:11px}
+.hi{background:var(--d2);border-radius:10px;padding:11px;margin-bottom:7px;border:1px solid var(--d3)}
+.hr2{display:flex;justify-content:space-between;align-items:flex-start}
+.hrt{font-size:12px;font-weight:600;flex:1}
+.hp{font-size:13px;font-weight:800;color:var(--g)}
+.hm{display:flex;gap:7px;margin-top:4px;flex-wrap:wrap}
+.htg{font-size:10px;color:var(--m)}
+.ph{padding:20px 15px 13px;background:var(--d2);border-bottom:1px solid var(--d3);display:flex;align-items:center;gap:12px}
+.pav{width:55px;height:55px;border-radius:50%;background:var(--g);color:var(--d);font-size:19px;font-weight:800;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.pn{font-size:16px;font-weight:800}.pp{font-size:12px;color:var(--m);margin-top:2px}
+.pl2{padding:11px;overflow-y:auto}
+.pi{display:flex;align-items:center;gap:11px;padding:12px;background:var(--d2);border-radius:10px;margin-bottom:7px;cursor:pointer}
+.pii{font-size:19px}.pit{flex:1;font-size:13px;font-weight:600}
+.dh{padding:13px;background:var(--d2);border-bottom:1px solid var(--d3);display:flex;align-items:center;justify-content:space-between}
+.ttr{width:43px;height:23px;border-radius:12px;background:var(--d4);position:relative;cursor:pointer;transition:background .3s}
+.ttr.on{background:var(--s)}
+.tth{position:absolute;top:2px;left:2px;width:19px;height:19px;border-radius:50%;background:white;transition:left .3s}
+.ttr.on .tth{left:22px}
+.sb{padding:4px 9px;border-radius:20px;font-size:10px;font-weight:700;background:rgba(255,77,109,.15);color:var(--r)}
+.sb.on{background:rgba(34,212,122,.15);color:var(--s)}
+.sr{display:flex;border-bottom:1px solid var(--d3)}
+.sb2{flex:1;padding:12px;text-align:center;border-right:1px solid var(--d3)}
+.sb2:last-child{border-right:none}
+.sv{font-size:18px;font-weight:800;color:var(--g)}
+.sl{font-size:10px;color:var(--m);text-transform:uppercase;letter-spacing:1px;margin-top:2px}
+.oreq{margin:12px;background:var(--d2);border-radius:16px;border:2px solid var(--g);padding:13px}
+.ort{font-size:10px;color:var(--g);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px}
+.ori{display:flex;align-items:flex-start;gap:7px;padding:3px 0}
+.ord{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.ortx{font-size:13px;font-weight:500}
+.om{display:flex;justify-content:space-between;margin:10px 0}
+.omi{text-align:center}
+.omv{font-size:14px;font-weight:800}
+.oml{font-size:10px;color:var(--m)}
+.acr{display:flex;gap:7px}
+.bac{flex:2;background:var(--s);color:white;font-family:Manrope,sans-serif;font-weight:800;font-size:13px;padding:11px;border-radius:10px;border:none;cursor:pointer}
+.bre{flex:1;background:var(--d3);color:var(--m);font-family:Manrope,sans-serif;font-weight:700;font-size:12px;padding:11px;border-radius:10px;border:none;cursor:pointer}
+.no{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px;color:var(--m);text-align:center;gap:11px}
+.mo{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:flex-end;z-index:100;opacity:0;pointer-events:none;transition:opacity .25s}
+.mo.on{opacity:1;pointer-events:all}
+.ms{width:100%;background:var(--d2);border-radius:22px 22px 0 0;padding:13px 13px 26px;transform:translateY(100%);transition:transform .3s ease;max-height:77vh;overflow-y:auto}
+.mo.on .ms{transform:translateY(0)}
+.mh{width:35px;height:4px;background:var(--d4);border-radius:2px;margin:0 auto 12px}
+.mt{font-size:15px;font-weight:800;margin-bottom:10px}
+.lo{display:flex;align-items:center;gap:11px;padding:10px 0;border-bottom:1px solid var(--d3);cursor:pointer}
+.lo:last-child{border-bottom:none}
+.li{font-size:16px;width:27px;text-align:center}
+.ln{font-size:13px;font-weight:600}.la{font-size:10px;color:var(--m)}
+.li2{width:100%;background:var(--d3);border:1.5px solid var(--d4);border-radius:10px;padding:10px 12px;color:var(--t);font-family:Manrope,sans-serif;font-size:13px;outline:none;margin-bottom:9px}
+.li2:focus{border-color:var(--g)}
+.chb{background:var(--d2);border-radius:11px;border:1px solid var(--d4);overflow:hidden;margin-top:8px}
+.cms{height:135px;overflow-y:auto;padding:9px;display:flex;flex-direction:column;gap:7px}
+.cir{display:flex;gap:7px;padding:7px;border-top:1px solid var(--d3)}
+.cin{flex:1;background:var(--d3);border:1px solid var(--d4);border-radius:8px;padding:8px 10px;color:var(--t);font-family:Manrope,sans-serif;font-size:13px;outline:none}
+.bsn{background:var(--g);border:none;border-radius:8px;padding:8px 11px;font-weight:800;cursor:pointer;font-size:13px}
+.toast{position:fixed;bottom:70px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--d4);color:var(--t);padding:10px 17px;border-radius:20px;font-size:13px;font-weight:600;opacity:0;transition:all .3s;z-index:200;white-space:nowrap;border:1px solid var(--d3)}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
 </head>
 <body>
+<div id="splash" class="sc on"><div style="font-size:60px">🚕</div><div class="logo">ABA GROUP<br/>TAKSI GO</div><div class="sub">Сенімді такси қызметі</div></div>
+<div id="city-sc" class="sc"><div class="ct">🌍 ҚАЛА ТАҢДАҢЫЗ</div><div class="cs">Сіз қай қалада такси пайдаланасыз?</div><input class="ci" id="city-inp" placeholder="🔍 Қала іздеу..." oninput="filterC(this.value)"/><div id="city-list"></div></div>
+<div id="auth-sc" class="sc"><div class="at">ABA GROUP<br/>TAKSI GO</div><div class="as">Тіркелу немесе кіру</div><div class="tabs"><button class="tab on" onclick="swTab(0,this)">Кіру</button><button class="tab" onclick="swTab(1,this)">Тіркелу</button></div>
+<div id="tl"><div class="f"><label>Телефон</label><input type="tel" id="lp" placeholder="+7 777 123 45 67"/></div><div class="f"><label>Құпия сөз</label><input type="password" id="lw" placeholder="••••••"/></div><div class="em" id="le">Телефон немесе пароль қате</div><button class="bp" onclick="doLogin()">Кіру</button></div>
+<div id="tr" style="display:none"><div class="f"><label>Аты-жөні</label><input type="text" id="rn" placeholder="Айгерім Бекова"/></div><div class="f"><label>Телефон</label><input type="tel" id="rp" placeholder="+7 777 123 45 67"/></div><div class="f"><label>Құпия сөз</label><input type="password" id="rw" placeholder="Кемінде 6 символ"/></div><div class="em" id="re"></div>
+<div class="st" style="margin-bottom:7px">Рөл</div><div class="rs"><div class="rb on" id="rpa" onclick="selRole(0)"><span class="ri">🙋</span>Жолаушы</div><div class="rb" id="rda" onclick="selRole(1)"><span class="ri">🚗</span>Жүргізуші</div></div>
+<div id="crf" style="display:none">
+<div class="f"><label>Машина маркасы</label><input type="text" id="reg-cm" placeholder="Toyota Camry"/></div>
+<div class="f"><label>Машина түсі</label><input type="text" id="reg-cc" placeholder="Ақ"/></div>
+<div class="f"><label>Номер</label><input type="text" id="reg-cp" placeholder="A 777 BC"/></div>
+<div class="f"><label>Куәлік №</label><input type="text" id="reg-cl" placeholder="12345678"/></div>
+<div style="background:var(--d3);border-radius:10px;padding:12px;margin-bottom:10px">
+  <div style="font-size:11px;color:var(--g);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">📋 Құжаттар (фото + мерзім)</div>
+  
+  <div class="f"><label>🪪 Жүргізуші куәлігі мерзімі</label><input type="date" id="reg-lic-exp" style="color-scheme:dark"/></div>
+  <div style="margin-bottom:10px">
+    <label style="font-size:10px;color:var(--m);font-weight:700;text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:4px">🪪 Жүргізуші куәлігі фотосы</label>
+    <div id="lic-prev" style="display:none;margin-bottom:6px"><img id="lic-img" style="width:100%;border-radius:8px;max-height:120px;object-fit:cover"/></div>
+    <label style="display:flex;align-items:center;gap:8px;background:var(--d4);border-radius:8px;padding:10px;cursor:pointer;font-size:13px;color:var(--m)">
+      📷 Фото жүктеу<input type="file" id="reg-lic-photo" accept="image/*" style="display:none" onchange="prevDoc(this,'lic')"/>
+    </label>
+  </div>
 
-<!-- SPLASH -->
-<div id="screen-splash" class="screen active">
-  <div class="splash-car">🚕</div>
-  <div class="splash-logo">ABA GROUP<br/>TAKSI GO</div>
-  <div class="splash-sub">Сенімді такси қызметі</div>
-</div>
+  <div class="f"><label>🚗 Техосмотр мерзімі</label><input type="date" id="reg-tech-exp" style="color-scheme:dark"/></div>
+  <div style="margin-bottom:10px">
+    <label style="font-size:10px;color:var(--m);font-weight:700;text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:4px">🚗 Техосмотр фотосы</label>
+    <div id="tech-prev" style="display:none;margin-bottom:6px"><img id="tech-img" style="width:100%;border-radius:8px;max-height:120px;object-fit:cover"/></div>
+    <label style="display:flex;align-items:center;gap:8px;background:var(--d4);border-radius:8px;padding:10px;cursor:pointer;font-size:13px;color:var(--m)">
+      📷 Фото жүктеу<input type="file" id="reg-tech-photo" accept="image/*" style="display:none" onchange="prevDoc(this,'tech')"/>
+    </label>
+  </div>
 
-<!-- CITY SELECT -->
-<div id="screen-city" class="screen">
-  <div style="padding:32px 22px 20px">
-    <div style="font-family:'Bebas Neue',sans-serif;font-size:38px;color:var(--gold);letter-spacing:2px;margin-bottom:4px">🌍 ҚАЛА ТАҢДАҢЫЗ</div>
-    <div style="font-size:13px;color:var(--muted);margin-bottom:24px">Сіз қай қалада такси пайдаланасыз?</div>
-    <input id="city-search" style="width:100%;background:var(--dark3);border:1.5px solid var(--dark4);border-radius:10px;padding:12px 14px;color:var(--text);font-family:Manrope,sans-serif;font-size:14px;outline:none;margin-bottom:16px" placeholder="🔍 Қала іздеу..." oninput="filterCities(this.value)"/>
-    <div id="city-list"></div>
-  </div>
-</div>
-
-<!-- AUTH -->
-<div id="screen-auth" class="screen">
-  <div style="margin-bottom:24px">
-    <div class="auth-title">ABA GROUP<br/>TAKSI GO</div>
-    <div class="auth-subtitle">Тіркелу немесе кіру</div>
-  </div>
-  <div class="tabs">
-    <button class="tab active" onclick="switchTab('login')">Кіру</button>
-    <button class="tab" onclick="switchTab('register')">Тіркелу</button>
-  </div>
-  <div id="tab-login">
-    <div class="field"><label>Телефон нөмірі</label><input type="tel" id="login-phone" placeholder="+7 777 123 45 67"/></div>
-    <div class="field"><label>Құпия сөз</label><input type="password" id="login-pass" placeholder="••••••"/></div>
-    <div class="error-msg" id="login-error">Телефон немесе құпия сөз қате</div>
-    <button class="btn-primary" onclick="doLogin()">Кіру</button>
-  </div>
-  <div id="tab-register" style="display:none">
-    <div class="field"><label>Аты-жөні</label><input type="text" id="reg-name" placeholder="Айгерім Бекова"/></div>
-    <div class="field"><label>Телефон нөмірі</label><input type="tel" id="reg-phone" placeholder="+7 777 123 45 67"/></div>
-    <div class="field"><label>Құпия сөз</label><input type="password" id="reg-pass" placeholder="Кемінде 6 символ"/></div>
-    <div class="error-msg" id="reg-error"></div>
-    <p class="section-title" style="margin-bottom:8px">Рөл таңдаңыз</p>
-    <div class="role-selector">
-      <div class="role-btn active" id="role-passenger" onclick="selectRole('passenger')"><span class="role-icon">🙋</span>Жолаушы</div>
-      <div class="role-btn" id="role-driver" onclick="selectRole('driver')"><span class="role-icon">🚗</span>Жүргізуші</div>
-    </div>
-    <div id="driver-car-fields" style="display:none">
-      <p class="section-title" style="margin-bottom:8px">Машина деректері</p>
-      <div class="field"><label>Машина маркасы</label><input type="text" id="reg-car-model" placeholder="Toyota Camry"/></div>
-      <div class="field"><label>Машина түсі</label><input type="text" id="reg-car-color" placeholder="Ақ, Қара"/></div>
-      <div class="field"><label>Мемлекеттік номер</label><input type="text" id="reg-car-plate" placeholder="A 777 BC"/></div>
-      <div class="field"><label>Жүргізуші куәлігі №</label><input type="text" id="reg-license" placeholder="12345678"/></div>
-    </div>
-    <button class="btn-primary" onclick="doRegister()">Тіркелу</button>
+  <div class="f"><label>🛡️ Сақтандыру мерзімі</label><input type="date" id="reg-ins-exp" style="color-scheme:dark"/></div>
+  <div style="margin-bottom:6px">
+    <label style="font-size:10px;color:var(--m);font-weight:700;text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:4px">🛡️ Сақтандыру фотосы</label>
+    <div id="ins-prev" style="display:none;margin-bottom:6px"><img id="ins-img" style="width:100%;border-radius:8px;max-height:120px;object-fit:cover"/></div>
+    <label style="display:flex;align-items:center;gap:8px;background:var(--d4);border-radius:8px;padding:10px;cursor:pointer;font-size:13px;color:var(--m)">
+      📷 Фото жүктеу<input type="file" id="reg-ins-photo" accept="image/*" style="display:none" onchange="prevDoc(this,'ins')"/>
+    </label>
   </div>
 </div>
-
-<!-- HOME -->
-<div id="screen-home" class="screen">
-  <div class="top-bar">
-    <div class="top-logo">🚕 ABA TAKSI GO</div>
-    <div style="display:flex;align-items:center;gap:8px">
-      <span id="home-username" style="font-size:13px;font-weight:600"></span>
-      <div class="avatar" id="home-avatar">?</div>
-    </div>
-  </div>
-  <div class="map-area">
-    <div class="map-bg">
-      <svg style="position:absolute;inset:0;width:100%;height:100%" viewBox="0 0 400 180" preserveAspectRatio="none">
-        <rect x="0" y="70" width="400" height="5" fill="#22222f"/>
-        <rect x="0" y="130" width="400" height="3" fill="#1a1a25"/>
-        <rect x="80" y="0" width="4" height="180" fill="#22222f"/>
-        <rect x="200" y="0" width="5" height="180" fill="#22222f"/>
-        <rect x="310" y="0" width="3" height="180" fill="#1a1a25"/>
-      </svg>
-    </div>
-    <div class="moving-car">🚕</div>
-    <div class="map-label" id="online-label">🔄 Жүктелуде...</div>
-  </div>
-  <div class="order-panel">
-    <p class="section-title">Маршрут</p>
-    <div class="route-inputs">
-      <div class="route-row">
-        <div class="route-dot from"></div>
-        <button class="route-btn" id="btn-from" onclick="openLoc('from')">Қайдан шығасыз?</button>
-      </div>
-      <div style="display:flex;padding:0 0 0 4px;margin:4px 0"><div class="route-line"></div></div>
-      <div class="route-row">
-        <div class="route-dot to"></div>
-        <button class="route-btn" id="btn-to" onclick="openLoc('to')">Қайда барасыз?</button>
-      </div>
-    </div>
-    <p class="section-title">Тариф</p>
-    <div class="tariff-cards">
-      <div class="tariff-card active" onclick="setTariff(this,600,'Эконом')"><div class="tariff-icon">🚗</div><div class="tariff-name">Эконом</div><div class="tariff-price">600 ₸</div><div class="tariff-time">~5 мин</div></div>
-      <div class="tariff-card" onclick="setTariff(this,900,'Комфорт')"><div class="tariff-icon">🚙</div><div class="tariff-name">Комфорт</div><div class="tariff-price">900 ₸</div><div class="tariff-time">~4 мин</div></div>
-      <div class="tariff-card" onclick="setTariff(this,1400,'Бизнес')"><div class="tariff-icon">🏎️</div><div class="tariff-name">Бизнес</div><div class="tariff-price">1400 ₸</div><div class="tariff-time">~7 мин</div></div>
-      <div class="tariff-card" onclick="setTariff(this,500,'Жүк')"><div class="tariff-icon">🚐</div><div class="tariff-name">Жүк</div><div class="tariff-price">500 ₸</div><div class="tariff-time">~10 мин</div></div>
-    </div>
-    <div class="price-summary">
-      <div><div class="price-label">Жалпы баға</div><div style="font-size:11px;color:var(--muted)" id="price-note">Маршрут таңдалмаған</div></div>
-      <div class="price-value" id="total-price">— ₸</div>
-    </div>
-    <button class="order-btn" onclick="placeOrder()">🚕 Такси шақыру</button>
-  </div>
-  <div class="bottom-nav">
-    <button class="nav-btn active" onclick="showTab('home')"><span class="nav-icon">🏠</span>Басты</button>
-    <button class="nav-btn" onclick="showTab('history')"><span class="nav-icon">📋</span>Тарих</button>
-    <button class="nav-btn" onclick="goDriver()"><span class="nav-icon">🚗</span>Жүргізуші</button>
-    <button class="nav-btn" onclick="showTab('profile')"><span class="nav-icon">👤</span>Профиль</button>
-  </div>
 </div>
-
-<!-- SEARCHING -->
-<div id="screen-searching" class="screen">
-  <div style="position:relative;width:110px;height:110px;margin-bottom:28px">
-    <div class="pulse-ring"></div><div class="pulse-ring"></div><div class="pulse-ring"></div>
-    <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:38px">🚕</div>
-  </div>
-  <div class="search-title">ЖҮРГІЗУШІ ІЗДЕУДЕ...</div>
-  <div class="search-sub">Сізге жақын жүргізушілер<br/>хабарландырылуда</div>
-  <div class="cancel-link" onclick="cancelOrder()">Бас тарту</div>
-</div>
-
-<!-- RIDING -->
-<div id="screen-riding" class="screen">
-  <div style="width:100%;max-width:420px">
-    <div style="font-size:11px;color:var(--success);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">✓ Жүргізуші табылды!</div>
-    <div class="driver-card">
-      <div class="driver-row">
-        <div class="driver-avatar" id="ride-avatar">А</div>
-        <div style="flex:1">
-          <div class="driver-name" id="ride-name">—</div>
-          <div class="driver-car" id="ride-car">—</div>
-          <div style="display:flex;align-items:center;gap:4px;margin-top:3px"><span style="color:var(--gold);font-size:12px">★★★★★</span><span style="font-size:12px;font-weight:600" id="ride-rating">5.0</span></div>
-        </div>
-        <div class="driver-plate" id="ride-plate">—</div>
-      </div>
-      <div class="eta-bar">
-        <div><div class="eta-label">Келу уақыты</div><div class="eta-value" id="ride-eta">— мин</div></div>
-        <div style="text-align:right"><div class="eta-label">Баға</div><div class="eta-value" id="ride-price2">— ₸</div></div>
-      </div>
-      <div class="action-row">
-        <button class="btn-icon" onclick="callDriver()">📞<span>Қоңырау</span></button>
-        <button class="btn-icon" onclick="toggleChat()">💬<span>Чат</span></button>
-        <button class="btn-icon" id="share-ride-btn" style="display:none" onclick="shareRideNow()">📍<span>Бөлісу</span></button>
-        <button class="btn-icon" id="sos-btn" style="display:none;background:rgba(255,77,109,.2)" onclick="activateSOS()">🆘<span>SOS</span></button>
-        <button class="btn-icon btn-danger" onclick="cancelOrder()">✕<span>Бас тарту</span></button>
-      </div>
-    </div>
-    <div id="chat-box" style="display:none;background:var(--dark2);border-radius:14px;border:1px solid var(--dark4);overflow:hidden;margin-top:0">
-      <div style="padding:9px 13px;border-bottom:1px solid var(--dark3);font-size:13px;font-weight:700">💬 Жүргізушімен чат</div>
-      <div id="chat-msgs" style="height:140px;overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:8px"></div>
-      <div style="display:flex;gap:8px;padding:8px;border-top:1px solid var(--dark3)">
-        <input id="chat-inp" style="flex:1;background:var(--dark3);border:1px solid var(--dark4);border-radius:8px;padding:8px 11px;color:var(--text);font-family:Manrope,sans-serif;font-size:13px;outline:none" placeholder="Хабар..." onkeydown="if(event.key==='Enter')sendMsg('passenger')"/>
-        <button onclick="sendMsg('passenger')" style="background:var(--gold);border:none;border-radius:8px;padding:8px 12px;font-weight:800;cursor:pointer;font-size:14px">➤</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- HISTORY -->
-<div id="screen-history" class="screen">
-  <div class="top-bar"><div class="top-logo">📋 Тарих</div></div>
-  <div class="history-list" id="history-list"><div style="text-align:center;color:var(--muted);padding:60px 20px;font-size:14px">Жүктелуде...</div></div>
-  <div class="bottom-nav">
-    <button class="nav-btn" onclick="showTab('home')"><span class="nav-icon">🏠</span>Басты</button>
-    <button class="nav-btn active" onclick="showTab('history')"><span class="nav-icon">📋</span>Тарих</button>
-    <button class="nav-btn" onclick="goDriver()"><span class="nav-icon">🚗</span>Жүргізуші</button>
-    <button class="nav-btn" onclick="showTab('profile')"><span class="nav-icon">👤</span>Профиль</button>
-  </div>
-</div>
-
-<!-- PROFILE -->
-<div id="screen-profile" class="screen">
-  <div class="top-bar">
-    <div class="top-logo">👤 Профиль</div>
-    <button style="background:var(--dark3);border:none;border-radius:8px;padding:7px 12px;color:var(--text);font-family:Manrope,sans-serif;font-weight:700;font-size:12px;cursor:pointer" onclick="logout()">Шығу</button>
-  </div>
-  <div class="profile-header">
-    <div style="position:relative;cursor:pointer" onclick="document.getElementById('pass-photo').click()">
-      <div class="profile-avatar" id="profile-avatar">?</div>
-      <div style="position:absolute;bottom:0;right:0;background:var(--gold);border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px">📷</div>
-      <input type="file" id="pass-photo" accept="image/*" style="display:none" onchange="uploadPhoto(this,'passenger')"/>
-    </div>
-    <div>
-      <div class="profile-name" id="profile-name">—</div>
-      <div class="profile-phone" id="profile-phone">—</div>
-      <div style="font-size:11px;color:var(--gold);margin-top:3px">📷 Фото жүктеу үшін басыңыз</div>
-    </div>
-  </div>
-  <div class="profile-list">
-    <div class="profile-item" onclick="openAdminChat()"><span class="profile-item-icon">💬</span><span class="profile-item-text">Админмен чат <span id="admin-chat-badge" style="background:var(--danger);color:white;border-radius:10px;padding:2px 7px;font-size:11px;font-weight:700;display:none">жаңа</span></span><span>›</span></div>
-    <div class="profile-item" id="kaspi-btn" style="display:none" onclick="toast('Kaspi QR жақын арада')"><span class="profile-item-icon">💳</span><span class="profile-item-text">Kaspi QR төлем</span><span>›</span></div>
-    <div class="profile-item" id="share-trip-btn" style="display:none" onclick="shareTrip()"><span class="profile-item-icon">📍</span><span class="profile-item-text">Сапарды бөлісу</span><span>›</span></div>
-    <div class="profile-item" id="commission-btn" style="display:none"><span class="profile-item-icon">💰</span><span class="profile-item-text">Комиссия: <span id="commission-info" style="color:var(--gold)">10%</span></span><span>›</span></div>
-    <div class="profile-item" id="receipt-btn" style="display:none" onclick="toast('Чек email-ге жіберіледі')"><span class="profile-item-icon">🧾</span><span class="profile-item-text">Чек алу</span><span>›</span></div>
-    <div class="profile-item" id="promo-btn" style="display:none" onclick="toast('Промокод жақын арада')"><span class="profile-item-icon">⭐</span><span class="profile-item-text">Промокод енгізу</span><span>›</span></div>
-    <div class="profile-item" id="referral-btn" style="display:none" onclick="shareReferral()"><span class="profile-item-icon">👥</span><span class="profile-item-text">Достарды шақыру</span><span>›</span></div>
-    <div class="profile-item" onclick="toast('support@abagroup.kz')"><span class="profile-item-icon">❓</span><span class="profile-item-text">Қолдау қызметі</span><span>›</span></div>
-  </div>
-  <div class="bottom-nav">
-    <button class="nav-btn" onclick="showTab('home')"><span class="nav-icon">🏠</span>Басты</button>
-    <button class="nav-btn" onclick="showTab('history')"><span class="nav-icon">📋</span>Тарих</button>
-    <button class="nav-btn" onclick="goDriver()"><span class="nav-icon">🚗</span>Жүргізуші</button>
-    <button class="nav-btn active" onclick="showTab('profile')"><span class="nav-icon">👤</span>Профиль</button>
-  </div>
-</div>
-
-<!-- DRIVER -->
-<div id="screen-driver" class="screen">
-  <div class="driver-header">
-    <div><div class="top-logo">🚗 ABA TAKSI GO</div><div style="font-size:11px;color:var(--muted);margin-top:2px">Жүргізуші режимі</div></div>
-    <div style="display:flex;align-items:center;gap:10px">
-      <div class="status-badge" id="drv-badge">Офлайн</div>
-      <div class="toggle-track" id="drv-toggle" onclick="toggleOnline()"><div class="toggle-thumb"></div></div>
-    </div>
-  </div>
-  <div class="stats-row">
-    <div class="stat-box"><div class="stat-val" id="d-trips">0</div><div class="stat-lbl">Сапарлар</div></div>
-    <div class="stat-box"><div class="stat-val" id="d-earn">0 ₸</div><div class="stat-lbl">Табыс</div></div>
-    <div class="stat-box"><div class="stat-val" id="d-rating">5.0</div><div class="stat-lbl">Рейтинг</div></div>
-  </div>
-  <div id="drv-area" style="flex:1;overflow-y:auto">
-    <div class="no-orders"><div class="no-orders-icon">🟡</div><div class="no-orders-text">Желіге қосылыңыз<br/>тапсырыстарды қабылдау үшін</div></div>
-  </div>
-  <div style="background:var(--dark2);border-top:1px solid var(--dark3);padding:11px 14px">
-    <div style="display:flex;align-items:center;gap:11px;margin-bottom:9px">
-      <div style="position:relative;cursor:pointer;flex-shrink:0" onclick="document.getElementById('drv-photo').click()">
-        <div id="drv-avatar" style="width:46px;height:46px;border-radius:50%;background:var(--gold);color:var(--dark);font-size:16px;font-weight:800;display:flex;align-items:center;justify-content:center;overflow:hidden">?</div>
-        <div style="position:absolute;bottom:0;right:0;background:var(--dark);border:2px solid var(--gold);border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-size:9px">📷</div>
-        <input type="file" id="drv-photo" accept="image/*" style="display:none" onchange="uploadPhoto(this,'driver')"/>
-      </div>
-      <div><div style="font-size:14px;font-weight:700" id="drv-name">—</div><div style="font-size:11px;color:var(--gold);margin-top:2px">📷 Фото жүктеу үшін басыңыз</div></div>
-    </div>
-    <div style="display:flex;align-items:center;justify-content:space-between">
-      <div><div style="font-size:11px;color:var(--muted)">Менің машинам</div><div style="font-size:13px;font-weight:700;margin-top:2px" id="drv-car">—</div></div>
-      <button onclick="openCarModal()" style="background:var(--gold);border:none;border-radius:8px;padding:7px 13px;font-family:Manrope,sans-serif;font-weight:700;font-size:12px;color:var(--dark);cursor:pointer">✏️ Өзгерту</button>
-    </div>
-  </div>
-  <div class="bottom-nav">
-    <button class="nav-btn active" onclick="show('driver');setupDriver()"><span class="nav-icon">🏠</span>Басты</button>
-    <button class="nav-btn" onclick="goHistory()"><span class="nav-icon">📋</span>Тарих</button>
-    <button class="nav-btn" onclick="goPassenger()"><span class="nav-icon">🙋</span>Жолаушы</button>
-    <button class="nav-btn" onclick="openDriverAdminChat()"><span class="nav-icon">💬</span>Қолдау</button>
-    <button class="nav-btn" onclick="driverProfile()"><span class="nav-icon">👤</span>Профиль</button>
-  </div>
-</div>
-
-<!-- LOCATION MODAL -->
-<div class="modal-overlay" id="loc-modal" onclick="if(event.target.id==='loc-modal')closeLoc()">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div class="modal-title" id="loc-title">Мекенжай таңдаңыз</div>
-    <input class="loc-input" id="loc-inp" placeholder="🔍 Іздеу немесе жазыңыз..." oninput="searchLoc()"/>
-    <div id="loc-list"></div>
-  </div>
-</div>
-
-<!-- CAR MODAL -->
-<div class="modal-overlay" id="car-modal" onclick="if(event.target.id==='car-modal')document.getElementById('car-modal').classList.remove('open')">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div class="modal-title">🚗 Машина деректері</div>
-    <div class="field"><label>Машина маркасы</label><input type="text" id="car-model" placeholder="Toyota Camry"/></div>
-    <div class="field"><label>Машина түсі</label><input type="text" id="car-color" placeholder="Ақ, Қара"/></div>
-    <div class="field"><label>Мемлекеттік номер</label><input type="text" id="car-plate" placeholder="A 777 BC"/></div>
-    <div class="field"><label>Жүргізуші куәлігі №</label><input type="text" id="car-license" placeholder="12345678"/></div>
-    <button class="btn-primary" onclick="saveCar()">💾 Сақтау</button>
-  </div>
-</div>
-
-<!-- ADMIN CHAT MODAL -->
-<div class="modal-overlay" id="admin-chat-modal" onclick="if(event.target.id==='admin-chat-modal')document.getElementById('admin-chat-modal').classList.remove('open')">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div class="modal-title">💬 Қолдау қызметі (Админ)</div>
-    <div id="admin-chat-msgs" style="height:260px;overflow-y:auto;padding:4px;display:flex;flex-direction:column;gap:8px;margin-bottom:12px">
-      <div style="text-align:center;color:var(--muted);font-size:12px;padding:20px">Хабар жоқ</div>
-    </div>
-    <div style="display:flex;gap:8px">
-      <input id="admin-chat-inp" style="flex:1;background:var(--dark3);border:1px solid var(--dark4);border-radius:8px;padding:10px 12px;color:var(--text);font-family:Manrope,sans-serif;font-size:13px;outline:none" placeholder="Хабар жазыңыз..." onkeydown="if(event.key==='Enter')sendToAdmin()"/>
-      <button onclick="sendToAdmin()" style="background:var(--gold);border:none;border-radius:8px;padding:10px 14px;font-weight:800;cursor:pointer;font-size:14px">➤</button>
-    </div>
-  </div>
-</div>
+<button class="bp" onclick="doReg()">Тіркелу</button></div></div>
+<div id="home-sc" class="sc"><div class="tb"><div><div class="tl">🚕 ABA TAKSI GO</div><div id="cbd" style="font-size:10px;color:var(--m)"></div></div><div style="display:flex;align-items:center;gap:7px"><span id="hun" style="font-size:12px;font-weight:600"></span><div class="av" id="hav">?</div></div></div>
+<div class="ma"><div class="mg"></div><div class="mc">🚕</div><div class="ml" id="onl">🔄 Жүктелуде...</div></div>
+<div class="op"><div class="st">Маршрут</div><div class="ri2"><div class="rr"><div class="rd" style="background:var(--g)"></div><button class="rb2" id="bf" onclick="openL(0)">Қайдан шығасыз?</button></div><div style="display:flex;padding:0 0 0 3px;margin:3px 0"><div class="rl"></div></div><div class="rr"><div class="rd" style="background:var(--r)"></div><button class="rb2" id="bt" onclick="openL(1)">Қайда барасыз?</button></div></div>
+<div class="st">Тариф</div><div class="tc" id="tcc"></div>
+<div class="ps"><div><div class="pl">Жалпы баға</div><div style="font-size:10px;color:var(--m)" id="pnt">Маршрут таңдаңыз</div></div><div class="pv" id="tpr">—</div></div>
+<button class="ob" onclick="placeOrder()">🚕 Такси шақыру</button></div>
+<div class="bn"><button class="nb on" onclick="showP(0)"><span class="ni">🏠</span>Басты</button><button class="nb" onclick="showP(1)"><span class="ni">📋</span>Тарих</button><button class="nb" onclick="goD()"><span class="ni">🚗</span>Жүргізуші</button><button class="nb" onclick="showP(2)"><span class="ni">👤</span>Профиль</button></div></div>
+<div id="search-sc" class="sc"><div style="position:relative;width:95px;height:95px;margin-bottom:22px"><div class="pr"></div><div class="pr"></div><div class="pr"></div><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:34px">🚕</div></div><div class="stt">ЖҮРГІЗУШІ ІЗДЕУДЕ...</div><div class="sss">Сізге жақын жүргізушілер<br/>хабарландырылуда</div><div class="cl" onclick="cancelOrd()">Бас тарту</div></div>
+<div id="ride-sc" class="sc"><div style="width:100%;max-width:420px;padding:13px;overflow-y:auto"><div style="font-size:10px;color:var(--s);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">✓ Жүргізуші табылды!</div>
+<div class="dc"><div class="dr"><div class="dav" id="rav">А</div><div style="flex:1"><div class="dn" id="rdn">—</div><div class="dc2" id="rdc">—</div><div style="display:flex;align-items:center;gap:4px;margin-top:2px"><span style="color:var(--g);font-size:11px">★★★★★</span><span style="font-size:11px;font-weight:600" id="rrt">5.0</span></div></div><div class="dp" id="rdp">—</div></div>
+<div class="eb"><div><div class="el">Келу уақыты</div><div class="ev" id="ret">— мин</div></div><div style="text-align:right"><div class="el">Баға</div><div class="ev" id="rpr">—</div></div></div>
+<div class="ar"><button class="bi" onclick="callD()">📞<span>Қоңырау</span></button><button class="bi" id="sosb" style="display:none;background:rgba(255,77,109,.2)" onclick="doSOS()">🆘<span>SOS</span></button><button class="bi" id="shrb" style="display:none" onclick="shareRide()">📍<span>Бөлісу</span></button><button class="bi bd" onclick="cancelOrd()">✕<span>Бас тарту</span></button></div></div>
+<div class="chb" style="border:2px solid var(--g);margin-top:10px"><div style="padding:9px 12px;border-bottom:1px solid var(--d3);font-size:13px;font-weight:700">💬 Жүргізушімен чат</div><div class="cms" id="rcm" style="height:220px"></div><div class="cir"><input class="cin" id="rci" placeholder="Хабар жазыңыз..." onkeydown="if(event.key==='Enter')sendM(0)"/><button class="bsn" onclick="sendM(0)">➤</button></div></div>
+</div></div>
+<div id="hist-sc" class="sc"><div class="tb"><div class="tl">📋 Тарих</div></div><div class="hl" id="hll"></div><div class="bn"><button class="nb" onclick="showP(0)"><span class="ni">🏠</span>Басты</button><button class="nb on" onclick="showP(1)"><span class="ni">📋</span>Тарих</button><button class="nb" onclick="goD()"><span class="ni">🚗</span>Жүргізуші</button><button class="nb" onclick="showP(2)"><span class="ni">👤</span>Профиль</button></div></div>
+<div id="prof-sc" class="sc"><div class="tb"><div class="tl">👤 Профиль</div><button style="background:var(--d3);border:none;border-radius:8px;padding:6px 11px;color:var(--t);font-family:Manrope,sans-serif;font-weight:700;font-size:11px;cursor:pointer" onclick="logout()">Шығу</button></div>
+<div class="ph"><div style="position:relative;cursor:pointer" onclick="document.getElementById('ppi').click()"><div class="pav" id="pav">?</div><div style="position:absolute;bottom:0;right:0;background:var(--g);border-radius:50%;width:17px;height:17px;display:flex;align-items:center;justify-content:center;font-size:9px">📷</div><input type="file" id="ppi" accept="image/*" style="display:none" onchange="upPhoto(this,0)"/></div><div><div class="pn" id="pvn">—</div><div class="pp" id="pvp">—</div></div></div>
+<div class="pl2"><div class="pi" onclick="openAC()"><span class="pii">💬</span><span class="pit">Админмен чат</span><span>›</span></div><div class="pi" id="kqr" style="display:none" onclick="toast('Kaspi QR жақын арада')"><span class="pii">💳</span><span class="pit">Kaspi QR</span><span>›</span></div><div class="pi" id="shp" style="display:none" onclick="shareRide()"><span class="pii">📍</span><span class="pit">Сапарды бөлісу</span><span>›</span></div><div class="pi" id="prp" style="display:none" onclick="toast('Промокод жақын арада')"><span class="pii">⭐</span><span class="pit">Промокод</span><span>›</span></div><div class="pi" id="rfp" style="display:none" onclick="shareRef()"><span class="pii">👥</span><span class="pit">Достарды шақыру</span><span>›</span></div><div class="pi" onclick="changeCity()"><span class="pii">🌍</span><span class="pit">Қаланы өзгерту</span><span>›</span></div><div class="pi" onclick="toast('support@abagroup.kz')"><span class="pii">❓</span><span class="pit">Қолдау</span><span>›</span></div></div>
+<div class="bn"><button class="nb" onclick="showP(0)"><span class="ni">🏠</span>Басты</button><button class="nb" onclick="showP(1)"><span class="ni">📋</span>Тарих</button><button class="nb" onclick="goD()"><span class="ni">🚗</span>Жүргізуші</button><button class="nb on" onclick="showP(2)"><span class="ni">👤</span>Профиль</button></div></div>
+<div id="drv-sc" class="sc"><div class="dh"><div><div class="tl">🚗 ABA TAKSI GO</div><div id="dcty" style="font-size:10px;color:var(--m);margin-top:2px">Жүргізуші режимі</div></div><div style="display:flex;align-items:center;gap:9px"><div class="sb" id="dsbg">Офлайн</div><div class="ttr" id="dtg" onclick="togOnline()"><div class="tth"></div></div></div></div>
+<div class="sr"><div class="sb2"><div class="sv" id="dtr">0</div><div class="sl">Сапарлар</div></div><div class="sb2"><div class="sv" id="der">0</div><div class="sl">Табыс</div></div><div class="sb2"><div class="sv" id="dra">5.0</div><div class="sl">Рейтинг</div></div></div>
+<div id="dar" style="flex:1;overflow-y:auto"><div class="no"><div style="font-size:46px">🟡</div><div style="font-size:13px;line-height:1.6">Желіге қосылыңыз<br/>тапсырыстарды қабылдау үшін</div></div></div>
+<div style="background:var(--d2);border-top:1px solid var(--d3);padding:9px 12px"><div style="display:flex;align-items:center;gap:9px;margin-bottom:7px"><div style="position:relative;cursor:pointer;flex-shrink:0" onclick="document.getElementById('dpi').click()"><div id="dav" style="width:42px;height:42px;border-radius:50%;background:var(--g);color:var(--d);font-size:14px;font-weight:800;display:flex;align-items:center;justify-content:center;overflow:hidden">?</div><input type="file" id="dpi" accept="image/*" style="display:none" onchange="upPhoto(this,1)"/></div><div><div style="font-size:13px;font-weight:700" id="dvn">—</div><div style="font-size:9px;color:var(--g)">📷 Фото жүктеу</div></div></div><div style="display:flex;align-items:center;justify-content:space-between"><div><div style="font-size:10px;color:var(--m)">Машина</div><div style="font-size:12px;font-weight:700;margin-top:1px" id="dvc">—</div></div><button onclick="openCM()" style="background:var(--g);border:none;border-radius:8px;padding:6px 11px;font-family:Manrope,sans-serif;font-weight:700;font-size:11px;color:var(--d);cursor:pointer">✏️</button></div></div>
+<div class="bn"><button class="nb on" onclick="setupD();show('drv-sc')"><span class="ni">🏠</span>Басты</button><button class="nb" onclick="loadH();show('hist-sc')"><span class="ni">📋</span>Тарих</button><button class="nb" onclick="goP()"><span class="ni">🙋</span>Жолаушы</button><button class="nb" onclick="openAC()"><span class="ni">💬</span>Қолдау</button><button class="nb" onclick="drvOut()"><span class="ni">👤</span>Шығу</button></div></div>
+<div class="mo" id="lmo" onclick="if(event.target.id==='lmo')closeLo()"><div class="ms"><div class="mh"></div><div class="mt" id="lmt">Мекенжай</div><input class="li2" id="lin" placeholder="🔍 Іздеу немесе жазыңыз..." oninput="searchLo()"/><div id="lls"></div></div></div>
+<div class="mo" id="cmo" onclick="if(event.target.id==='cmo')document.getElementById('cmo').classList.remove('on')"><div class="ms"><div class="mh"></div><div class="mt">🚗 Машина деректері</div><div class="f"><label>Машина маркасы</label><input type="text" id="ecm" placeholder="Toyota Camry"/></div><div class="f"><label>Машина түсі</label><input type="text" id="ecc" placeholder="Ақ"/></div><div class="f"><label>Номер</label><input type="text" id="ecp" placeholder="A 777 BC"/></div><div class="f"><label>Куәлік №</label><input type="text" id="ecl" placeholder="12345678"/></div><button class="bp" onclick="saveCar()">💾 Сақтау</button></div></div>
+<div class="mo" id="acmo" onclick="if(event.target.id==='acmo')document.getElementById('acmo').classList.remove('on')"><div class="ms"><div class="mh"></div><div class="mt">💬 Қолдау қызметі</div><div class="cms" id="acm" style="height:230px;margin-bottom:9px"></div><div class="cir"><input class="cin" id="aci" placeholder="Хабар жазыңыз..." onkeydown="if(event.key==='Enter')sendAC()"/><button class="bsn" onclick="sendAC()">➤</button></div></div></div>
 
 <!-- RECEIPT MODAL -->
-<div class="modal-overlay" id="receipt-modal" onclick="if(event.target.id==='receipt-modal')document.getElementById('receipt-modal').classList.remove('open')">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div id="receipt-content" style="background:white;border-radius:16px;padding:24px;color:#111;font-family:Manrope,sans-serif">
-      <div style="text-align:center;margin-bottom:16px">
-        <div style="font-size:32px">🚕</div>
-        <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:#f5c518;letter-spacing:2px">ABA GROUP TAKSI GO</div>
-        <div style="font-size:11px;color:#888;margin-top:2px">Ресми чек / Official Receipt</div>
+<div class="mo" id="rcptmo" onclick="if(event.target.id==='rcptmo')document.getElementById('rcptmo').classList.remove('on')">
+  <div class="ms">
+    <div class="mh"></div>
+    <div id="rcpt-box" style="background:white;border-radius:13px;padding:20px;color:#111;font-family:Manrope,sans-serif;margin-bottom:11px">
+      <div style="text-align:center;margin-bottom:13px">
+        <div style="font-size:26px">🚕</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:#f5c518;letter-spacing:2px">ABA GROUP TAKSI GO</div>
+        <div style="font-size:10px;color:#999">Ресми чек</div>
       </div>
-      <div style="border-top:2px dashed #eee;border-bottom:2px dashed #eee;padding:14px 0;margin-bottom:14px">
-        <div id="receipt-from" style="display:flex;justify-content:space-between;padding:5px 0;font-size:13px"><span style="color:#888">📍 Қайдан</span><span id="r-from" style="font-weight:700;text-align:right;max-width:60%"></span></div>
-        <div style="display:flex;justify-content:space-between;padding:5px 0;font-size:13px"><span style="color:#888">🏁 Қайда</span><span id="r-to" style="font-weight:700;text-align:right;max-width:60%"></span></div>
-        <div style="display:flex;justify-content:space-between;padding:5px 0;font-size:13px"><span style="color:#888">🚗 Жүргізуші</span><span id="r-driver" style="font-weight:700"></span></div>
-        <div style="display:flex;justify-content:space-between;padding:5px 0;font-size:13px"><span style="color:#888">🏷️ Тариф</span><span id="r-tariff" style="font-weight:700"></span></div>
-        <div style="display:flex;justify-content:space-between;padding:5px 0;font-size:13px"><span style="color:#888">📅 Күні</span><span id="r-date" style="font-weight:700"></span></div>
+      <div style="border-top:2px dashed #eee;border-bottom:2px dashed #eee;padding:11px 0;margin-bottom:11px">
+        <div style="display:flex;justify-content:space-between;padding:3px 0;font-size:12px"><span style="color:#888">📍 Қайдан</span><span id="r-from" style="font-weight:700;text-align:right;max-width:55%"></span></div>
+        <div style="display:flex;justify-content:space-between;padding:3px 0;font-size:12px"><span style="color:#888">🏁 Қайда</span><span id="r-to" style="font-weight:700;text-align:right;max-width:55%"></span></div>
+        <div style="display:flex;justify-content:space-between;padding:3px 0;font-size:12px"><span style="color:#888">🚗 Жүргізуші</span><span id="r-drv" style="font-weight:700"></span></div>
+        <div style="display:flex;justify-content:space-between;padding:3px 0;font-size:12px"><span style="color:#888">🏷️ Тариф</span><span id="r-tar" style="font-weight:700"></span></div>
+        <div style="display:flex;justify-content:space-between;padding:3px 0;font-size:12px"><span style="color:#888">📅 Күні</span><span id="r-date" style="font-weight:700"></span></div>
       </div>
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-        <div style="font-size:15px;font-weight:700;color:#111">Жалпы сомасы</div>
-        <div id="r-price" style="font-size:26px;font-weight:800;color:#f5c518"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:11px">
+        <div style="font-size:13px;font-weight:700">Жалпы сомасы</div>
+        <div id="r-price" style="font-size:22px;font-weight:800;color:#f5c518"></div>
       </div>
-      <div style="text-align:center;font-size:11px;color:#aaa;border-top:1px solid #eee;padding-top:12px">
-        ABA Group • aba-taksi.vercel.app<br/>
-        <span id="r-id" style="font-size:10px"></span>
+      <div id="kaspi-section" style="display:none;background:#e8f5e9;border-radius:9px;padding:11px;margin-bottom:9px;text-align:center">
+        <div style="font-size:12px;font-weight:700;color:#2e7d32;margin-bottom:6px">💳 Kaspi QR арқылы төлеңіз</div>
+        <div style="background:white;border-radius:8px;padding:10px;display:inline-block;margin-bottom:6px">
+          <div style="font-size:10px;color:#666;margin-bottom:4px">QR код</div>
+          <div style="width:80px;height:80px;background:linear-gradient(45deg,#333 25%,transparent 25%,transparent 75%,#333 75%),linear-gradient(45deg,#333 25%,transparent 25%,transparent 75%,#333 75%);background-size:10px 10px;background-position:0 0,5px 5px;border-radius:4px;margin:0 auto"></div>
+        </div>
+        <div style="font-size:11px;color:#2e7d32">Kaspi.kz → QR → Сканерлеу</div>
       </div>
+      <div style="text-align:center;font-size:10px;color:#bbb;border-top:1px solid #eee;padding-top:9px">ABA Group • aba-taksi.vercel.app</div>
     </div>
-    <div style="display:flex;gap:8px;margin-top:12px">
-      <button onclick="shareReceipt()" style="flex:1;background:var(--gold);border:none;border-radius:10px;padding:13px;font-family:Manrope,sans-serif;font-weight:800;font-size:14px;color:var(--dark);cursor:pointer">📤 Бөлісу</button>
-      <button onclick="document.getElementById('receipt-modal').classList.remove('open')" style="flex:1;background:var(--dark3);border:none;border-radius:10px;padding:13px;font-family:Manrope,sans-serif;font-weight:700;font-size:14px;color:var(--text);cursor:pointer">✕ Жабу</button>
+    <div style="display:flex;gap:7px">
+      <button onclick="shareReceipt()" style="flex:1;background:var(--g);border:none;border-radius:9px;padding:12px;font-family:Manrope,sans-serif;font-weight:800;font-size:13px;color:var(--d);cursor:pointer">📤 Бөлісу</button>
+      <button onclick="document.getElementById('rcptmo').classList.remove('on')" style="flex:1;background:var(--d3);border:none;border-radius:9px;padding:12px;font-family:Manrope,sans-serif;font-weight:700;font-size:13px;color:var(--t);cursor:pointer">✕ Жабу</button>
     </div>
   </div>
 </div>
-
-<div class="toast" id="toast"></div>
-
+<div class="toast" id="tst"></div>
 <script>
-// ── CONFIG ──
-var FB_CONFIG={apiKey:"AIzaSyC-1odJDeZBGSMClhe9sN7lJ-8wYZkyzVw",authDomain:"aba-group-taksi-go.firebaseapp.com",databaseURL:"https://aba-group-taksi-go-default-rtdb.firebaseio.com",projectId:"aba-group-taksi-go",storageBucket:"aba-group-taksi-go.firebasestorage.app",messagingSenderId:"734948093057",appId:"1:734948093057:web:866c74d8857a6938eb7180"};
-
-// ── CITIES ──
+var FBCFG={apiKey:"AIzaSyC-1odJDeZBGSMClhe9sN7lJ-8wYZkyzVw",authDomain:"aba-group-taksi-go.firebaseapp.com",databaseURL:"https://aba-group-taksi-go-default-rtdb.firebaseio.com",projectId:"aba-group-taksi-go",storageBucket:"aba-group-taksi-go.firebasestorage.app",messagingSenderId:"734948093057",appId:"1:734948093057:web:866c74d8857a6938eb7180"};
 var CITIES={
-  'kabanbay':{name:'Қабанбай ауылы',country:'🇰🇿 Қазақстан',lat:46.0770,lng:82.0762,locs:[
-    {i:'🏥',n:'Аурухана',a:'Қабанбай ауылы',lat:46.0768,lng:82.0758},
-    {i:'🏫',n:'№1 Мектеп',a:'Қабанбай ауылы',lat:46.0772,lng:82.0765},
-    {i:'🏫',n:'№2 Мектеп',a:'Қабанбай ауылы',lat:46.0765,lng:82.0770},
-    {i:'🏪',n:'Базар',a:'Қабанбай ауылы',lat:46.0770,lng:82.0762},
-    {i:'🏛️',n:'Әкімдік',a:'Қабанбай ауылы',lat:46.0769,lng:82.0760},
-    {i:'🏢',n:'Пошта',a:'Қабанбай ауылы',lat:46.0771,lng:82.0763},
-    {i:'⛽',n:'АЗС',a:'Қабанбай ауылы',lat:46.0775,lng:82.0755},
-    {i:'🏖️',n:'Жарбулақ жағажайы',a:'Жарбулақ, Алакөл',lat:46.0820,lng:82.0680},
-    {i:'🏖️',n:'Жаланаш жағажайы',a:'Алакөл жағалауы',lat:45.5929,lng:82.1768},
-    {i:'🚉',n:'Жаланашкөл теміржол бекеті',a:'Жаланашкөл → Қабанбай',lat:45.5929,lng:82.1768},
-    {i:'💊',n:'Дәріхана',a:'Қабанбай ауылы',lat:46.0768,lng:82.0764},
-    {i:'🌊',n:'Алакөл санаторийі',a:'Жарбулақ',lat:46.0810,lng:82.0690},
-    {i:'🏨',n:'Мейманхана',a:'Қабанбай ауылы',lat:46.0770,lng:82.0760},
-    {i:'🏠',n:'1-ші аудан',a:'Қабанбай ауылы',lat:46.0774,lng:82.0768},
-    {i:'🏠',n:'2-ші аудан',a:'Қабанбай ауылы',lat:46.0766,lng:82.0756},
-    {i:'🏠',n:'Жаңа аудан',a:'Қабанбай ауылы',lat:46.0780,lng:82.0770},
-  ]},
-  'almaty':{name:'Алматы',country:'🇰🇿 Қазақстан',lat:43.2220,lng:76.8512,locs:[
-    {i:'✈️',n:'Алматы әуежайы',a:'Алматы',lat:43.3521,lng:77.0405},
-    {i:'🏛️',n:'Республика алаңы',a:'Алматы орталығы',lat:43.2220,lng:76.8512},
-    {i:'🛍️',n:'Mega Mall',a:'Алматы',lat:43.2089,lng:76.8894},
-    {i:'🏥',n:'Орталық аурухана',a:'Алматы',lat:43.2354,lng:76.9102},
-    {i:'🎓',n:'Әл-Фараби университеті',a:'Алматы',lat:43.2096,lng:76.8973},
-    {i:'🚉',n:'Алматы-1 вокзалы',a:'Алматы',lat:43.2576,lng:76.9478},
-    {i:'🌳',n:'Горький бақшасы',a:'Алматы',lat:43.2640,lng:76.9310},
-  ]},
-  'astana':{name:'Астана',country:'🇰🇿 Қазақстан',lat:51.1801,lng:71.4460,locs:[
-    {i:'✈️',n:'Астана әуежайы',a:'Астана',lat:51.0222,lng:71.4669},
-    {i:'🏛️',n:'Байтерек монументі',a:'Астана',lat:51.1280,lng:71.4306},
-    {i:'🛍️',n:'Khan Shatyr',a:'Астана',lat:51.1318,lng:71.4053},
-    {i:'🏥',n:'Ұлттық медициналық орталық',a:'Астана',lat:51.1801,lng:71.4460},
-    {i:'🚉',n:'Астана вокзалы',a:'Астана',lat:51.1737,lng:71.3709},
-    {i:'🏢',n:'Үкімет үйі',a:'Астана',lat:51.1265,lng:71.4306},
-  ]},
-  'karaganda':{name:'Қарағанды',country:'🇰🇿 Қазақстан',lat:49.8047,lng:73.1094,locs:[
-    {i:'✈️',n:'Қарағанды әуежайы',a:'Қарағанды',lat:49.6708,lng:73.3344},
-    {i:'🏛️',n:'Орталық алаң',a:'Қарағанды',lat:49.8047,lng:73.1094},
-    {i:'🛍️',n:'Keruen сауда орталығы',a:'Қарағанды',lat:49.8012,lng:73.0876},
-    {i:'🚉',n:'Қарағанды вокзалы',a:'Қарағанды',lat:49.8312,lng:73.1656},
-    {i:'🏥',n:'Облыстық аурухана',a:'Қарағанды',lat:49.8156,lng:73.0987},
-  ]},
-  'semey':{name:'Семей',country:'🇰🇿 Қазақстан',lat:50.4111,lng:80.2275,locs:[
-    {i:'✈️',n:'Семей әуежайы',a:'Семей',lat:50.3513,lng:80.2344},
-    {i:'🏛️',n:'Орталық алаң',a:'Семей',lat:50.4111,lng:80.2275},
-    {i:'🚉',n:'Семей вокзалы',a:'Семей',lat:50.4234,lng:80.2456},
-    {i:'🏥',n:'Семей медициналық университеті',a:'Семей',lat:50.4089,lng:80.2198},
-    {i:'🌉',n:'Иртыш көпірі',a:'Семей',lat:50.4167,lng:80.2333},
-  ]},
-  'oskemen':{name:'Өскемен',country:'🇰🇿 Қазақстан',lat:49.9483,lng:82.6189,locs:[
-    {i:'✈️',n:'Өскемен әуежайы',a:'Өскемен',lat:49.9944,lng:82.4944},
-    {i:'🏛️',n:'Орталық алаң',a:'Өскемен',lat:49.9483,lng:82.6189},
-    {i:'🚉',n:'Өскемен вокзалы',a:'Өскемен',lat:49.9567,lng:82.6012},
-    {i:'🛍️',n:'Сити Молл',a:'Өскемен',lat:49.9423,lng:82.6234},
-    {i:'🏥',n:'Облыстық аурухана',a:'Өскемен',lat:49.9512,lng:82.6145},
-  ]},
-  'urdzhar':{name:'Үржар',country:'🇰🇿 Қазақстан',lat:47.0956,lng:81.6278,locs:[
-    {i:'🏛️',n:'Әкімдік',a:'Үржар',lat:47.0956,lng:81.6278},
-    {i:'🏥',n:'Аурухана',a:'Үржар',lat:47.0934,lng:81.6245},
-    {i:'🏪',n:'Базар',a:'Үржар',lat:47.0967,lng:81.6290},
-    {i:'🚉',n:'Үржар теміржол бекеті',a:'Үржар',lat:47.0912,lng:81.6189},
-    {i:'🏫',n:'Мектеп',a:'Үржар',lat:47.0978,lng:81.6312},
-  ]},
-  'taldykorgan':{name:'Талдықорған',country:'🇰🇿 Қазақстан',lat:45.0173,lng:78.3733,locs:[
-    {i:'✈️',n:'Талдықорған әуежайы',a:'Талдықорған',lat:45.1244,lng:78.4467},
-    {i:'🏛️',n:'Орталық алаң',a:'Талдықорған',lat:45.0173,lng:78.3733},
-    {i:'🚉',n:'Талдықорған вокзалы',a:'Талдықорған',lat:45.0234,lng:78.3812},
-    {i:'🏥',n:'Облыстық аурухана',a:'Талдықорған',lat:45.0145,lng:78.3678},
-  ]},
-  'shymkent':{name:'Шымкент',country:'🇰🇿 Қазақстан',lat:42.3417,lng:69.5901,locs:[
-    {i:'✈️',n:'Шымкент әуежайы',a:'Шымкент',lat:42.3642,lng:69.4789},
-    {i:'🏛️',n:'Орталық алаң',a:'Шымкент',lat:42.3417,lng:69.5901},
-    {i:'🛍️',n:'Mega Shymkent',a:'Шымкент',lat:42.3389,lng:69.5712},
-    {i:'🚉',n:'Шымкент вокзалы',a:'Шымkent',lat:42.3512,lng:69.6123},
-    {i:'🏥',n:'Облыстық аурухана',a:'Шымкент',lat:42.3356,lng:69.5834},
-  ]},
-  'atyrau':{name:'Атырау',country:'🇰🇿 Қазақстан',lat:47.1167,lng:51.9000,locs:[
-    {i:'✈️',n:'Атырау әуежайы',a:'Атырау',lat:47.1211,lng:51.8234},
-    {i:'🏛️',n:'Орталық алаң',a:'Атырау',lat:47.1167,lng:51.9000},
-    {i:'🚉',n:'Атырау вокзалы',a:'Атырау',lat:47.1234,lng:51.9123},
-    {i:'🏥',n:'Облыстық аурухана',a:'Атырau',lat:47.1145,lng:51.8934},
-    {i:'🌊',n:'Жайық өзені жағалауы',a:'Атырау',lat:47.1189,lng:51.9045},
-  ]},
-  'makhanshi':{name:'Мақаншы',country:'🇰🇿 Қазақстан',lat:46.4989,lng:82.6018,locs:[
-    {i:'🏛️',n:'Әкімдік',a:'Мақаншы',lat:46.4989,lng:82.6018},
-    {i:'🏥',n:'Аурухана',a:'Мақаншы',lat:46.4967,lng:82.5989},
-    {i:'🏪',n:'Базар',a:'Мақаншы',lat:46.5001,lng:82.6034},
-    {i:'🚉',n:'Мақаншы теміржол бекеті',a:'Мақаншы',lat:46.4934,lng:82.5912},
-  ]},
-  'zharbulak':{name:'Жарбулақ',country:'🇰🇿 Қазақстан',lat:46.0820,lng:82.0680,locs:[
-    {i:'🏖️',n:'Жарбулақ жағажайы',a:'Алакөл жағалауы',lat:46.0820,lng:82.0680},
-    {i:'🌊',n:'Алакөл санаторийі',a:'Жарбулақ',lat:46.0810,lng:82.0690},
-    {i:'🏨',n:'Мейманхана',a:'Жарбулақ',lat:46.0815,lng:82.0685},
-    {i:'🚉',n:'Жаланашкөл бекеті',a:'Жаланашкөл',lat:45.5929,lng:82.1768},
-  ]},
-  'pittsburgh':{name:'Pittsburgh',country:'🇺🇸 АҚШ',lat:40.4406,lng:-79.9959,locs:[
-    {i:'✈️',n:'Pittsburgh Airport',a:'Pittsburgh, PA',lat:40.4915,lng:-80.2329},
-    {i:'🏛️',n:'Downtown Pittsburgh',a:'Pittsburgh, PA',lat:40.4406,lng:-79.9959},
-    {i:'🏥',n:'UPMC Medical Center',a:'Pittsburgh, PA',lat:40.4412,lng:-79.9617},
-    {i:'🎓',n:'University of Pittsburgh',a:'Pittsburgh, PA',lat:40.4444,lng:-79.9533},
-    {i:'🏟️',n:'PNC Park',a:'Pittsburgh, PA',lat:40.4468,lng:-80.0057},
-    {i:'🛍️',n:'Station Square',a:'Pittsburgh, PA',lat:40.4301,lng:-80.0034},
-  ]},
-  'bishkek':{name:'Бішкек',country:'🇰🇬 Қырғызстан',lat:42.8746,lng:74.5698,locs:[
-    {i:'✈️',n:'Манас әуежайы',a:'Бішкек',lat:42.9474,lng:74.4776},
-    {i:'🏛️',n:'Ала-Тоо алаңы',a:'Бішкек орталығы',lat:42.8746,lng:74.5698},
-    {i:'🛍️',n:'Dordoi Bazaar',a:'Бішкек',lat:42.9234,lng:74.6123},
-    {i:'🏥',n:'Ұлттық аурухана',a:'Бішкек',lat:42.8712,lng:74.5634},
-    {i:'🎓',n:'КРСУ университеті',a:'Бішкек',lat:42.8689,lng:74.5923},
-  ]},
-  'tashkent':{name:'Ташкент',country:'🇺🇿 Өзбекстан',lat:41.2995,lng:69.2401,locs:[
-    {i:'✈️',n:'Ташкент әуежайы',a:'Ташкент',lat:41.2579,lng:69.2812},
-    {i:'🏛️',n:'Мустақиллик алаңы',a:'Ташкент орталығы',lat:41.2995,lng:69.2401},
-    {i:'🕌',n:'Хазрати Имом мешіті',a:'Ташкент',lat:41.3123,lng:69.2567},
-    {i:'🛍️',n:'Chorsu Bazaar',a:'Ташкент',lat:41.3267,lng:69.2345},
-    {i:'🚇',n:'Ташкент метро',a:'Ташкент',lat:41.2989,lng:69.2378},
-    {i:'🏥',n:'Республикалық аурухана',a:'Ташкент',lat:41.2934,lng:69.2312},
-  ]},
+kabanbay:{nm:"Қабанбай ауылы",cn:"Қазақстан",fl:"🇰🇿",sy:"\u20B8",fx:true,la:46.077,ln:82.076,locs:[{i:"🏥",n:"Аурухана",a:"Қабанбай",lt:46.0768,lg:82.0758},{i:"🏫",n:"№1 Мектеп",a:"Қабанбай",lt:46.0772,lg:82.0765},{i:"🏫",n:"№2 Мектеп",a:"Қабанбай",lt:46.0765,lg:82.0770},{i:"🏪",n:"Базар",a:"Қабанбай",lt:46.0770,lg:82.0762},{i:"🏛️",n:"Әкімдік",a:"Қабанбай",lt:46.0769,lg:82.0760},{i:"⛽",n:"АЗС",a:"Қабанбай",lt:46.0775,lg:82.0755},{i:"🏖️",n:"Жарбулақ жағажайы",a:"Алакөл",lt:46.082,lg:82.068},{i:"🏖️",n:"Жаланаш жағажайы",a:"Алакөл",lt:45.5929,lg:82.1768},{i:"🚉",n:"Жаланашкөл теміржол бекеті",a:"Жаланашкөл",lt:45.5929,lg:82.1768},{i:"💊",n:"Дәріхана",a:"Қабанбай",lt:46.0768,lg:82.0764},{i:"🌊",n:"Алакөл санаторийі",a:"Жарбулақ",lt:46.081,lg:82.069},{i:"🏠",n:"1-ші аудан",a:"Қабанбай",lt:46.0774,lg:82.0768},{i:"🏠",n:"2-ші аудан",a:"Қабанбай",lt:46.0766,lg:82.0756},{i:"🏠",n:"Жаңа аудан",a:"Қабанбай",lt:46.078,lg:82.077}],tr:[{i:"🚗",n:"Эконом",p:600},{i:"🚙",n:"Комфорт",p:900},{i:"🏎️",n:"Бизнес",p:1400},{i:"🚐",n:"Жүк",p:500}]},
+zharbulak:{nm:"Жарбулақ",cn:"Қазақстан",fl:"🇰🇿",sy:"\u20B8",fx:true,la:46.082,ln:82.068,locs:[{i:"🏖️",n:"Жарбулақ жағажайы",a:"Алакөл",lt:46.082,lg:82.068},{i:"🌊",n:"Алакөл санаторийі",a:"Жарбулақ",lt:46.081,lg:82.069},{i:"🚉",n:"Жаланашкөл бекеті",a:"Жаланашкөл",lt:45.5929,lg:82.1768}],tr:[{i:"🚗",n:"Эконом",p:600},{i:"🚙",n:"Комфорт",p:900},{i:"🏎️",n:"Бизнес",p:1400},{i:"🚐",n:"Жүк",p:500}]},
+makhanshi:{nm:"Мақаншы",cn:"Қазақстан",fl:"🇰🇿",sy:"\u20B8",fx:true,la:46.499,ln:82.602,locs:[{i:"🏛️",n:"Әкімдік",a:"Мақаншы",lt:46.499,lg:82.602},{i:"🏥",n:"Аурухана",a:"Мақаншы",lt:46.497,lg:82.599},{i:"🏪",n:"Базар",a:"Мақаншы",lt:46.500,lg:82.603},{i:"🚉",n:"Теміржол бекеті",a:"Мақаншы",lt:46.493,lg:82.591}],tr:[{i:"🚗",n:"Эконом",p:700},{i:"🚙",n:"Комфорт",p:1000},{i:"🏎️",n:"Бизнес",p:1500},{i:"🚐",n:"Жүк",p:600}]},
+urdzhar:{nm:"Үржар",cn:"Қазақстан",fl:"🇰🇿",sy:"\u20B8",fx:true,la:47.096,ln:81.628,locs:[{i:"🏛️",n:"Әкімдік",a:"Үржар",lt:47.096,lg:81.628},{i:"🏥",n:"Аурухана",a:"Үржар",lt:47.093,lg:81.625},{i:"🏪",n:"Базар",a:"Үржар",lt:47.097,lg:81.629},{i:"🚉",n:"Теміржол бекеті",a:"Үржар",lt:47.091,lg:81.619}],tr:[{i:"🚗",n:"Эконом",p:800},{i:"🚙",n:"Комфорт",p:1200},{i:"🏎️",n:"Бизнес",p:2000},{i:"🚐",n:"Жүк",p:700}]},
+almaty:{nm:"Алматы",cn:"Қазақстан",fl:"🇰🇿",sy:"\u20B8",fx:false,la:43.222,ln:76.851,locs:[{i:"✈️",n:"Алматы әуежайы",a:"Алматы",lt:43.352,lg:77.041},{i:"🏛️",n:"Республика алаңы",a:"Алматы",lt:43.222,lg:76.851},{i:"🛍️",n:"Mega Mall",a:"Алматы",lt:43.209,lg:76.889},{i:"🏥",n:"Орталық аурухана",a:"Алматы",lt:43.235,lg:76.910},{i:"🚉",n:"Алматы-1 вокзалы",a:"Алматы",lt:43.258,lg:76.948}],tr:[{i:"🚗",n:"Эконом",p:300,rk:150,mn:500},{i:"🚙",n:"Комфорт",p:500,rk:220,mn:800},{i:"🏎️",n:"Бизнес",p:800,rk:350,mn:1500},{i:"🚐",n:"Жүк",p:400,rk:180,mn:700}]},
+astana:{nm:"Астана",cn:"Қазақстан",fl:"🇰🇿",sy:"\u20B8",fx:false,la:51.180,ln:71.446,locs:[{i:"✈️",n:"Астана әуежайы",a:"Астана",lt:51.022,lg:71.467},{i:"🏛️",n:"Байтерек",a:"Астана",lt:51.128,lg:71.431},{i:"🛍️",n:"Khan Shatyr",a:"Астана",lt:51.132,lg:71.405},{i:"🚉",n:"Астана вокзалы",a:"Астана",lt:51.174,lg:71.371}],tr:[{i:"🚗",n:"Эконом",p:300,rk:140,mn:500},{i:"🚙",n:"Комфорт",p:450,rk:200,mn:750},{i:"🏎️",n:"Бизнес",p:750,rk:320,mn:1400},{i:"🚐",n:"Жүк",p:350,rk:160,mn:650}]},
+karaganda:{nm:"Қарағанды",cn:"Қазақстан",fl:"🇰🇿",sy:"\u20B8",fx:false,la:49.805,ln:73.109,locs:[{i:"✈️",n:"Қарағанды әуежайы",a:"Қарағанды",lt:49.671,lg:73.334},{i:"🏛️",n:"Орталық алаң",a:"Қарағанды",lt:49.805,lg:73.109},{i:"🚉",n:"Қарағанды вокзалы",a:"Қарағанды",lt:49.831,lg:73.166}],tr:[{i:"🚗",n:"Эконом",p:200,rk:120,mn:400},{i:"🚙",n:"Комфорт",p:350,rk:180,mn:600},{i:"🏎️",n:"Бизнес",p:600,rk:280,mn:1200},{i:"🚐",n:"Жүк",p:300,rk:140,mn:550}]},
+semey:{nm:"Семей",cn:"Қазақстан",fl:"🇰🇿",sy:"\u20B8",fx:false,la:50.411,ln:80.228,locs:[{i:"✈️",n:"Семей әуежайы",a:"Семей",lt:50.351,lg:80.234},{i:"🏛️",n:"Орталық алаң",a:"Семей",lt:50.411,lg:80.228},{i:"🚉",n:"Семей вокзалы",a:"Семей",lt:50.423,lg:80.246},{i:"🏥",n:"Семей медициналық университеті",a:"Семей",lt:50.409,lg:80.220}],tr:[{i:"🚗",n:"Эконом",p:200,rk:110,mn:400},{i:"🚙",n:"Комфорт",p:320,rk:170,mn:580},{i:"🏎️",n:"Бизнес",p:550,rk:260,mn:1100},{i:"🚐",n:"Жүк",p:280,rk:130,mn:500}]},
+oskemen:{nm:"Өскемен",cn:"Қазақстан",fl:"🇰🇿",sy:"\u20B8",fx:false,la:49.948,ln:82.619,locs:[{i:"✈️",n:"Өскемен әуежайы",a:"Өскемен",lt:49.994,lg:82.494},{i:"🏛️",n:"Орталық алаң",a:"Өскемен",lt:49.948,lg:82.619},{i:"🚉",n:"Өскемен вокзалы",a:"Өскемен",lt:49.957,lg:82.601}],tr:[{i:"🚗",n:"Эконом",p:200,rk:110,mn:400},{i:"🚙",n:"Комфорт",p:320,rk:170,mn:580},{i:"🏎️",n:"Бизнес",p:550,rk:260,mn:1100},{i:"🚐",n:"Жүк",p:280,rk:130,mn:500}]},
+taldykorgan:{nm:"Талдықорған",cn:"Қазақстан",fl:"🇰🇿",sy:"\u20B8",fx:false,la:45.017,ln:78.373,locs:[{i:"✈️",n:"Талдықорған әуежайы",a:"Талдықорған",lt:45.124,lg:78.447},{i:"🏛️",n:"Орталық алаң",a:"Талдықорған",lt:45.017,lg:78.373},{i:"🚉",n:"Талдықорған вокзалы",a:"Талдықорған",lt:45.023,lg:78.381}],tr:[{i:"🚗",n:"Эконом",p:220,rk:120,mn:420},{i:"🚙",n:"Комфорт",p:340,rk:180,mn:600},{i:"🏎️",n:"Бизнес",p:580,rk:270,mn:1150},{i:"🚐",n:"Жүк",p:290,rk:140,mn:520}]},
+shymkent:{nm:"Шымкент",cn:"Қазақстан",fl:"🇰🇿",sy:"\u20B8",fx:false,la:42.342,ln:69.590,locs:[{i:"✈️",n:"Шымкент әуежайы",a:"Шымкент",lt:42.364,lg:69.479},{i:"🏛️",n:"Орталық алаң",a:"Шымкент",lt:42.342,lg:69.590},{i:"🛍️",n:"Mega Shymkent",a:"Шымкент",lt:42.339,lg:69.571},{i:"🚉",n:"Шымкент вокзалы",a:"Шымкент",lt:42.351,lg:69.612}],tr:[{i:"🚗",n:"Эконом",p:250,rk:130,mn:450},{i:"🚙",n:"Комфорт",p:380,rk:190,mn:650},{i:"🏎️",n:"Бизнес",p:650,rk:300,mn:1300},{i:"🚐",n:"Жүк",p:320,rk:150,mn:580}]},
+atyrau:{nm:"Атырау",cn:"Қазақстан",fl:"🇰🇿",sy:"\u20B8",fx:false,la:47.117,ln:51.900,locs:[{i:"✈️",n:"Атырау әуежайы",a:"Атырау",lt:47.121,lg:51.823},{i:"🏛️",n:"Орталық алаң",a:"Атырау",lt:47.117,lg:51.900},{i:"🚉",n:"Атырау вокзалы",a:"Атырау",lt:47.123,lg:51.912}],tr:[{i:"🚗",n:"Эконом",p:250,rk:130,mn:450},{i:"🚙",n:"Комфорт",p:380,rk:190,mn:650},{i:"🏎️",n:"Бизнес",p:650,rk:300,mn:1300},{i:"🚐",n:"Жүк",p:320,rk:150,mn:580}]},
+pittsburgh:{nm:"Pittsburgh",cn:"АҚШ",fl:"🇺🇸",sy:"$",fx:false,la:40.441,ln:-79.996,locs:[{i:"✈️",n:"Pittsburgh Airport",a:"Pittsburgh PA",lt:40.492,lg:-80.233},{i:"🏛️",n:"Downtown Pittsburgh",a:"Pittsburgh PA",lt:40.441,lg:-79.996},{i:"🏥",n:"UPMC Medical Center",a:"Pittsburgh PA",lt:40.441,lg:-79.962},{i:"🎓",n:"University of Pittsburgh",a:"Pittsburgh PA",lt:40.444,lg:-79.953},{i:"🏟️",n:"PNC Park",a:"Pittsburgh PA",lt:40.447,lg:-80.006},{i:"🛍️",n:"Station Square",a:"Pittsburgh PA",lt:40.430,lg:-80.003}],tr:[{i:"🚗",n:"Economy",p:2.5,rk:1.5,mn:5},{i:"🚙",n:"Comfort",p:3.5,rk:2.0,mn:8},{i:"🏎️",n:"Business",p:5.0,rk:3.0,mn:15},{i:"🚐",n:"Cargo",p:4.0,rk:1.8,mn:8}]},
+bishkek:{nm:"Бішкек",cn:"Қырғызстан",fl:"🇰🇬",sy:"с",fx:false,la:42.875,ln:74.570,locs:[{i:"✈️",n:"Манас әуежайы",a:"Бішкек",lt:42.947,lg:74.478},{i:"🏛️",n:"Ала-Тоо алаңы",a:"Бішкек",lt:42.875,lg:74.570},{i:"🛍️",n:"Dordoi Bazaar",a:"Бішкек",lt:42.923,lg:74.612}],tr:[{i:"🚗",n:"Эконом",p:50,rk:30,mn:100},{i:"🚙",n:"Комфорт",p:80,rk:45,mn:160},{i:"🏎️",n:"Бизнес",p:130,rk:70,mn:280},{i:"🚐",n:"Жүк",p:60,rk:35,mn:120}]},
+tashkent:{nm:"Ташкент",cn:"Өзбекстан",fl:"🇺🇿",sy:"сум",fx:false,la:41.300,ln:69.240,locs:[{i:"✈️",n:"Ташкент әуежайы",a:"Ташкент",lt:41.258,lg:69.281},{i:"🏛️",n:"Мустақиллик алаңы",a:"Ташкент",lt:41.300,lg:69.240},{i:"🕌",n:"Хазрати Имом",a:"Ташкент",lt:41.312,lg:69.257},{i:"🛍️",n:"Chorsu Bazaar",a:"Ташкент",lt:41.327,lg:69.235}],tr:[{i:"🚗",n:"Эконом",p:3000,rk:2000,mn:8000},{i:"🚙",n:"Комфорт",p:5000,rk:3000,mn:12000},{i:"🏎️",n:"Бизнес",p:8000,rk:5000,mn:20000},{i:"🚐",n:"Жүк",p:4000,rk:2500,mn:10000}]}
 };
-
-var CUR_CITY='kabanbay';
-var LOCS=CITIES[CUR_CITY].locs;
-
-// ── CURRENCY & TARIFFS ──
-var CITY_CURRENCY={
-  'kabanbay':{symbol:'₸',code:'KZT',tariffs:[{icon:'🚗',name:'Эконом',price:600,time:'~5 мин'},{icon:'🚙',name:'Комфорт',price:900,time:'~4 мин'},{icon:'🏎️',name:'Бизнес',price:1400,time:'~7 мин'},{icon:'🚐',name:'Жүк',price:500,time:'~10 мин'}]},
-  'zharbulak':{symbol:'₸',code:'KZT',tariffs:[{icon:'🚗',name:'Эконом',price:600,time:'~5 мин'},{icon:'🚙',name:'Комфорт',price:900,time:'~4 мин'},{icon:'🏎️',name:'Бизнес',price:1400,time:'~7 мин'},{icon:'🚐',name:'Жүк',price:500,time:'~10 мин'}]},
-  'makhanshi':{symbol:'₸',code:'KZT',tariffs:[{icon:'🚗',name:'Эконом',price:600,time:'~5 мин'},{icon:'🚙',name:'Комфорт',price:900,time:'~4 мін'},{icon:'🏎️',name:'Бизнес',price:1400,time:'~7 мін'},{icon:'🚐',name:'Жүк',price:500,time:'~10 мін'}]},
-  'urdzhar':{symbol:'₸',code:'KZT',tariffs:[{icon:'🚗',name:'Эконом',price:700,time:'~5 мін'},{icon:'🚙',name:'Комфорт',price:1000,time:'~4 мін'},{icon:'🏎️',name:'Бизнес',price:1500,time:'~7 мін'},{icon:'🚐',name:'Жүк',price:600,time:'~10 мін'}]},
-  'almaty':{symbol:'₸',code:'KZT',tariffs:[{icon:'🚗',name:'Эконом',price:1200,time:'~5 мін'},{icon:'🚙',name:'Комфорт',price:1800,time:'~4 мін'},{icon:'🏎️',name:'Бизнес',price:3000,time:'~7 мін'},{icon:'🚐',name:'Жүк',price:1000,time:'~10 мін'}]},
-  'astana':{symbol:'₸',code:'KZT',tariffs:[{icon:'🚗',name:'Эконом',price:1100,time:'~5 мін'},{icon:'🚙',name:'Комфорт',price:1700,time:'~4 мін'},{icon:'🏎️',name:'Бизнес',price:2800,time:'~7 мін'},{icon:'🚐',name:'Жүк',price:900,time:'~10 мін'}]},
-  'karaganda':{symbol:'₸',code:'KZT',tariffs:[{icon:'🚗',name:'Эконом',price:900,time:'~5 мін'},{icon:'🚙',name:'Комфорт',price:1400,time:'~4 мін'},{icon:'🏎️',name:'Бизнес',price:2200,time:'~7 мін'},{icon:'🚐',name:'Жүк',price:800,time:'~10 мін'}]},
-  'semey':{symbol:'₸',code:'KZT',tariffs:[{icon:'🚗',name:'Эконом',price:800,time:'~5 мін'},{icon:'🚙',name:'Комфорт',price:1200,time:'~4 мін'},{icon:'🏎️',name:'Бизнес',price:2000,time:'~7 мін'},{icon:'🚐',name:'Жүк',price:700,time:'~10 мін'}]},
-  'oskemen':{symbol:'₸',code:'KZT',tariffs:[{icon:'🚗',name:'Эконом',price:800,time:'~5 мін'},{icon:'🚙',name:'Комфорт',price:1200,time:'~4 мін'},{icon:'🏎️',name:'Бизнес',price:2000,time:'~7 мін'},{icon:'🚐',name:'Жүк',price:700,time:'~10 мін'}]},
-  'taldykorgan':{symbol:'₸',code:'KZT',tariffs:[{icon:'🚗',name:'Эконом',price:900,time:'~5 мін'},{icon:'🚙',name:'Комфорт',price:1400,time:'~4 мін'},{icon:'🏎️',name:'Бизнес',price:2200,time:'~7 мін'},{icon:'🚐',name:'Жүк',price:800,time:'~10 мін'}]},
-  'shymkent':{symbol:'₸',code:'KZT',tariffs:[{icon:'🚗',name:'Эконом',price:1000,time:'~5 мін'},{icon:'🚙',name:'Комфорт',price:1500,time:'~4 мін'},{icon:'🏎️',name:'Бизнес',price:2500,time:'~7 мін'},{icon:'🚐',name:'Жүк',price:900,time:'~10 мін'}]},
-  'atyrau':{symbol:'₸',code:'KZT',tariffs:[{icon:'🚗',name:'Эконом',price:1000,time:'~5 мін'},{icon:'🚙',name:'Комфорт',price:1500,time:'~4 мін'},{icon:'🏎️',name:'Бизнес',price:2500,time:'~7 мін'},{icon:'🚐',name:'Жүк',price:900,time:'~10 мін'}]},
-  'pittsburgh':{symbol:'$',code:'USD',tariffs:[{icon:'🚗',name:'Economy',price:8,time:'~5 min'},{icon:'🚙',name:'Comfort',price:14,time:'~4 min'},{icon:'🏎️',name:'Business',price:25,time:'~7 min'},{icon:'🚐',name:'Cargo',price:6,time:'~10 min'}]},
-  'bishkek':{symbol:'с',code:'KGS',tariffs:[{icon:'🚗',name:'Эконом',price:200,time:'~5 мин'},{icon:'🚙',name:'Комфорт',price:350,time:'~4 мин'},{icon:'🏎️',name:'Бизнес',price:600,time:'~7 мин'},{icon:'🚐',name:'Груз',price:180,time:'~10 мин'}]},
-  'tashkent':{symbol:'сўм',code:'UZS',tariffs:[{icon:'🚗',name:'Эконом',price:15000,time:'~5 мин'},{icon:'🚙',name:'Комфорт',price:25000,time:'~4 мин'},{icon:'🏎️',name:'Бизнес',price:40000,time:'~7 мин'},{icon:'🚐',name:'Груз',price:12000,time:'~10 мин'}]},
-};
-
-function getCurrency(){return CITY_CURRENCY[CUR_CITY]||CITY_CURRENCY['kabanbay']}
-function getCurrencySymbol(){return getCurrency().symbol}
-function getTariffs(){return getCurrency().tariffs}
-
-// ── STATE ──
-var U=null,ROLE=null,SEL_ROLE='passenger';
-var FROM=null,TO=null,FROM_GEO=null,TO_GEO=null;
-var TARIFF={name:'Эконом',price:600};
-var LOC_TARGET=null,ORDER_ID=null,DRV_PHONE=null;
-var ONLINE=false,CHAT_KEY=null;
-var DB=null;
-
-// ── FIREBASE LOAD ──
-function loadFirebase(){
-  var s1=document.createElement('script');
-  s1.src='https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js';
+var U=null,ROLE=null,SROLE="passenger",DB=null;
+var FROM=null,TO=null,FG=null,TG=null;
+var TAR={n:"Эконом",p:600},LT=0,OID=null,DP=null,ONLINE=false,CK=null;
+var CUR="kabanbay",SET={},ACT={};
+function gc(){return CITIES[CUR]||CITIES.kabanbay}
+function gs(){return gc().sy}
+function glo(){return gc().locs||[]}
+function gtr(){return gc().tr||[]}
+function loadFB(){
+  var s1=document.createElement("script");
+  s1.src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js";
   s1.onload=function(){
-    var s2=document.createElement('script');
-    s2.src='https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js';
+    var s2=document.createElement("script");
+    s2.src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js";
     s2.onload=function(){
       try{
-        if(!firebase.apps.length)firebase.initializeApp(FB_CONFIG);
+        if(!firebase.apps.length)firebase.initializeApp(FBCFG);
         DB=firebase.database();
-        console.log('Firebase OK');
-        onFBReady();
-      }catch(e){console.error('FB init error:',e)}
+        onRdy();
+      }catch(e){console.error(e)}
     };
-    s2.onerror=function(){console.error('DB script failed')};
     document.head.appendChild(s2);
   };
-  s1.onerror=function(){console.error('App script failed')};
   document.head.appendChild(s1);
 }
-
-function onFBReady(){
-  // Restore city
-  var savedCity=localStorage.getItem('aba_city');
-  if(savedCity&&CITIES[savedCity]){
-    CUR_CITY=savedCity;
-    LOCS=CITIES[savedCity].locs;
-  }
-  var s=getSess();
-  if(s){
-    U=s;ROLE=s.role;
-    enterApp();
-  } else {
-    loadActiveCities(function(){show('city')});
-  }
+window.onload=function(){
+  if("serviceWorker" in navigator)navigator.serviceWorker.register("./sw.js").catch(function(){});
+  setTimeout(loadFB,100);
+};
+function onRdy(){
+  var c=localStorage.getItem("aba_city");
+  if(c&&CITIES[c])CUR=c;
+  loadSET();
+  var s=getSS();
+  if(s){U=s;ROLE=s.role;enterApp();}
+  else{loadAC(function(){show("city-sc");})}
 }
-
-// ── CITY FUNCTIONS ──
-var activeCities={};
-
-function loadActiveCities(cb){
-  DB.ref('active_cities').once('value',function(snap){
-    if(snap.exists()&&Object.keys(snap.val()).length>0){
-      activeCities=snap.val();
-    } else {
-      // Default - only kabanbay active
-      activeCities={'kabanbay':true};
-    }
-    renderCityList(Object.keys(activeCities));
+function saveSS(u){localStorage.setItem("aba_s",JSON.stringify(u))}
+function getSS(){try{return JSON.parse(localStorage.getItem("aba_s"))}catch(e){return null}}
+function clrSS(){localStorage.removeItem("aba_s")}
+function show(id){
+  document.querySelectorAll(".sc").forEach(function(s){s.classList.remove("on")});
+  var el=document.getElementById(id);
+  if(el)el.classList.add("on");
+}
+function toast(m){
+  var el=document.getElementById("tst");
+  el.textContent=m;el.classList.add("on");
+  setTimeout(function(){el.classList.remove("on")},3000);
+}
+function ini(n){return n.split(" ").map(function(w){return w[0]}).join("").slice(0,2).toUpperCase()}
+function sel(id){var el=document.getElementById(id);if(el)el.style.display="flex"}
+function hid(id){var el=document.getElementById(id);if(el)el.style.display="none"}
+function loadSET(){
+  if(!DB)return;
+  DB.ref("app_settings").on("value",function(snap){
+    SET=snap.exists()?snap.val():{};
+    applySET();
+  });
+}
+function applySET(){
+  var sb=document.getElementById("sosb");if(sb)sb.style.display=SET.sos_button?"flex":"none";
+  var sh=document.getElementById("shrb");if(sh)sh.style.display=SET.share_trip?"flex":"none";
+  SET.kaspi_qr?sel("kqr"):hid("kqr");
+  SET.share_trip?sel("shp"):hid("shp");
+  SET.promo_code?sel("prp"):hid("prp");
+  SET.referral?sel("rfp"):hid("rfp");
+  if(SET.privacy_policy&&!localStorage.getItem("aba_prv"))showPrv();
+}
+function loadAC(cb){
+  if(!DB){if(cb)cb();return}
+  DB.ref("active_cities").once("value",function(snap){
+    ACT=snap.exists()&&Object.keys(snap.val()).length>0?snap.val():{kabanbay:true};
+    renderC(Object.keys(ACT));
     if(cb)cb();
   });
 }
-
-function renderCityList(keys){
-  var el=document.getElementById('city-list');
-  if(!el)return;
-  if(!keys.length){
-    el.innerHTML='<div style="text-align:center;color:var(--muted);padding:40px;font-size:14px">Белсенді қалалар жоқ.<br>Админге хабарласыңыз.</div>';
+function renderC(keys){
+  var el=document.getElementById("city-list");if(!el)return;
+  if(!keys.length){el.innerHTML="<div style='text-align:center;color:var(--m);padding:40px'>Белсенді қалалар жоқ</div>";return}
+  var gr={};
+  keys.forEach(function(k){
+    var c=CITIES[k];if(!c)return;
+    var key=c.fl+" "+c.cn;
+    if(!gr[key])gr[key]=[];
+    gr[key].push({k:k,c:c});
+  });
+  var h="";
+  Object.keys(gr).forEach(function(g){
+    h+="<div class='cg'>"+g+"</div>";
+    gr[g].forEach(function(item){
+      h+="<button class='city-btn' data-ck='"+item.k+"'>";
+      h+="<div style='font-size:22px'>🏙️</div>";
+      h+="<div><div class='cn'>"+item.c.nm+"</div><div class='cc'>"+item.c.fl+" "+item.c.cn+"</div></div>";
+      h+="<div style='color:var(--g);font-size:17px'>›</div></button>";
+    });
+  });
+  el.innerHTML=h;
+}
+function filterC(q){
+  var keys=Object.keys(ACT);
+  if(!q){renderC(keys);return}
+  q=q.toLowerCase();
+  renderC(keys.filter(function(k){var c=CITIES[k];return c&&(c.nm.toLowerCase().indexOf(q)>=0||c.cn.toLowerCase().indexOf(q)>=0)}));
+}
+function selCity(key){CUR=key;localStorage.setItem("aba_city",key);show("auth-sc")}
+function changeCity(){loadAC(function(){show("city-sc")})}
+document.addEventListener("click",function(e){
+  var cb=e.target.closest(".city-btn");
+  if(cb){selCity(cb.getAttribute("data-ck"));return}
+  var lo=e.target.closest(".lo[data-n]");
+  if(lo){
+    var n=lo.getAttribute("data-n");
+    var lt=lo.getAttribute("data-lt");
+    var lg=lo.getAttribute("data-lg");
+    pickL(n,lt?parseFloat(lt):null,lg?parseFloat(lg):null);
     return;
   }
-  // Group by country
-  var groups={};
-  keys.forEach(function(key){
-    var city=CITIES[key];if(!city)return;
-    if(!groups[city.country])groups[city.country]=[];
-    groups[city.country].push({key:key,city:city});
-  });
-  var html='';
-  Object.keys(groups).forEach(function(country){
-    html+='<div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;margin-top:16px">'+country+'</div>';
-    groups[country].forEach(function(item){
-      html+='<div onclick="selectCity(\''+item.key+'\')" style="display:flex;align-items:center;gap:14px;padding:14px;background:var(--dark2);border-radius:12px;margin-bottom:8px;cursor:pointer;border:2px solid var(--dark4);transition:border-color .2s" onmouseover="this.style.borderColor=\'var(--gold)\'" onmouseout="this.style.borderColor=\'var(--dark4)\'">'
-        +'<div style="font-size:28px">🏙️</div>'
-        +'<div><div style="font-size:16px;font-weight:700">'+item.city.name+'</div>'
-        +'<div style="font-size:12px;color:var(--muted);margin-top:2px">'+item.city.country+'</div></div>'
-        +'<div style="margin-left:auto;color:var(--gold);font-size:20px">›</div>'
-        +'</div>';
-    });
-  });
-  el.innerHTML=html;
+});
+function swTab(i,el){
+  document.getElementById("tl").style.display=i===0?"block":"none";
+  document.getElementById("tr").style.display=i===1?"block":"none";
+  document.querySelectorAll(".tab").forEach(function(t){t.classList.remove("on")});
+  el.classList.add("on");
 }
-
-function filterCities(q){
-  var keys=Object.keys(activeCities);
-  if(!q){renderCityList(keys);return}
-  q=q.toLowerCase();
-  var filtered=keys.filter(function(key){
-    var city=CITIES[key];
-    return city&&(city.name.toLowerCase().indexOf(q)>=0||city.country.toLowerCase().indexOf(q)>=0);
-  });
-  renderCityList(filtered);
+function selRole(i){
+  SROLE=i===0?"passenger":"driver";
+  document.getElementById("rpa").classList.toggle("on",i===0);
+  document.getElementById("rda").classList.toggle("on",i===1);
+  document.getElementById("crf").style.display=i===1?"block":"none";
 }
-
-function selectCity(cityKey){
-  CUR_CITY=cityKey;
-  LOCS=CITIES[cityKey]?CITIES[cityKey].locs:CITIES['kabanbay'].locs;
-  // Save city to localStorage
-  localStorage.setItem('aba_city',cityKey);
-  show('auth');
-}
-
-function enterApp(){
-  var savedCity=localStorage.getItem('aba_city');
-  if(savedCity&&CITIES[savedCity]){CUR_CITY=savedCity;LOCS=CITIES[savedCity].locs}
-  loadAppSettings();
-  if(ROLE==='driver'){setupDriver();show('driver')}
-  else{setupHome();show('home')}
-}
-
-function activateSOS(){
-  if(confirm('🆘 SOS сигналын жіберу керек пе?\n\n112 қоңырау шалынады және орныңыз Админге жіберіледі!')){
-    // Call 112
-    window.location.href='tel:112';
-    // Send alert to admin
-    if(U&&window.DB){
-      window.DB.ref('sos_alerts').push({
-        userId:U.id,userName:U.name,phone:U.phone,
-        orderId:ORDER_ID||null,time:Date.now(),
-        message:'🆘 ШҰҒЫЛ! '+U.name+' ('+U.phone+') SOS сигналын жіберді!'
-      });
-    }
-    toast('🆘 SOS жіберілді! 112 қоңырауланды');
-  }
-}
-
-window.onload=function(){
-  if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(function(){});
-  setTimeout(function(){loadFirebase()},100);
-};
-
-// ── UTILS ──
-function show(id){document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active')});document.getElementById('screen-'+id).classList.add('active')}
-// ── APP SETTINGS ──
-var APP_SETTINGS={};
-
-function loadAppSettings(){
-  var tryLoad=function(){
-    if(!window.DB){setTimeout(tryLoad,300);return}
-    window.DB.ref('app_settings').on('value',function(snap){
-      APP_SETTINGS=snap.exists()?snap.val():{};
-      applySettings();
-    });
-  };
-  tryLoad();
-}
-
-function applySettings(){
-  function show(id){var el=document.getElementById(id);if(el)el.style.display='flex'}
-  function hide(id){var el=document.getElementById(id);if(el)el.style.display='none'}
-
-  // SOS button — сапар кезінде
-  var sosBtn=document.getElementById('sos-btn');
-  if(sosBtn)sosBtn.style.display=APP_SETTINGS.sos_button?'flex':'none';
-
-  // Kaspi QR
-  APP_SETTINGS.kaspi_qr?show('kaspi-btn'):hide('kaspi-btn');
-
-  // Сапарды бөлісу — riding экранында + профильде
-  var shareRideBtn=document.getElementById('share-ride-btn');
-  if(shareRideBtn)shareRideBtn.style.display=APP_SETTINGS.share_trip?'flex':'none';
-  APP_SETTINGS.share_trip?show('share-trip-btn'):hide('share-trip-btn');
-
-  // Комиссия
-  APP_SETTINGS.commission?show('commission-btn'):hide('commission-btn');
-
-  // Чек
-  APP_SETTINGS.receipt?show('receipt-btn'):hide('receipt-btn');
-
-  // Промокод
-  APP_SETTINGS.promo_code?show('promo-btn'):hide('promo-btn');
-
-  // Реферал
-  APP_SETTINGS.referral?show('referral-btn'):hide('referral-btn');
-
-  // Privacy Policy
-  if(APP_SETTINGS.privacy_policy&&!localStorage.getItem('aba_privacy_ok')){
-    showPrivacyModal();
-  }
-}
-
-// ── RECEIPT ──
-function showReceipt(orderData){
-  if(!APP_SETTINGS.receipt)return;
-  document.getElementById('r-from').textContent=orderData.from||'—';
-  document.getElementById('r-to').textContent=orderData.to||'—';
-  document.getElementById('r-driver').textContent=orderData.driverName||'—';
-  document.getElementById('r-tariff').textContent=orderData.tariff||'—';
-  document.getElementById('r-date').textContent=new Date(orderData.createdAt||Date.now()).toLocaleString('ru-RU');
-  document.getElementById('r-price').textContent=(orderData.price||0)+' '+(orderData.currency||'₸');
-  document.getElementById('r-id').textContent='Тапсырыс №: '+(orderData.key||'—').slice(-8).toUpperCase();
-  document.getElementById('receipt-modal').classList.add('open');
-}
-
-function shareReceipt(){
-  var content=document.getElementById('receipt-content');
-  // Share as text
-  var text='🚕 ABA GROUP TAKSI GO — Чек\n\n'+
-    '📍 '+document.getElementById('r-from').textContent+'\n'+
-    '🏁 '+document.getElementById('r-to').textContent+'\n'+
-    '🚗 '+document.getElementById('r-driver').textContent+'\n'+
-    '💰 '+document.getElementById('r-price').textContent+'\n'+
-    '📅 '+document.getElementById('r-date').textContent+'\n\n'+
-    'aba-taksi.vercel.app';
-  if(navigator.share){
-    navigator.share({title:'ABA TAKSI GO Чек',text:text});
-  } else {
-    navigator.clipboard.writeText(text).then(function(){toast('📋 Чек көшірілді!')});
-  }
-}
-  if(!ORDER_ID){toast('Белсенді сапар жоқ');return}
-  var text='Менің сапарымды қадағалаңыз!\nABA TAKSI GO: https://aba-taksi.vercel.app';
-  if(navigator.share){navigator.share({title:'ABA TAKSI GO',text:text})}
-  else{toast('Сапар сілтемесі көшірілді!')}
-}
-
-function shareReferral(){
-  var code='ABA'+(U?U.id.slice(-4).toUpperCase():'0000');
-  if(navigator.share){navigator.share({title:'ABA TAKSI GO',text:'ABA TAKSI GO қосымшасын қолданыңыз! Промокод: '+code,url:'https://aba-taksi.vercel.app'})}
-  else{toast('Промокодыңыз: '+code)}
-}
-
-function shareTrip(){shareRideNow()}
-
-function shareRideNow(){
-  var driverName=document.getElementById('ride-name')?document.getElementById('ride-name').textContent:'—';
-  var driverCar=document.getElementById('ride-car')?document.getElementById('ride-car').textContent:'—';
-  var driverPlate=document.getElementById('ride-plate')?document.getElementById('ride-plate').textContent:'—';
-  var eta=document.getElementById('ride-eta')?document.getElementById('ride-eta').textContent:'—';
-  var text='🚕 Мен қазір такси ұстадым!\n\n'+
-    '📍 Қайдан: '+(FROM||'—')+'\n'+
-    '🏁 Қайда: '+(TO||'—')+'\n'+
-    '🚗 Жүргізуші: '+driverName+'\n'+
-    '🚙 Машина: '+driverCar+' ('+driverPlate+')\n'+
-    '⏱️ Келу уақыты: '+eta+'\n\n'+
-    '📱 ABA TAKSI GO — aba-taksi.vercel.app';
-  if(navigator.share){navigator.share({title:'Менің сапарым — ABA TAKSI GO',text:text})}
-  else if(navigator.clipboard){navigator.clipboard.writeText(text).then(function(){toast('📋 Ақпарат көшірілді!')})}
-  else{toast('Бөлісу мүмкін емес')}
-}
-
-function showPrivacyModal(){
-  var m=document.createElement('div');
-  m.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.9);display:flex;align-items:center;justify-content:center;z-index:500;padding:20px';
-  m.innerHTML='<div style="background:var(--dark2);border-radius:20px;padding:26px;width:100%;max-width:340px;text-align:center">'+
-    '<div style="font-size:32px;margin-bottom:12px">📜</div>'+
-    '<div style="font-size:17px;font-weight:800;margin-bottom:8px">Пайдаланушы келісімі</div>'+
-    '<div style="font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.6">'+
-      'ABA Group TAKSI GO қызметін пайдалану арқылы сіз біздің '+
-      '<span style="color:var(--gold)">Пайдалану шарттары</span> мен '+
-      '<span style="color:var(--gold)">Конфиденциалдылық саясатымызға</span> келісесіз.'+
-    '</div>'+
-    '<button onclick="acceptPrivacy(this)" style="width:100%;background:var(--gold);border:none;border-radius:10px;padding:14px;font-family:Manrope,sans-serif;font-weight:800;font-size:14px;color:var(--dark);cursor:pointer;margin-bottom:8px">✓ Келісемін</button>'+
-    '<button onclick="logout()" style="width:100%;background:none;border:1px solid var(--dark4);border-radius:10px;padding:12px;font-family:Manrope,sans-serif;font-weight:600;font-size:13px;color:var(--muted);cursor:pointer">Бас тарту</button>'+
-  '</div>';
-  document.body.appendChild(m);
-}
-
-function acceptPrivacy(btn){
-  localStorage.setItem('aba_privacy_ok','1');
-  btn.closest('div').parentNode.remove();
-}
-function openAdminChat(){
-  if(!U)return;
-  document.getElementById('admin-chat-modal').classList.add('open');
-  loadAdminChat();
-}
-function loadAdminChat(){
-  if(!U||!window.DB)return;
-  window.DB.ref('admin_chats/'+U.id).on('value',function(snap){
-    var el=document.getElementById('admin-chat-msgs');if(!el)return;
-    var msgs=[];snap.forEach(function(c){msgs.push(c.val())});
-    if(!msgs.length){el.innerHTML='<div style="text-align:center;color:var(--muted);font-size:12px;padding:20px">Хабар жоқ. Сұрағыңызды жазыңыз!</div>';return}
-    el.innerHTML=msgs.map(function(m){
-      var isAdmin=m.from==='admin';
-      return '<div style="align-self:'+(isAdmin?'flex-start':'flex-end')+';max-width:80%">'+
-        '<div style="background:'+(isAdmin?'var(--dark3)':'var(--gold)')+';color:'+(isAdmin?'var(--text)':'var(--dark)')+';padding:8px 12px;border-radius:12px;font-size:13px">'+m.text+'</div>'+
-        '<div style="font-size:10px;color:var(--muted);margin-top:2px;text-align:'+(isAdmin?'left':'right')+'">'+(isAdmin?'👑 Админ':'Сіз')+' • '+new Date(m.time).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})+'</div>'+
-      '</div>';
-    }).join('');
-    el.scrollTop=el.scrollHeight;
-    var badge=document.getElementById('admin-chat-badge');
-    if(badge)badge.style.display='none';
+function doLogin(){
+  var phone=document.getElementById("lp").value.trim();
+  var pass=document.getElementById("lw").value.trim();
+  var err=document.getElementById("le");
+  err.style.display="none";
+  if(!DB){toast("Firebase жүктелуде...");return}
+  var key=phone.replace(/\D/g,"");
+  DB.ref("users/"+key).get().then(function(snap){
+    if(!snap.exists()||snap.val().pass!==pass){err.style.display="block";return}
+    U=snap.val();ROLE=U.role;saveSS(U);enterApp();
   });
 }
-function sendToAdmin(){
-  if(!U||!window.DB)return;
-  var inp=document.getElementById('admin-chat-inp');
-  var text=inp.value.trim();if(!text)return;
-  window.DB.ref('admin_chats/'+U.id).push({text:text,from:U.id,senderName:U.name.split(' ')[0],time:Date.now()});
-  inp.value='';
-}
-
-function toast(m){var el=document.getElementById('toast');el.textContent=m;el.classList.add('show');setTimeout(function(){el.classList.remove('show')},3000)}
-function saveSess(u){localStorage.setItem('aba_s',JSON.stringify(u))}
-function getSess(){try{return JSON.parse(localStorage.getItem('aba_s'))}catch(e){return null}}
-function clearSess(){localStorage.removeItem('aba_s')}
-function ini(name){return name.split(' ').map(function(n){return n[0]}).join('').slice(0,2).toUpperCase()}
-
-// ── AUTH ──
-function switchTab(t){
-  document.getElementById('tab-login').style.display=t==='login'?'block':'none';
-  document.getElementById('tab-register').style.display=t==='register'?'block':'none';
-  document.querySelectorAll('.tab').forEach(function(el,i){el.classList.toggle('active',(i===0)===(t==='login'))});
-}
-function selectRole(r){
-  SEL_ROLE=r;
-  document.getElementById('role-passenger').classList.toggle('active',r==='passenger');
-  document.getElementById('role-driver').classList.toggle('active',r==='driver');
-  document.getElementById('driver-car-fields').style.display=r==='driver'?'block':'none';
-}
-
-function doRegister(){
-  var name=document.getElementById('reg-name').value.trim();
-  var phone=document.getElementById('reg-phone').value.trim();
-  var pass=document.getElementById('reg-pass').value.trim();
-  var err=document.getElementById('reg-error');
-  if(!name||!phone||pass.length<6){err.style.display='block';err.textContent='Барлық өрістерді толтырыңыз';return}
-  err.style.display='none';
-  var key=phone.replace(/\D/g,'');
-  DB.ref('users/'+key).get().then(function(snap){
+function doReg(){
+  var name=document.getElementById("rn").value.trim();
+  var phone=document.getElementById("rp").value.trim();
+  var pass=document.getElementById("rw").value.trim();
+  var err=document.getElementById("re");
+  if(!name||!phone||pass.length<6){err.style.display="block";err.textContent="Барлық өрістерді толтырыңыз";return}
+  err.style.display="none";
+  var key=phone.replace(/\D/g,"");
+  var cm=SROLE==="driver"?document.getElementById("reg-cm").value.trim():"";
+  var cc=SROLE==="driver"?document.getElementById("reg-cc").value.trim():"";
+  var cp=SROLE==="driver"?document.getElementById("reg-cp").value.trim():"";
+  var cl=SROLE==="driver"?document.getElementById("reg-cl").value.trim():"";
+  var licExp=SROLE==="driver"?(document.getElementById("reg-lic-exp").value||""):"";
+  var techExp=SROLE==="driver"?(document.getElementById("reg-tech-exp").value||""):"";
+  var insExp=SROLE==="driver"?(document.getElementById("reg-ins-exp").value||""):"";
+  var licPhoto=SROLE==="driver"?(document.getElementById("reg-lic-photo").getAttribute("data-b64")||""):"";
+  var techPhoto=SROLE==="driver"?(document.getElementById("reg-tech-photo").getAttribute("data-b64")||""):"";
+  var insPhoto=SROLE==="driver"?(document.getElementById("reg-ins-photo").getAttribute("data-b64")||""):"";
+  var docs=SROLE==="driver"?{licExp:licExp,techExp:techExp,insExp:insExp,licPhoto:licPhoto,techPhoto:techPhoto,insPhoto:insPhoto}:{};
+  DB.ref("users/"+key).get().then(function(snap){
     if(snap.exists()){
       var ex=snap.val();
-      if(ex.pass!==pass){err.textContent='Бұл нөмір тіркелген';err.style.display='block';return}
-      var upd={role:SEL_ROLE};
-      if(SEL_ROLE==='driver'){
-        upd.carModel=document.getElementById('reg-car-model').value.trim();
-        upd.carColor=document.getElementById('reg-car-color').value.trim();
-        upd.plate=document.getElementById('reg-car-plate').value.trim();
-        upd.license=document.getElementById('reg-license').value.trim();
-        upd.car=upd.carModel+(upd.carColor?', '+upd.carColor:'');
-      }
-      DB.ref('users/'+key).update(upd).then(function(){
-        U=Object.assign({},ex,upd);ROLE=SEL_ROLE;saveSess(U);enterApp();
-      });
+      if(ex.pass!==pass){err.textContent="Бұл нөмір тіркелген";err.style.display="block";return}
+      var upd={role:SROLE};
+      if(SROLE==="driver"){upd.carModel=cm;upd.carColor=cc;upd.plate=cp;upd.license=cl;upd.car=cm+(cc?", "+cc:"")}
+      DB.ref("users/"+key).update(upd).then(function(){U=Object.assign({},ex,upd);ROLE=SROLE;saveSS(U);enterApp()});
       return;
     }
-    var carModel=SEL_ROLE==='driver'?document.getElementById('reg-car-model').value.trim():'';
-    var carColor=SEL_ROLE==='driver'?document.getElementById('reg-car-color').value.trim():'';
-    var plate=SEL_ROLE==='driver'?document.getElementById('reg-car-plate').value.trim():'';
-    var license=SEL_ROLE==='driver'?document.getElementById('reg-license').value.trim():'';
-    var user={id:key,name:name,phone:phone,pass:pass,role:SEL_ROLE,trips:0,earn:0,rating:5.0,online:false,car:carModel+(carColor?', '+carColor:''),carModel:carModel,carColor:carColor,plate:plate,license:license};
-    DB.ref('users/'+key).set(user).then(function(){U=user;ROLE=user.role;saveSess(U);enterApp()});
-  });
-}
-
-function doLogin(){
-  var phone=document.getElementById('login-phone').value.trim();
-  var pass=document.getElementById('login-pass').value.trim();
-  var err=document.getElementById('login-error');
-  err.style.display='none';
-  var key=phone.replace(/\D/g,'');
-  DB.ref('users/'+key).get().then(function(snap){
-    if(!snap.exists()||snap.val().pass!==pass){err.style.display='block';return}
-    U=snap.val();ROLE=U.role;saveSess(U);enterApp();
-  });
-}
-
-function enterApp(){if(ROLE==='driver'){setupDriver();show('driver')}else{setupHome();show('home')}}
-function logout(){if(U&&ONLINE)DB.ref('users/'+U.id).update({online:false});clearSess();U=null;ROLE=null;ONLINE=false;show('auth')}
-
-// ── HOME ──
-function setupHome(){
-  if(!U)return;
-  var av=document.getElementById('home-avatar');
-  if(U.photo)av.innerHTML='<img src="'+U.photo+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
-  else av.textContent=ini(U.name);
-  document.getElementById('home-username').textContent=U.name.split(' ')[0];
-  var pa=document.getElementById('profile-avatar');
-  if(U.photo)pa.innerHTML='<img src="'+U.photo+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
-  else pa.textContent=ini(U.name);
-  document.getElementById('profile-name').textContent=U.name;
-  document.getElementById('profile-phone').textContent=U.phone;
-  renderTariffs();
-  loadOnlineCount();
-}
-
-function renderTariffs(){
-  var tariffs=getTariffs();
-  var sym=getCurrencySymbol();
-  var el=document.querySelector('.tariff-cards');
-  if(!el)return;
-  el.innerHTML=tariffs.map(function(t,i){
-    return '<div class="tariff-card'+(i===0?' active':'')+'" onclick="setTariff(this,'+t.price+',\''+t.name+'\')">'+
-      '<div class="tariff-icon">'+t.icon+'</div>'+
-      '<div class="tariff-name">'+t.name+'</div>'+
-      '<div class="tariff-price">'+t.price+' '+sym+'</div>'+
-      '<div class="tariff-time">'+t.time+'</div>'+
-    '</div>';
-  }).join('');
-  // Set default tariff
-  TARIFF={name:tariffs[0].name,price:tariffs[0].price};
-  updatePrice();
-}
-
-function loadOnlineCount(){
-  DB.ref('users').orderByChild('online').equalTo(true).on('value',function(snap){
-    var c=0;snap.forEach(function(ch){if(ch.val().role==='driver')c++});
-    var el=document.getElementById('online-label');
-    if(el)el.textContent=c>0?'🟢 '+c+' жүргізуші онлайн':'🔴 Жүргізушілер жоқ';
-  });
-}
-
-function showTab(tab){
-  if(tab==='home'){setupHome();show('home')}
-  else if(tab==='history'){loadHistory();show('history')}
-  else if(tab==='profile'){
-    setupHome();
-    show('profile');
-    // Reload settings from Firebase each time
-    if(window.DB){
-      window.DB.ref('app_settings').once('value',function(snap){
-        APP_SETTINGS=snap.exists()?snap.val():{};
-        applySettings();
-      });
-    }
-  }
-}
-
-// ── TARIFF ──
-function setTariff(el,price,name){
-  document.querySelectorAll('.tariff-card').forEach(function(c){c.classList.remove('active')});
-  el.classList.add('active');
-  TARIFF={name:name,price:price};
-  updatePrice();
-}
-
-function renderTariffs(){
-  var tariffs=getTariffs();
-  var sym=getCurrencySymbol();
-  var isDistCity=DISTANCE_CITIES.indexOf(CUR_CITY)>=0;
-  var el=document.querySelector('.tariff-cards');
-  if(!el)return;
-  el.innerHTML=tariffs.map(function(t,i){
-    // Қашықтық қалаларда баға жасырын — маршрут таңдалғанда ғана шығады
-    var priceHtml=isDistCity
-      ?'<div class="tariff-price" id="tariff-price-'+i+'" style="color:var(--muted);font-size:11px">Маршрут таңдаңыз</div>'
-      :'<div class="tariff-price">'+t.price+' '+sym+'</div>';
-    return '<div class="tariff-card'+(i===0?' active':'')+'" onclick="setTariff(this,'+t.price+',\''+t.name+'\')">'
-      +'<div class="tariff-icon">'+t.icon+'</div>'
-      +'<div class="tariff-name">'+t.name+'</div>'
-      +priceHtml
-      +'<div class="tariff-time">'+t.time+'</div>'
-      +'</div>';
-  }).join('');
-  TARIFF={name:tariffs[0].name,price:tariffs[0].price};
-  updatePrice();
-}
-
-// Қашықтық бойынша баға — тек үлкен қалалар
-var DISTANCE_CITIES=['almaty','astana','karaganda','semey','oskemen','taldykorgan','shymkent','atyrau','urdzhar','makhanshi','pittsburgh','bishkek','tashkent'];
-
-// Әр қала тарифтері: базалық + км бойынша
-var CITY_RATES={
-  'almaty':     {'Эконом':{base:300,perKm:150,min:500},'Комфорт':{base:500,perKm:220,min:800},'Бизнес':{base:800,perKm:350,min:1500},'Жүк':{base:400,perKm:180,min:700}},
-  'astana':     {'Эконом':{base:300,perKm:140,min:500},'Комфорт':{base:450,perKm:200,min:750},'Бизнес':{base:750,perKm:320,min:1400},'Жүк':{base:350,perKm:160,min:650}},
-  'karaganda':  {'Эконом':{base:200,perKm:120,min:400},'Комфорт':{base:350,perKm:180,min:600},'Бизнес':{base:600,perKm:280,min:1200},'Жүк':{base:300,perKm:140,min:550}},
-  'semey':      {'Эконом':{base:200,perKm:110,min:400},'Комфорт':{base:320,perKm:170,min:580},'Бизнес':{base:550,perKm:260,min:1100},'Жүк':{base:280,perKm:130,min:500}},
-  'oskemen':    {'Эконом':{base:200,perKm:110,min:400},'Комфорт':{base:320,perKm:170,min:580},'Бизнес':{base:550,perKm:260,min:1100},'Жүк':{base:280,perKm:130,min:500}},
-  'taldykorgan':{'Эконом':{base:220,perKm:120,min:420},'Комфорт':{base:340,perKm:180,min:600},'Бизнес':{base:580,perKm:270,min:1150},'Жүк':{base:290,perKm:140,min:520}},
-  'shymkent':   {'Эконом':{base:250,perKm:130,min:450},'Комфорт':{base:380,perKm:190,min:650},'Бизнес':{base:650,perKm:300,min:1300},'Жүк':{base:320,perKm:150,min:580}},
-  'atyrau':     {'Эконом':{base:250,perKm:130,min:450},'Комфорт':{base:380,perKm:190,min:650},'Бизнес':{base:650,perKm:300,min:1300},'Жүк':{base:320,perKm:150,min:580}},
-  'urdzhar':    {'Эконом':{base:150,perKm:100,min:350},'Комфорт':{base:280,perKm:160,min:550},'Бизнес':{base:500,perKm:240,min:1000},'Жүк':{base:250,perKm:120,min:450}},
-  'makhanshi':  {'Эконом':{base:150,perKm:100,min:350},'Комфорт':{base:280,perKm:160,min:550},'Бизнес':{base:500,perKm:240,min:1000},'Жүк':{base:250,perKm:120,min:450}},
-  'pittsburgh': {'Economy':{base:2.50,perKm:1.50,min:5},'Comfort':{base:3.50,perKm:2.00,min:8},'Business':{base:5.00,perKm:3.00,min:15},'Cargo':{base:4.00,perKm:1.80,min:8}},
-  'bishkek':    {'Эконом':{base:50,perKm:30,min:100},'Комфорт':{base:80,perKm:45,min:160},'Бизнес':{base:130,perKm:70,min:280},'Груз':{base:60,perKm:35,min:120}},
-  'tashkent':   {'Эконом':{base:3000,perKm:2000,min:8000},'Комфорт':{base:5000,perKm:3000,min:12000},'Бизнес':{base:8000,perKm:5000,min:20000},'Груз':{base:4000,perKm:2500,min:10000}},
-};
-
-function calcDistancePrice(from,to,tariffName){
-  var R=6371;
-  var dLat=(to.lat-from.lat)*Math.PI/180;
-  var dLng=(to.lng-from.lng)*Math.PI/180;
-  var a=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(from.lat*Math.PI/180)*Math.cos(to.lat*Math.PI/180)*Math.sin(dLng/2)*Math.sin(dLng/2);
-  var distKm=R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
-  var timeMin=Math.round(distKm/30*60);
-  var rates=CITY_RATES[CUR_CITY];
-  if(!rates)return null;
-  var tName=tariffName||TARIFF.name;
-  // Find matching rate key (case insensitive, partial match)
-  var rateKey=Object.keys(rates).find(function(k){
-    return k===tName||k.toLowerCase()===tName.toLowerCase()||
-           tName.toLowerCase().indexOf(k.toLowerCase())>=0||
-           k.toLowerCase().indexOf(tName.toLowerCase())>=0;
-  });
-  // If no match, use index from tariffs array
-  if(!rateKey){
-    var tariffs=getTariffs();
-    var idx=tariffs.findIndex(function(t){return t.name===tName});
-    if(idx>=0)rateKey=Object.keys(rates)[idx];
-    else rateKey=Object.keys(rates)[0];
-  }
-  var rate=rates[rateKey];
-  var price=rate.base+(distKm*rate.perKm);
-  price=Math.max(price,rate.min);
-  var sym=getCurrencySymbol();
-  if(sym==='$')price=Math.round(price*100)/100;
-  else price=Math.round(price/10)*10;
-  return {price:price,distKm:distKm.toFixed(1),timeMin:timeMin,sym:sym};
-}
-
-function updatePrice(){
-  var sym=getCurrencySymbol();
-  var isDistCity=DISTANCE_CITIES.indexOf(CUR_CITY)>=0;
-
-  if(!FROM||!TO){
-    document.getElementById('total-price').textContent='— '+sym;
-    document.getElementById('price-note').textContent='Маршрут таңдаңыз';
-    if(isDistCity){
-      document.querySelectorAll('.tariff-price').forEach(function(el){
-        el.textContent='Маршрут таңдаңыз';
-        el.style.color='var(--muted)';
-        el.style.fontSize='11px';
-      });
-    }
-    return;
-  }
-
-  // Үлкен қалалар — қашықтық бойынша
-  if(isDistCity&&FROM_GEO&&TO_GEO){
-    var tariffs=getTariffs();
-    var savedTariff={name:TARIFF.name,price:TARIFF.price};
-    // Show price on each tariff card
-    tariffs.forEach(function(t,i){
-      var result=calcDistancePrice(FROM_GEO,TO_GEO,t.name);
-      if(result){
-        var cards=document.querySelectorAll('.tariff-card');
-        if(cards[i]){
-          var priceEl=cards[i].querySelector('.tariff-price');
-          if(priceEl){
-            priceEl.textContent=result.price+' '+sym;
-            priceEl.style.color='var(--gold)';
-            priceEl.style.fontSize='14px';
-            priceEl.style.fontWeight='800';
-          }
-          cards[i].setAttribute('onclick','setTariff(this,'+result.price+',\''+t.name+'\')');
-        }
+    var user={id:key,name:name,phone:phone,pass:pass,role:SROLE,trips:0,earn:0,rating:5.0,online:false,car:cm+(cc?", "+cc:""),carModel:cm,carColor:cc,plate:cp,license:cl,verified:SROLE==="driver"?false:true,docs:docs};
+    DB.ref("users/"+key).set(user).then(function(){
+      U=user;ROLE=user.role;saveSS(U);
+      // Жаңа жүргізуші тіркелді — Админге хабар
+      if(SROLE==="driver"){
+        DB.ref("sos_alerts").push({
+          type:"new_driver",userId:key,userName:name,phone:phone,
+          message:"🆕 Жаңа жүргізуші тіркелді: "+name+" ("+phone+")",
+          time:Date.now()
+        });
       }
+      enterApp();
     });
-    // Calculate for selected tariff
-    TARIFF=savedTariff;
-    var finalResult=calcDistancePrice(FROM_GEO,TO_GEO,TARIFF.name);
-    if(finalResult){
-      TARIFF.price=finalResult.price;
-      document.getElementById('total-price').textContent=finalResult.price+' '+sym;
-      document.getElementById('price-note').textContent=TARIFF.name+' • '+finalResult.distKm+' км • ~'+finalResult.timeMin+' мин';
-    }
+  });
+}
+function enterApp(){
+  var c=localStorage.getItem("aba_city");if(c&&CITIES[c])CUR=c;
+  loadSET();
+  if(ROLE==="driver"){setupD();show("drv-sc")}
+  else{setupH();show("home-sc")}
+}
+function logout(){
+  if(U&&ONLINE&&DB)DB.ref("users/"+U.id).update({online:false});
+  clrSS();U=null;ROLE=null;ONLINE=false;show("auth-sc");
+}
+function setupH(){
+  if(!U)return;
+  var hav=document.getElementById("hav");
+  if(U.photo)hav.innerHTML="<img src='"+U.photo+"' style='width:100%;height:100%;object-fit:cover;border-radius:50%'>";
+  else hav.textContent=ini(U.name);
+  var pav=document.getElementById("pav");
+  if(pav){if(U.photo)pav.innerHTML="<img src='"+U.photo+"' style='width:100%;height:100%;object-fit:cover;border-radius:50%'>";else pav.textContent=ini(U.name)}
+  var hun=document.getElementById("hun");if(hun)hun.textContent=U.name.split(" ")[0];
+  var pvn=document.getElementById("pvn");if(pvn)pvn.textContent=U.name;
+  var pvp=document.getElementById("pvp");if(pvp)pvp.textContent=U.phone;
+  var cbd=document.getElementById("cbd");if(cbd)cbd.textContent=gc().nm;
+  renderTR();loadOnl();applySET();
+}
+function loadOnl(){
+  if(!DB)return;
+  DB.ref("users").orderByChild("online").equalTo(true).on("value",function(snap){
+    var c=0;snap.forEach(function(ch){if(ch.val().role==="driver")c++});
+    var el=document.getElementById("onl");
+    if(el)el.textContent=c>0?"🟢 "+c+" жүргізуші онлайн":"🔴 Жүргізушілер жоқ";
+  });
+}
+function renderTR(){
+  var t=gtr();var sy=gs();var fx=gc().fx;
+  var el=document.getElementById("tcc");if(!el)return;
+  el.innerHTML=t.map(function(tt,i){
+    var ph=fx?"<div class='tp'>"+tt.p+" "+sy+"</div>":"<div class='tp' id='tp"+i+"' style='color:var(--m);font-size:10px'>Маршрут таңдаңыз</div>";
+    return "<div class='tcard"+(i===0?" on":"")+"' id='tc"+i+"' onclick='selT("+i+")'><div class='ti'>"+tt.i+"</div><div class='tn'>"+tt.n+"</div>"+ph+"<div class='tt'>"+(tt.tm||"~"+(i*2+5)+" мин")+"</div></div>";
+  }).join("");
+  TAR={n:t[0].n,p:t[0].p};updP();
+}
+function selT(i){
+  var t=gtr();
+  document.querySelectorAll(".tcard").forEach(function(c){c.classList.remove("on")});
+  var el=document.getElementById("tc"+i);if(el)el.classList.add("on");
+  TAR={n:t[i].n,p:t[i].p};updP();
+}
+function calcD(a,b){
+  var R=6371,dl=(b.lt-a.lt)*Math.PI/180,dg=(b.lg-a.lg)*Math.PI/180;
+  var x=Math.sin(dl/2)*Math.sin(dl/2)+Math.cos(a.lt*Math.PI/180)*Math.cos(b.lt*Math.PI/180)*Math.sin(dg/2)*Math.sin(dg/2);
+  return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));
+}
+function updP(){
+  var sy=gs(),city=gc();
+  if(!FROM||!TO){
+    document.getElementById("tpr").textContent="— "+sy;
+    document.getElementById("pnt").textContent="Маршрут таңдаңыз";
     return;
   }
-
-  // Қабанбай, Жарбулақ — стандарт баға
-  document.getElementById('total-price').textContent=TARIFF.price+' '+sym;
-  document.getElementById('price-note').textContent=TARIFF.name+' тарифі';
+  if(!city.fx&&FG&&TG){
+    var km=calcD(FG,TG);
+    gtr().forEach(function(tt,i){
+      var p=tt.p+(km*(tt.rk||0));
+      p=Math.max(p,tt.mn||p);
+      p=sy==="$"?Math.round(p*100)/100:Math.round(p/10)*10;
+      var ep=document.getElementById("tp"+i);
+      if(ep){ep.textContent=p+" "+sy;ep.style.color="var(--g)";ep.style.fontSize="12px";ep.style.fontWeight="800"}
+      var etc=document.getElementById("tc"+i);
+      if(etc)etc.setAttribute("onclick","selT2("+i+","+p+")");
+      if(TAR.n===tt.n)TAR.p=p;
+    });
+    document.getElementById("tpr").textContent=TAR.p+" "+sy;
+    document.getElementById("pnt").textContent=TAR.n+" • "+km.toFixed(1)+" км";
+    return;
+  }
+  document.getElementById("tpr").textContent=TAR.p+" "+sy;
+  document.getElementById("pnt").textContent=TAR.n+" тарифі";
 }
-
-function calcPittsburghPrice(){}
-
-// ── LOCATION ──
-var locTimer=null;
-function openLoc(target){
-  LOC_TARGET=target;
-  document.getElementById('loc-title').textContent=target==='from'?'Қайдан шығасыз?':'Қайда барасыз?';
-  document.getElementById('loc-inp').value='';
-  document.getElementById('loc-modal').classList.add('open');
-  renderLocs(LOCS);
+function selT2(i,price){
+  var t=gtr();
+  document.querySelectorAll(".tcard").forEach(function(c){c.classList.remove("on")});
+  var el=document.getElementById("tc"+i);if(el)el.classList.add("on");
+  TAR={n:t[i].n,p:price};updP();
 }
-function closeLoc(){document.getElementById('loc-modal').classList.remove('open')}
-
-function renderLocs(locs){
-  var el=document.getElementById('loc-list');
-  var gps=LOC_TARGET==='from'?'<div class="location-option" onclick="useGPS()"><div class="loc-icon">📍</div><div><div class="loc-name" style="color:var(--success)">Менің орным (GPS)</div><div class="loc-addr">Автоматты анықтау</div></div></div>':'';
-  el.innerHTML=gps+locs.map(function(l){return '<div class="location-option" onclick="pickLoc(\''+l.n.replace(/'/g,"\\'")+'\',' +(l.lat||'null')+','+(l.lng||'null')+')"><div class="loc-icon">'+l.i+'</div><div><div class="loc-name">'+l.n+'</div><div class="loc-addr">'+l.a+'</div></div></div>'}).join('');
+var ltmr=null;
+function openL(tg){
+  LT=tg;
+  document.getElementById("lmt").textContent=tg===0?"Қайдан шығасыз?":"Қайда барасыз?";
+  document.getElementById("lin").value="";
+  document.getElementById("lmo").classList.add("on");
+  renderL(glo());
 }
-
-function searchLoc(){
-  clearTimeout(locTimer);
-  var q=document.getElementById('loc-inp').value.trim();
-  if(!q){renderLocs(LOCS);return}
-  var local=LOCS.filter(function(l){return l.n.toLowerCase().indexOf(q.toLowerCase())>=0||l.a.toLowerCase().indexOf(q.toLowerCase())>=0});
-  var custom=[{i:'✏️',n:q,a:'Осы мекенжайды пайдалану'}].concat(local);
-  renderLocs(custom);
-  locTimer=setTimeout(function(){
-    fetch('https://nominatim.openstreetmap.org/search?q='+encodeURIComponent(q+', Қабанбай, Мақаншы, Қазақстан')+'&format=json&limit=3&accept-language=kk,ru')
+function closeLo(){document.getElementById("lmo").classList.remove("on")}
+function renderL(locs){
+  var el=document.getElementById("lls");
+  var gps=LT===0?"<div class='lo' onclick='useGPS()'><div class='li'>📍</div><div><div class='ln' style='color:var(--s)'>Менің орным (GPS)</div><div class='la'>Автоматты анықтау</div></div></div>":"";
+  el.innerHTML=gps+locs.map(function(l){
+    return "<div class='lo' data-n='"+l.n.replace(/'/g,"&#39;")+"' data-lt='"+(l.lt||"")+"' data-lg='"+(l.lg||"")+"'><div class='li'>"+l.i+"</div><div><div class='ln'>"+l.n+"</div><div class='la'>"+l.a+"</div></div></div>";
+  }).join("");
+}
+function searchLo(){
+  clearTimeout(ltmr);
+  var q=document.getElementById("lin").value.trim();
+  if(!q){renderL(glo());return}
+  var local=glo().filter(function(l){return l.n.toLowerCase().indexOf(q.toLowerCase())>=0});
+  var custom=[{i:"✏️",n:q,a:"Осы мекенжайды пайдалану",lt:null,lg:null}].concat(local);
+  renderL(custom);
+  ltmr=setTimeout(function(){
+    var c=gc();
+    fetch("https://nominatim.openstreetmap.org/search?q="+encodeURIComponent(q+", "+c.nm+", "+c.cn)+"&format=json&limit=3&accept-language=kk,ru")
     .then(function(r){return r.json()})
     .then(function(d){
       if(!d.length)return;
-      var mr=d.map(function(item){return {i:'🗺️',n:item.display_name.split(',')[0],a:item.display_name.split(',').slice(1,3).join(',').trim(),lat:parseFloat(item.lat),lng:parseFloat(item.lon)}});
-      renderLocs(custom.concat(mr));
+      renderL(custom.concat(d.map(function(item){return {i:"🗺️",n:item.display_name.split(",")[0],a:item.display_name.split(",").slice(1,3).join(","),lt:parseFloat(item.lat),lg:parseFloat(item.lon)}})));
     }).catch(function(){});
   },700);
 }
-
 function useGPS(){
-  toast('📍 GPS анықталуда...');
-  if(!navigator.geolocation){toast('GPS жоқ');return}
+  toast("📍 GPS анықталуда...");
+  if(!navigator.geolocation){toast("GPS жоқ");return}
   navigator.geolocation.getCurrentPosition(function(pos){
-    var lat=pos.coords.latitude,lng=pos.coords.longitude;
-    fetch('https://nominatim.openstreetmap.org/reverse?lat='+lat+'&lon='+lng+'&format=json&accept-language=kk,ru')
+    var lt=pos.coords.latitude,lg=pos.coords.longitude;
+    fetch("https://nominatim.openstreetmap.org/reverse?lat="+lt+"&lon="+lg+"&format=json&accept-language=kk,ru")
     .then(function(r){return r.json()})
-    .then(function(d){pickLoc(d.display_name?d.display_name.split(',').slice(0,2).join(','):lat.toFixed(4)+','+lng.toFixed(4),lat,lng)})
-    .catch(function(){pickLoc(lat.toFixed(5)+','+lng.toFixed(5),lat,lng)});
-  },function(){toast('GPS рұқсатын беріңіз')});
+    .then(function(d){pickL(d.display_name?d.display_name.split(",").slice(0,2).join(","):lt.toFixed(4)+","+lg.toFixed(4),lt,lg)})
+    .catch(function(){pickL(lt.toFixed(5)+","+lg.toFixed(5),lt,lg)});
+  },function(){toast("GPS рұқсатын беріңіз")});
 }
-
-function pickLoc(name,lat,lng){
-  closeLoc();
-  if(LOC_TARGET==='from'){FROM=name;FROM_GEO=lat?{lat:lat,lng:lng}:null;var el=document.getElementById('btn-from');el.textContent=name;el.classList.add('selected')}
-  else{TO=name;TO_GEO=lat?{lat:lat,lng:lng}:null;var el=document.getElementById('btn-to');el.textContent=name;el.classList.add('selected')}
-  updatePrice();
+function pickL(name,lt,lg){
+  closeLo();
+  if(LT===0){FROM=name;FG=lt?{lt:lt,lg:lg}:null;var el=document.getElementById("bf");el.textContent=name;el.classList.add("sel")}
+  else{TO=name;TG=lt?{lt:lt,lg:lg}:null;var el=document.getElementById("bt");el.textContent=name;el.classList.add("sel")}
+  updP();
 }
-
-// ── ORDER ──
 function placeOrder(){
-  if(!FROM||!TO){toast('Маршрутты таңдаңыз');return}
-  show('searching');
-  var fromC=FROM_GEO?FROM_GEO.lat+','+FROM_GEO.lng:FROM;
-  var toC=TO_GEO?TO_GEO.lat+','+TO_GEO.lng:TO;
-  var ref=DB.ref('orders').push();
-  ORDER_ID=ref.key;
-  ref.set({passengerId:U.id,passengerName:U.name,passengerPhone:U.phone,from:FROM,to:TO,fromCoord:fromC,toCoord:toC,tariff:TARIFF.name,price:TARIFF.price,currency:getCurrencySymbol(),city:CUR_CITY,status:'waiting',createdAt:Date.now()});
-  DB.ref('orders/'+ORDER_ID).on('value',function(snap){
+  if(!FROM||!TO){toast("Маршрутты таңдаңыз");return}
+  show("search-sc");
+  var fc=FG?FG.lt+","+FG.lg:FROM;
+  var tc=TG?TG.lt+","+TG.lg:TO;
+  var ref=DB.ref("orders").push();
+  OID=ref.key;
+  ref.set({passengerId:U.id,passengerName:U.name,passengerPhone:U.phone,from:FROM,to:TO,fromCoord:fc,toCoord:tc,tariff:TAR.n,price:TAR.p,currency:gs(),city:CUR,status:"waiting",createdAt:Date.now()});
+  DB.ref("orders/"+OID).on("value",function(snap){
     var d=snap.val();if(!d)return;
-    if(d.status==='accepted'){
-      DRV_PHONE=d.driverPhone||null;
-      var av=document.getElementById('ride-avatar');
-      if(d.driverPhoto)av.innerHTML='<img src="'+d.driverPhoto+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
-      else av.textContent=(d.driverName||'?').split(' ').map(function(n){return n[0]}).join('').slice(0,2);
-      document.getElementById('ride-name').textContent=d.driverName||'—';
-      document.getElementById('ride-car').textContent=d.driverCar||'—';
-      document.getElementById('ride-plate').textContent=d.driverPlate||'—';
-      document.getElementById('ride-rating').textContent=d.driverRating||'5.0';
-      document.getElementById('ride-eta').textContent=(d.eta||5)+' мин';
-      document.getElementById('ride-price2').textContent=d.price+' '+(d.currency||'₸');
-      CHAT_KEY=ORDER_ID;loadChat('passenger');
-      show('riding');
-    }
-    if(d.status==='completed'){
-      var oid=ORDER_ID;
-      var orderData=Object.assign({},d,{key:oid});
-      resetHome();show('home');
+    if(d.status==="accepted"){
+      DP=d.driverPhone||null;
+      var av=document.getElementById("rav");
+      if(d.driverPhoto)av.innerHTML="<img src='"+d.driverPhoto+"' style='width:100%;height:100%;object-fit:cover;border-radius:50%'>";
+      else av.textContent=ini(d.driverName||"?");
+      document.getElementById("rdn").textContent=d.driverName||"—";
+      document.getElementById("rdc").textContent=d.driverCar||"—";
+      document.getElementById("rdp").textContent=d.driverPlate||"—";
+      document.getElementById("rrt").textContent=d.driverRating||"5.0";
+      document.getElementById("ret").textContent=(d.eta||5)+" мин";
+      document.getElementById("rpr").textContent=d.price+" "+(d.currency||gs());
+      CK=OID;
+      show("ride-sc");
+      // Экран көрсетілгеннен кейін чатты жүктеу
       setTimeout(function(){
-        showRating(oid);
-        if(APP_SETTINGS.receipt)setTimeout(function(){showReceipt(orderData)},3000);
-      },600);
-      toast('Сапар аяқталды! Рахмет 🙏');
+        DB.ref("chats/"+OID).off();
+        DB.ref("chats/"+OID).on("value",function(snap){
+          var el=document.getElementById("rcm");if(!el)return;
+          var msgs=[];snap.forEach(function(c){msgs.push(c.val())});
+          if(!msgs.length){
+            el.innerHTML="<div style='text-align:center;color:var(--m);font-size:12px;padding:18px'>Хабар жоқ. Жүргізушімен байланысыңыз!</div>";
+            return;
+          }
+          el.innerHTML=msgs.map(function(m){
+            var me=m.from===U.id;
+            return "<div style='align-self:"+(me?"flex-end":"flex-start")+";max-width:82%;margin-bottom:4px'>"
+              +"<div style='background:"+(me?"var(--g)":"#2a2a3a")+";color:"+(me?"var(--d)":"var(--t)")+";padding:8px 11px;border-radius:11px;font-size:13px;line-height:1.4'>"+m.text+"</div>"
+              +"<div style='font-size:9px;color:var(--m);margin-top:2px;text-align:"+(me?"right":"left")+"'>"+(me?"Сіз":"🚗 "+(m.senderName||"Жүргізуші"))+"</div>"
+              +"</div>";
+          }).join("");
+          el.scrollTop=el.scrollHeight;
+        });
+      },300);
     }
-    if(d.status==='cancelled'){toast('Тапсырыс бас тартылды');resetHome();show('home')}
+    if(d.status==="completed"){
+      var oid=OID;
+      var ordData=Object.assign({},d,{key:OID});
+      rstH();show("home-sc");
+      setTimeout(function(){
+        showRat(oid);
+        // Чек және Kaspi QR көрсету
+        setTimeout(function(){showReceipt(ordData)},3500);
+      },600);
+      toast("Сапар аяқталды! Рахмет 🙏");
+    }
+    if(d.status==="cancelled"){toast("Тапсырыс бас тартылды");rstH();show("home-sc")}
   });
 }
-
-function cancelOrder(){
-  if(ORDER_ID){DB.ref('orders/'+ORDER_ID).update({status:'cancelled'});DB.ref('orders/'+ORDER_ID).off()}
-  resetHome();show('home');
+function cancelOrd(){
+  if(OID){DB.ref("orders/"+OID).update({status:"cancelled"});DB.ref("orders/"+OID).off()}
+  rstH();show("home-sc");
 }
-
-function resetHome(){
-  FROM=null;TO=null;FROM_GEO=null;TO_GEO=null;ORDER_ID=null;CHAT_KEY=null;
-  document.getElementById('btn-from').textContent='Қайдан шығасыз?';document.getElementById('btn-from').classList.remove('selected');
-  document.getElementById('btn-to').textContent='Қайда барасыз?';document.getElementById('btn-to').classList.remove('selected');
-  document.getElementById('chat-box').style.display='none';
-  updatePrice();
+function rstH(){
+  FROM=null;TO=null;FG=null;TG=null;OID=null;CK=null;DP=null;
+  var bf=document.getElementById("bf");if(bf){bf.textContent="Қайдан шығасыз?";bf.classList.remove("sel")}
+  var bt=document.getElementById("bt");if(bt){bt.textContent="Қайда барасыз?";bt.classList.remove("sel")}
+  var rc=document.getElementById("rch");if(rc)rc.style.display="none";
+  updP();
 }
-
-// ── CALL & CHAT ──
-function callDriver(){if(DRV_PHONE)window.location.href='tel:'+DRV_PHONE;else toast('Телефон жоқ')}
-function toggleChat(){var b=document.getElementById('chat-box');b.style.display=b.style.display==='none'?'block':'none'}
-
-function loadChat(who){
-  if(!CHAT_KEY)return;
-  var el=document.getElementById(who==='passenger'?'chat-msgs':'drv-msgs');
-  if(!el)return;
-  DB.ref('chats/'+CHAT_KEY).on('value',function(snap){
+function callD(){if(DP)window.location.href="tel:"+DP;else toast("Телефон жоқ")}
+function togCh(){
+  var b=document.getElementById("rch");if(!b)return;
+  if(b.style.display==="none"){
+    b.style.display="block";
+    if(CK){
+      // Firebase тыңдауды қайта қосу
+      DB.ref("chats/"+CK).off();
+      loadCh("rcm",CK);
+    }
+  } else {
+    b.style.display="none";
+  }
+}
+function loadCh(eid,key){
+  if(!key||!DB)return;
+  // Алдыңғы тыңдауды өшір
+  DB.ref("chats/"+key).off();
+  // Жаңа тыңдау қос
+  DB.ref("chats/"+key).on("value",function(snap){
+    var el=document.getElementById(eid);if(!el)return;
     var msgs=[];snap.forEach(function(c){msgs.push(c.val())});
-    if(!msgs.length){el.innerHTML='<div style="text-align:center;color:var(--muted);font-size:12px;padding:20px">Хабар жоқ</div>';return}
-    el.innerHTML=msgs.map(function(m){var me=m.from===U.id;return '<div style="align-self:'+(me?'flex-end':'flex-start')+';max-width:80%"><div style="background:'+(me?'var(--gold)':'var(--dark3)')+';color:'+(me?'var(--dark)':'var(--text)')+';padding:7px 11px;border-radius:11px;font-size:13px">'+m.text+'</div><div style="font-size:10px;color:var(--muted);margin-top:2px;text-align:'+(me?'right':'left')+'">'+( m.senderName||'')+'</div></div>'}).join('');
+    if(!msgs.length){
+      el.innerHTML="<div style='text-align:center;color:var(--m);font-size:12px;padding:18px'>Хабар жоқ</div>";
+      return;
+    }
+    el.innerHTML=msgs.map(function(m){
+      var me=m.from===U.id;
+      return "<div style='align-self:"+(me?"flex-end":"flex-start")+";max-width:82%'>"
+        +"<div style='background:"+(me?"var(--g)":"var(--d3)")+";color:"+(me?"var(--d)":"var(--t)")+";padding:7px 10px;border-radius:10px;font-size:12px'>"+m.text+"</div>"
+        +"<div style='font-size:9px;color:var(--m);margin-top:2px;text-align:"+(me?"right":"left")+"'>"+(me?"Сіз":(m.senderName||"—"))+"</div>"
+        +"</div>";
+    }).join("");
     el.scrollTop=el.scrollHeight;
   });
 }
-
-function sendMsg(who){
-  var inp=document.getElementById(who==='passenger'?'chat-inp':'drv-chat-inp');
-  if(!inp||!CHAT_KEY)return;
-  var text=inp.value.trim();if(!text)return;
-  DB.ref('chats/'+CHAT_KEY).push({text:text,from:U.id,senderName:U.name.split(' ')[0],time:Date.now()});
-  inp.value='';
+function sendM(type){
+  var inp=document.getElementById(type===0?"rci":"dci");
+  var text=inp?inp.value.trim():"";if(!text||!CK)return;
+  DB.ref("chats/"+CK).push({text:text,from:U.id,senderName:U.name.split(" ")[0],time:Date.now()});
+  if(inp)inp.value="";
 }
-
-// ── RATING ──
-var SEL_STAR=5;
-function showRating(orderKey){
-  var m=document.createElement('div');
-  m.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;z-index:300;padding:20px';
-  m.innerHTML='<div style="background:var(--dark2);border-radius:20px;padding:26px;width:100%;max-width:310px;text-align:center"><div style="font-size:34px;margin-bottom:8px">⭐</div><div style="font-size:17px;font-weight:800;margin-bottom:4px">Сапарды бағалаңыз</div><div style="font-size:12px;color:var(--muted);margin-bottom:18px">Жүргізушіге баға беріңіз</div><div style="display:flex;justify-content:center;gap:6px;margin-bottom:18px">'+ [1,2,3,4,5].map(function(i){return '<span onclick="setStar('+i+')" id="str-'+i+'" style="font-size:36px;cursor:pointer;opacity:.3;transition:opacity .15s">★</span>'}).join('')+'</div><button onclick="submitRating(\''+orderKey+'\',this.closest(\'div\').parentNode)" style="width:100%;background:var(--gold);border:none;border-radius:10px;padding:13px;font-family:Manrope,sans-serif;font-weight:800;font-size:14px;color:var(--dark);cursor:pointer">Жіберу ✓</button><button onclick="this.closest(\'div\').parentNode.remove()" style="width:100%;background:none;border:none;color:var(--muted);font-family:Manrope,sans-serif;font-size:13px;margin-top:8px;cursor:pointer;padding:8px">Өткізіп жіберу</button></div>';
+function openAC(){
+  if(!U)return;
+  document.getElementById("acmo").classList.add("on");
+  if(DB){
+    DB.ref("admin_chats/"+U.id).on("value",function(snap){
+      var el=document.getElementById("acm");if(!el)return;
+      var msgs=[];snap.forEach(function(c){msgs.push(c.val())});
+      if(!msgs.length){el.innerHTML="<div style='text-align:center;color:var(--m);font-size:12px;padding:18px'>Хабар жоқ</div>";return}
+      el.innerHTML=msgs.map(function(m){
+        var ia=m.from==="admin";
+        return "<div style='align-self:"+(ia?"flex-start":"flex-end")+";max-width:80%'><div style='background:"+(ia?"var(--d3)":"var(--g)")+";color:"+(ia?"var(--t)":"var(--d)")+";padding:7px 10px;border-radius:10px;font-size:12px'>"+m.text+"</div><div style='font-size:9px;color:var(--m);margin-top:2px;text-align:"+(ia?"left":"right")+"'>"+(ia?"👑 Админ":"Сіз")+"</div></div>";
+      }).join("");
+      el.scrollTop=el.scrollHeight;
+    });
+  }
+}
+function sendAC(){
+  var inp=document.getElementById("aci");
+  var text=inp?inp.value.trim():"";if(!text||!U||!DB)return;
+  DB.ref("admin_chats/"+U.id).push({text:text,from:U.id,senderName:U.name.split(" ")[0],time:Date.now()});
+  if(inp)inp.value="";
+}
+var SSTR=5;
+function showRat(ok){
+  var m=document.createElement("div");
+  m.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;z-index:300;padding:20px";
+  var stars=[1,2,3,4,5].map(function(i){return "<span onclick='setSt("+i+")' id='sr"+i+"' style='font-size:32px;cursor:pointer;opacity:.3'>★</span>"}).join("");
+  m.innerHTML="<div style='background:var(--d2);border-radius:18px;padding:22px;width:100%;max-width:300px;text-align:center'><div style='font-size:30px;margin-bottom:7px'>⭐</div><div style='font-size:16px;font-weight:800;margin-bottom:4px'>Сапарды бағалаңыз</div><div style='font-size:12px;color:var(--m);margin-bottom:14px'>Жүргізушіге баға беріңіз</div><div style='display:flex;justify-content:center;gap:5px;margin-bottom:14px'>"+stars+"</div><button onclick='subRat(\""+ok+"\",this.closest(\"div\").parentNode)' style='width:100%;background:var(--g);border:none;border-radius:9px;padding:12px;font-family:Manrope,sans-serif;font-weight:800;font-size:13px;color:var(--d);cursor:pointer'>Жіберу ✓</button><button onclick='this.closest(\"div\").parentNode.remove()' style='width:100%;background:none;border:none;color:var(--m);font-family:Manrope,sans-serif;font-size:12px;margin-top:7px;cursor:pointer;padding:7px'>Өткізіп жіберу</button></div>";
   document.body.appendChild(m);
-  SEL_STAR=5;setStar(5);
+  SSTR=5;setSt(5);
 }
-function setStar(n){SEL_STAR=n;for(var i=1;i<=5;i++){var e=document.getElementById('str-'+i);if(e)e.style.opacity=i<=n?'1':'.3'}}
-function submitRating(orderKey,modal){
-  var r=SEL_STAR||5;
-  DB.ref('orders/'+orderKey).get().then(function(snap){
-    if(snap.exists()&&snap.val().driverId){
-      var dId=snap.val().driverId;
-      DB.ref('users/'+dId).get().then(function(ds){
-        if(ds.exists()){
-          var d=ds.val();var t=Math.max(d.trips||1,1);
-          var nr=Math.round((((d.rating||5)*(t-1)+r)/t)*10)/10;
-          DB.ref('users/'+dId).update({rating:Math.min(5,Math.max(1,nr))});
-        }
-      });
-    }
-  });
+function setSt(n){SSTR=n;for(var i=1;i<=5;i++){var e=document.getElementById("sr"+i);if(e)e.style.opacity=i<=n?"1":".3"}}
+function subRat(ok,modal){
+  var r=SSTR||5;
+  if(DB){DB.ref("orders/"+ok).get().then(function(snap){if(snap.exists()&&snap.val().driverId){var did=snap.val().driverId;DB.ref("users/"+did).get().then(function(ds){if(ds.exists()){var d=ds.val();var t=Math.max(d.trips||1,1);var nr=Math.round((((d.rating||5)*(t-1)+r)/t)*10)/10;DB.ref("users/"+did).update({rating:Math.min(5,Math.max(1,nr))})}})}})}
   if(modal)modal.remove();
-  toast('⭐ Рахмет! Бағаңыз жіберілді!');
+  toast("⭐ Рахмет!");
 }
-
-// ── HISTORY ──
-function loadHistory(){
-  var el=document.getElementById('history-list');
-  el.innerHTML='<div style="text-align:center;color:var(--muted);padding:40px;font-size:14px">⏳ Жүктелуде...</div>';
-  var field=ROLE==='driver'?'driverId':'passengerId';
-  DB.ref('orders').orderByChild(field).equalTo(U.id).once('value',function(snap){
-    var items=[];snap.forEach(function(c){var v=c.val();if(v.status==='completed')items.unshift(v)});
-    if(!items.length){el.innerHTML='<div style="text-align:center;color:var(--muted);padding:60px 20px;font-size:14px">Сапар тарихы жоқ</div>';return}
-    el.innerHTML=items.map(function(item){return '<div class="history-item"><div class="history-row"><div class="history-route">'+(item.from||'—')+' → '+(item.to||'—')+'</div><div class="history-price">'+(item.price||0)+' '+(item.currency||'₸')+'</div></div><div class="history-meta"><span class="history-tag">'+(ROLE==='driver'?'🙋 '+(item.passengerName||'—'):'🚗 '+(item.driverName||'—'))+'</span><span class="history-tag">•</span><span class="history-tag">'+(item.tariff||'—')+'</span><span class="history-tag">•</span><span class="history-tag">'+(item.createdAt?new Date(item.createdAt).toLocaleDateString('ru-RU'):'—')+'</span></div></div>'}).join('');
+function loadH(){
+  var el=document.getElementById("hll");if(!el)return;
+  el.innerHTML="<div style='text-align:center;color:var(--m);padding:40px;font-size:13px'>⏳ Жүктелуде...</div>";
+  if(!DB)return;
+  var fld=ROLE==="driver"?"driverId":"passengerId";
+  DB.ref("orders").orderByChild(fld).equalTo(U.id).once("value",function(snap){
+    var items=[];snap.forEach(function(c){var v=c.val();if(v.status==="completed")items.unshift(v)});
+    if(!items.length){el.innerHTML="<div style='text-align:center;color:var(--m);padding:50px 18px;font-size:13px'>Сапар тарихы жоқ</div>";return}
+    el.innerHTML=items.map(function(item){return "<div class='hi'><div class='hr2'><div class='hrt'>"+(item.from||"—")+" → "+(item.to||"—")+"</div><div class='hp'>"+(item.price||0)+" "+(item.currency||"\u20B8")+"</div></div><div class='hm'><span class='htg'>"+(ROLE==="driver"?"🙋 "+(item.passengerName||"—"):"🚗 "+(item.driverName||"—"))+"</span><span class='htg'>•</span><span class='htg'>"+(item.tariff||"—")+"</span><span class='htg'>•</span><span class='htg'>"+(item.createdAt?new Date(item.createdAt).toLocaleDateString("ru-RU"):"—")+"</span></div></div>"}).join("");
   });
 }
-
-// ── PHOTO ──
-function compressPhoto(file,size,cb){
+function prevDoc(input,type){
+  var file=input.files[0];if(!file)return;
+  compress(file,800,function(b64){
+    var prev=document.getElementById(type+"-prev");
+    var img=document.getElementById(type+"-img");
+    if(prev&&img){prev.style.display="block";img.src=b64}
+    input.setAttribute("data-b64",b64);
+  });
+}
+function compress(file,size,cb){
   var reader=new FileReader();
   reader.onload=function(e){
     var img=new Image();
     img.onload=function(){
-      var canvas=document.createElement('canvas');var w=img.width,h=img.height;
+      var cv=document.createElement("canvas");var w=img.width,h=img.height;
       if(w>h&&w>size){h=h*size/w;w=size}else if(h>size){w=w*size/h;h=size}
-      canvas.width=w;canvas.height=h;canvas.getContext('2d').drawImage(img,0,0,w,h);
-      cb(canvas.toDataURL('image/jpeg',.6));
+      cv.width=w;cv.height=h;cv.getContext("2d").drawImage(img,0,0,w,h);
+      cb(cv.toDataURL("image/jpeg",.6));
     };img.src=e.target.result;
   };reader.readAsDataURL(file);
 }
-function uploadPhoto(input,who){
+function upPhoto(input,type){
   var file=input.files[0];if(!file)return;
-  toast('Фото жүктелуде...');
-  compressPhoto(file,200,function(b64){
-    DB.ref('users/'+U.id).update({photo:b64}).then(function(){
-      U.photo=b64;saveSess(U);
-      if(who==='passenger')setupHome();else setupDriver();
-      toast('✅ Фото сақталды!');
+  toast("Фото жүктелуде...");
+  compress(file,200,function(b64){
+    if(!DB)return;
+    DB.ref("users/"+U.id).update({photo:b64}).then(function(){
+      U.photo=b64;saveSS(U);
+      if(type===0)setupH();else setupD();
+      toast("✅ Фото сақталды!");
     });
   });
 }
-
-// ── DRIVER ──
-function setupDriver(){
+function showP(i){
+  if(i===0){setupH();show("home-sc")}
+  else if(i===1){loadH();show("hist-sc")}
+  else if(i===2){
+    setupH();show("prof-sc");
+    if(DB)DB.ref("app_settings").once("value",function(snap){SET=snap.exists()?snap.val():{};applySET()});
+  }
+}
+function setupD(){
   if(!U)return;
-  document.getElementById('d-trips').textContent=U.trips||0;
-  document.getElementById('d-earn').textContent=(U.earn||0)+' '+(getCurrencySymbol()||'₸');
-  document.getElementById('d-rating').textContent=U.rating?Number(U.rating).toFixed(1):'5.0';
-  document.getElementById('drv-name').textContent=U.name;
-  var av=document.getElementById('drv-avatar');
-  if(U.photo)av.innerHTML='<img src="'+U.photo+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
+  document.getElementById("dtr").textContent=U.trips||0;
+  document.getElementById("der").textContent=(U.earn||0)+" "+(U.earnCurrency||gs());
+  document.getElementById("dra").textContent=U.rating?Number(U.rating).toFixed(1):"5.0";
+  document.getElementById("dvn").textContent=U.name;
+  document.getElementById("dcty").textContent=gc().nm+" — Жүргізуші режимі";
+  var av=document.getElementById("dav");
+  if(U.photo)av.innerHTML="<img src='"+U.photo+"' style='width:100%;height:100%;object-fit:cover;border-radius:50%'>";
   else av.textContent=ini(U.name);
-  var ci=document.getElementById('drv-car');
-  if(U.carModel&&U.plate){ci.textContent=U.carModel+(U.carColor?', '+U.carColor:'')+' • '+U.plate;ci.style.color='var(--text)'}
-  else{ci.textContent='Машина тіркелмеген';ci.style.color='var(--danger)'}
+  var dc=document.getElementById("dvc");
+  if(dc){
+    if(U.carModel&&U.plate){dc.textContent=U.carModel+(U.carColor?", "+U.carColor:"")+" • "+U.plate;dc.style.color="var(--t)"}
+    else{dc.textContent="Машина тіркелмеген";dc.style.color="var(--r)"}
+  }
+  // Верификация тексеру
+  var dar=document.getElementById("dar");
+  if(U.verified===false){
+    dar.innerHTML="<div class='no' style='padding:30px 20px'>"
+      +"<div style='font-size:48px;margin-bottom:12px'>⏳</div>"
+      +"<div style='font-size:16px;font-weight:800;color:var(--g);margin-bottom:8px'>Верификация күтілуде</div>"
+      +"<div style='font-size:13px;color:var(--m);line-height:1.6;text-align:center'>Аккаунтыңыз тексерілуде.<br/>Админ растаған соң жұмыс бастай аласыз.<br/><br/>"
+      +"<span style='color:var(--t);font-weight:600'>📞 Байланыс: support@abagroup.kz</span></div>"
+      +"</div>";
+    var tog=document.getElementById("dtg");
+    if(tog){tog.style.pointerEvents="none";tog.style.opacity="0.4"}
+    return;
+  }
+  // Құжат мерзімін тексеру
+  var today=new Date();today.setHours(0,0,0,0);
+  var warn7=new Date(today);warn7.setDate(warn7.getDate()+7);
+  var expired=[];var expiring=[];
+  var docs=U.docs||{};
+  var docNames={licExp:"🪪 Жүргізуші куәлігі",techExp:"🚗 Техосмотр",insExp:"🛡️ Сақтандыру"};
+  Object.keys(docNames).forEach(function(k){
+    if(!docs[k])return;
+    var d=new Date(docs[k]);d.setHours(0,0,0,0);
+    if(d<today)expired.push(docNames[k]);
+    else if(d<=warn7)expiring.push(docNames[k]+" ("+docs[k]+")");
+  });
+  if(expired.length>0){
+    // Автоблок — мерзімі өткен
+    DB.ref("users/"+U.id).update({verified:false,blockedReason:"Құжат мерзімі өтті: "+expired.join(", ")});
+    U.verified=false;saveSS(U);
+    dar.innerHTML="<div class='no' style='padding:30px 20px'>"
+      +"<div style='font-size:48px;margin-bottom:12px'>🚫</div>"
+      +"<div style='font-size:16px;font-weight:800;color:var(--r);margin-bottom:8px'>Құжат мерзімі өтті!</div>"
+      +"<div style='font-size:13px;color:var(--m);line-height:1.6;text-align:center'>"
+      +expired.join("<br/>")+"<br/><br/>"
+      +"Құжаттарды жаңартып, Админге хабарласыңыз.</div>"
+      +"</div>";
+    var tog=document.getElementById("dtg");
+    if(tog){tog.style.pointerEvents="none";tog.style.opacity="0.4"}
+    return;
+  }
+  if(expiring.length>0){
+    // Ескерту — 7 күн қалды
+    toast("⚠️ Құжат мерзімі аяқталуда: "+expiring[0]);
+  }
+  var tog=document.getElementById("dtg");
+  if(tog){tog.style.pointerEvents="auto";tog.style.opacity="1"}
 }
-
-function toggleOnline(){
+function showWt(){document.getElementById("dar").innerHTML="<div class='no'><div style='font-size:46px'>🚕</div><div style='font-size:13px;color:var(--t);line-height:1.6'>Тапсырыс күтілуде...<br/><span style='color:var(--m);font-size:11px'>Жолаушылар іздеуде</span></div></div>";}
+function togOnline(){
+  if(U&&U.verified===false){toast("⏳ Алдымен верификациядан өтіңіз!");return}
   ONLINE=!ONLINE;
-  document.getElementById('drv-toggle').classList.toggle('on',ONLINE);
-  var b=document.getElementById('drv-badge');
-  b.textContent=ONLINE?'Онлайн':'Офлайн';b.classList.toggle('online',ONLINE);
-  DB.ref('users/'+U.id).update({online:ONLINE});
-  if(ONLINE){showWaiting();listenOrders()}
-  else document.getElementById('drv-area').innerHTML='<div class="no-orders"><div class="no-orders-icon">🟡</div><div class="no-orders-text">Желіге қосылыңыз<br/>тапсырыстарды қабылдау үшін</div></div>';
+  document.getElementById("dtg").classList.toggle("on",ONLINE);
+  var b=document.getElementById("dsbg");b.textContent=ONLINE?"Онлайн":"Офлайн";b.classList.toggle("on",ONLINE);
+  if(DB)DB.ref("users/"+U.id).update({online:ONLINE});
+  if(ONLINE){showWt();listenOrd();}
+  else{document.getElementById("dar").innerHTML="<div class='no'><div style='font-size:46px'>🟡</div><div style='font-size:13px;line-height:1.6'>Желіге қосылыңыз<br/>тапсырыстарды қабылдау үшін</div></div>";}
+}
+// ── ДЫБЫС ЖӘНЕ ДАУЫС ЖҮЙЕСІ ──
+function playBeep(){
+  try{
+    var ctx=new(window.AudioContext||window.webkitAudioContext)();
+    [[880,0,0.3],[1100,0.35,0.3],[1320,0.7,0.4]].forEach(function(n){
+      var o=ctx.createOscillator();var g=ctx.createGain();
+      o.connect(g);g.connect(ctx.destination);
+      o.frequency.value=n[0];
+      g.gain.setValueAtTime(0.4,ctx.currentTime+n[1]);
+      g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+n[1]+n[2]);
+      o.start(ctx.currentTime+n[1]);
+      o.stop(ctx.currentTime+n[1]+n[2]);
+    });
+  }catch(e){}
+  if(navigator.vibrate)navigator.vibrate([300,100,300,100,500]);
 }
 
-function showWaiting(){document.getElementById('drv-area').innerHTML='<div class="no-orders"><div class="no-orders-icon">🚕</div><div class="no-orders-text" style="color:var(--text)">Тапсырыс күтілуде...<br/><span style="color:var(--muted);font-size:12px">Жолаушылар іздеуде</span></div></div>'}
+function speakOrder(order){
+  if(!window.speechSynthesis)return;
+  var city=CITIES[order.city||CUR]||gc();
+  var text="";
+  var lang="ru-RU";
 
-function listenOrders(){
-  DB.ref('orders').orderByChild('status').equalTo('waiting').on('value',function(snap){
+  if(order.city==="pittsburgh"){
+    lang="en-US";
+    text="New order! From "+order.from+" to "+order.to+". Price: "+order.price+" dollars.";
+  } else if(order.city==="bishkek"){
+    lang="ru-RU";
+    text="Жаңы буйрутма! "+order.from+" дан "+order.to+" га. Баасы: "+order.price+" сом.";
+  } else if(order.city==="tashkent"){
+    lang="uz-UZ";
+    text="Yangi buyurtma! "+order.from+" dan "+order.to+" ga. Narxi: "+order.price+" so'm.";
+  } else {
+    // Қазақстан қалалары — орысша (барлық телефонда жұмыс істейді)
+    lang="ru-RU";
+    text="Новый заказ! Откуда: "+order.from+". Куда: "+order.to+". Цена: "+order.price+" тенге.";
+  }
+
+  var utter=new SpeechSynthesisUtterance(text);
+  utter.lang=lang;
+  utter.rate=0.9;
+  utter.volume=1;
+  window.speechSynthesis.cancel();
+  window.speechSynthesis.speak(utter);
+}
+
+function notifyNewOrder(order){
+  playBeep();
+  setTimeout(function(){speakOrder(order)},1200);
+  toast("🔔 Жаңа тапсырыс келді!");
+}
+
+var lastOrdKey=null;
+function listenOrd(){
+  if(!DB)return;
+  DB.ref("orders").orderByChild("status").equalTo("waiting").on("value",function(snap){
     if(!ONLINE)return;
-    var found=null;snap.forEach(function(c){if(!found)found=Object.assign({key:c.key},c.val())});
-    if(found)showOrder(found);else showWaiting();
+    var found=null;
+    snap.forEach(function(c){
+      var v=c.val();
+      if(!found&&(v.city===CUR||!v.city||v.city===undefined))
+        found=Object.assign({key:c.key},v);
+    });
+    if(found){
+      if(found.key!==lastOrdKey){
+        lastOrdKey=found.key;
+        notifyNewOrder(found);
+      }
+      showOrd(found);
+    } else {
+      lastOrdKey=null;
+      if(!CK)showWt();
+    }
   });
 }
-
-function showOrder(order){
-  var fc=order.fromCoord||order.from;var tc=order.toCoord||order.to;
-  var isC=function(s){return /^-?\d+\./.test(s)};
-  var fF=isC(fc)?fc:fc+', Қазақстан';var tF=isC(tc)?tc:tc+', Қазақстан';
-  var mu='https://www.google.com/maps/dir/?api=1&origin='+encodeURIComponent(fF)+'&destination='+encodeURIComponent(tF)+'&travelmode=driving';
-  document.getElementById('drv-area').innerHTML='<div class="order-request"><div class="order-request-title">🔔 Жаңа тапсырыс!</div><div style="margin-bottom:11px"><div class="order-route-item"><div class="order-route-dot" style="background:var(--gold)"></div><div class="order-route-text">'+order.from+'</div></div><div style="width:2px;height:11px;background:var(--dark4);margin-left:4px;margin-bottom:2px"></div><div class="order-route-item"><div class="order-route-dot" style="background:var(--danger)"></div><div class="order-route-text">'+order.to+'</div></div></div><div class="order-meta"><div class="order-meta-item"><div class="order-meta-val">'+order.price+' '+(order.currency||'₸')+'</div><div class="order-meta-lbl">Баға</div></div><div class="order-meta-item"><div class="order-meta-val">'+order.tariff+'</div><div class="order-meta-lbl">Тариф</div></div><div class="order-meta-item"><div class="order-meta-val">'+(order.passengerName||'').split(' ')[0]+'</div><div class="order-meta-lbl">Жолаушы</div></div></div><a href="'+mu+'" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:8px;background:rgba(66,133,244,.15);border:1px solid rgba(66,133,244,.3);border-radius:8px;padding:10px;margin-bottom:10px;color:#4285f4;font-weight:700;font-size:13px;text-decoration:none">🗺️ Google Maps-та маршрутты ашу</a><div class="accept-row"><button class="btn-accept" onclick="acceptOrder(\''+order.key+'\','+order.price+',\''+encodeURIComponent(fc)+'\',\''+encodeURIComponent(tc)+'\')">✓ Қабылдау</button><button class="btn-reject" onclick="rejectOrder(\''+order.key+'\')">✗ Өткізу</button></div></div>';
-  // Listen for cancel
-  DB.ref('orders/'+order.key).on('value',function(snap){
+function showOrd(order){
+  var fc=order.fromCoord||order.from;
+  var tc=order.toCoord||order.to;
+  var isC=function(s){return /^-?[0-9]/.test(s)};
+  var fF=isC(fc)?fc:fc+", "+gc().cn;
+  var tF=isC(tc)?tc:tc+", "+gc().cn;
+  var mu="https://www.google.com/maps/dir/?api=1&origin="+encodeURIComponent(fF)+"&destination="+encodeURIComponent(tF)+"&travelmode=driving";
+  var sy=order.currency||gs();
+  var ok=order.key;
+  document.getElementById("dar").innerHTML=
+    "<div class='oreq'>"+
+    "<div class='ort'>🔔 Жаңа тапсырыс!</div>"+
+    "<div style='margin-bottom:9px'>"+
+      "<div class='ori'><div class='ord' style='background:var(--g)'></div><div class='ortx'>"+order.from+"</div></div>"+
+      "<div style='width:2px;height:9px;background:var(--d4);margin-left:3px;margin-bottom:2px'></div>"+
+      "<div class='ori'><div class='ord' style='background:var(--r)'></div><div class='ortx'>"+order.to+"</div></div>"+
+    "</div>"+
+    "<div class='om'>"+
+      "<div class='omi'><div class='omv'>"+order.price+" "+sy+"</div><div class='oml'>Баға</div></div>"+
+      "<div class='omi'><div class='omv'>"+(order.tariff||"—")+"</div><div class='oml'>Тариф</div></div>"+
+      "<div class='omi'><div class='omv'>"+(order.passengerName||"—").split(" ")[0]+"</div><div class='oml'>Жолаушы</div></div>"+
+    "</div>"+
+    "<a href='"+mu+"' target='_blank' style='display:flex;align-items:center;justify-content:center;gap:7px;background:rgba(66,133,244,.15);border:1px solid rgba(66,133,244,.3);border-radius:8px;padding:9px;margin-bottom:9px;color:#4285f4;font-weight:700;font-size:12px;text-decoration:none'>🗺️ Google Maps маршруты</a>"+
+    "<div class='acr'>"+
+      "<button class='bac' onclick=\"accOrd('"+ok+"',"+order.price+",'"+encodeURIComponent(fc)+"','"+encodeURIComponent(tc)+"','"+sy+"')\">✓ Қабылдау</button>"+
+      "<button class='bre' onclick=\"rejOrd('"+ok+"')\">✗ Өткізу</button>"+
+    "</div>"+
+    "</div>";
+  DB.ref("orders/"+ok).on("value",function(snap){
     var d=snap.val();
-    if(d&&d.status==='cancelled'){toast('⚠️ Жолаушы бас тартты!');DB.ref('orders/'+order.key).off();showWaiting()}
+    if(d&&d.status==="cancelled"){
+      toast("⚠️ Жолаушы бас тартты!");
+      DB.ref("orders/"+ok).off();
+      showWt();
+    }
   });
 }
-
-function acceptOrder(orderKey,price,fromEnc,toEnc){
-  var from=decodeURIComponent(fromEnc);var to=decodeURIComponent(toEnc);
+function accOrd(ok,price,fe,te,sy){
+  var from=decodeURIComponent(fe);var to=decodeURIComponent(te);
   var eta=Math.floor(Math.random()*5)+3;
-  var isC=function(s){return /^-?\d+\./.test(s)};
-  var fF=isC(from)?from:from+', Қазақстан';var tF=isC(to)?to:to+', Қазақстан';
-  var mu='https://www.google.com/maps/dir/?api=1&origin='+encodeURIComponent(fF)+'&destination='+encodeURIComponent(tF)+'&travelmode=driving';
-  DB.ref('orders/'+orderKey).update({status:'accepted',driverId:U.id,driverName:U.name,driverPhone:U.phone,driverCar:(U.carModel||'Автомобиль')+(U.carColor?', '+U.carColor:''),driverPlate:U.plate||'—',driverRating:U.rating||5.0,driverPhoto:U.photo||null,eta:eta,currency:getCurrencySymbol(),city:CUR_CITY});
+  var isC=function(s){return /^-?[0-9]/.test(s)};
+  var fF=isC(from)?from:from+", "+gc().cn;var tF=isC(to)?to:to+", "+gc().cn;
+  var mu="https://www.google.com/maps/dir/?api=1&origin="+encodeURIComponent(fF)+"&destination="+encodeURIComponent(tF)+"&travelmode=driving";
+  DB.ref("orders/"+ok).update({status:"accepted",driverId:U.id,driverName:U.name,driverPhone:U.phone,driverCar:(U.carModel||"Автомобиль")+(U.carColor?", "+U.carColor:""),driverPlate:U.plate||"—",driverRating:U.rating||5.0,driverPhoto:U.photo||null,eta:eta,currency:sy});
   var nt=(U.trips||0)+1;var ne=(U.earn||0)+price;
-  DB.ref('users/'+U.id).update({trips:nt,earn:ne,earnCurrency:getCurrencySymbol()});
-  U.trips=nt;U.earn=ne;saveSess(U);
-  document.getElementById('d-trips').textContent=nt;
-  document.getElementById('d-earn').textContent=ne+' '+(getCurrencySymbol()||'₸');
-  CHAT_KEY=orderKey;
-  toast('✅ Қабылданды!');
-  setTimeout(function(){window.open(mu,'_blank')},800);
-  document.getElementById('drv-area').innerHTML='<div style="padding:13px"><div style="background:var(--dark2);border-radius:14px;border:2px solid var(--success);padding:14px;margin-bottom:10px"><div style="font-size:11px;color:var(--success);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">✅ Тапсырыс қабылданды!</div><div style="margin-bottom:11px"><div class="order-route-item"><div class="order-route-dot" style="background:var(--gold)"></div><div class="order-route-text">'+from+'</div></div><div style="width:2px;height:11px;background:var(--dark4);margin-left:4px;margin-bottom:2px"></div><div class="order-route-item"><div class="order-route-dot" style="background:var(--danger)"></div><div class="order-route-text">'+to+'</div></div></div><a href="'+mu+'" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:8px;background:rgba(66,133,244,.15);border:1px solid rgba(66,133,244,.3);border-radius:8px;padding:11px;color:#4285f4;font-weight:700;font-size:13px;text-decoration:none;margin-bottom:10px">🗺️ Маршрутты Google Maps-та ашу</a><button onclick="completeTrip(\''+orderKey+'\','+price+')" style="width:100%;background:var(--success);border:none;border-radius:8px;padding:12px;color:white;font-family:Manrope,sans-serif;font-weight:700;font-size:14px;cursor:pointer">✅ Сапарды аяқтау</button></div><div style="background:var(--dark2);border-radius:14px;border:1px solid var(--dark4);overflow:hidden"><div style="padding:9px 13px;border-bottom:1px solid var(--dark3);font-size:13px;font-weight:700">💬 Жолаушымен чат</div><div id="drv-msgs" style="height:130px;overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:8px"><div style="text-align:center;color:var(--muted);font-size:12px">Хабар жоқ</div></div><div style="display:flex;gap:8px;padding:8px;border-top:1px solid var(--dark3)"><input id="drv-chat-inp" style="flex:1;background:var(--dark3);border:1px solid var(--dark4);border-radius:8px;padding:8px 11px;color:var(--text);font-family:Manrope,sans-serif;font-size:13px;outline:none" placeholder="Хабар..." onkeydown="if(event.key===\'Enter\')sendMsg(\'driver\')"/><button onclick="sendMsg(\'driver\')" style="background:var(--gold);border:none;border-radius:8px;padding:8px 12px;font-weight:800;cursor:pointer;font-size:14px">➤</button></div></div></div>';
-  loadChat('driver');
+  DB.ref("users/"+U.id).update({trips:nt,earn:ne,earnCurrency:sy});
+  U.trips=nt;U.earn=ne;saveSS(U);
+  document.getElementById("dtr").textContent=nt;
+  document.getElementById("der").textContent=ne+" "+sy;
+  CK=ok;toast("✅ Қабылданды!");
+  setTimeout(function(){window.open(mu,"_blank")},800);
+  document.getElementById("dar").innerHTML="<div style='padding:12px'><div style='background:var(--d2);border-radius:13px;border:2px solid var(--s);padding:13px;margin-bottom:9px'><div style='font-size:10px;color:var(--s);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:9px'>✅ Тапсырыс қабылданды!</div><div style='margin-bottom:9px'><div class='ori'><div class='ord' style='background:var(--g)'></div><div class='ortx'>"+from+"</div></div><div style='width:2px;height:9px;background:var(--d4);margin-left:3px;margin-bottom:2px'></div><div class='ori'><div class='ord' style='background:var(--r)'></div><div class='ortx'>"+to+"</div></div></div><a href='"+mu+"' target='_blank' style='display:flex;align-items:center;justify-content:center;gap:7px;background:rgba(66,133,244,.15);border:1px solid rgba(66,133,244,.3);border-radius:8px;padding:10px;color:#4285f4;font-weight:700;font-size:12px;text-decoration:none;margin-bottom:9px'>🗺️ Маршрутты ашу</a><button onclick='compTrip(\""+ok+"\","+price+",\""+sy+"\")' style='width:100%;background:var(--s);border:none;border-radius:8px;padding:11px;color:white;font-family:Manrope,sans-serif;font-weight:700;font-size:13px;cursor:pointer'>✅ Сапарды аяқтау</button></div><div class='chb'><div style='padding:8px 11px;border-bottom:1px solid var(--d3);font-size:12px;font-weight:700'>💬 Жолаушымен чат</div><div class='cms' id='dcm'></div><div class='cir'><input class='cin' id='dci' placeholder='Хабар...' onkeydown='if(event.key===\"Enter\")sendDM(\""+ok+"\")'/><button class='bsn' onclick='sendDM(\""+ok+"\")'>➤</button></div></div></div>";
+  loadCh("dcm",ok);
 }
-
-function completeTrip(orderKey,price){
-  DB.ref('orders/'+orderKey).update({status:'completed'});
-  if(CHAT_KEY)DB.ref('chats/'+CHAT_KEY).off();
-  CHAT_KEY=null;
-  toast('Сапар аяқталды! +'+price+' '+(getCurrencySymbol()||'₸'));
-  showWaiting();
+function sendDM(key){
+  var inp=document.getElementById("dci");
+  var text=inp?inp.value.trim():"";if(!text)return;
+  DB.ref("chats/"+key).push({text:text,from:U.id,senderName:U.name.split(" ")[0],time:Date.now()});
+  if(inp)inp.value="";
 }
-
-function rejectOrder(orderKey){DB.ref('orders/'+orderKey).off();showWaiting()}
-
-// ── ROLE SWITCH ──
-function goPassenger(){ROLE='passenger';U.role='passenger';saveSess(U);DB.ref('users/'+U.id).update({role:'passenger',online:false});ONLINE=false;setupHome();show('home');toast('🙋 Жолаушы режимі')}
-function goDriver(){
-  if(!U){toast('Алдымен кіріңіз');return}
-  if(!U.carModel){toast('Алдымен машина деректерін толтырыңыз');openCarModal();return}
-  ROLE='driver';U.role='driver';saveSess(U);DB.ref('users/'+U.id).update({role:'driver'});setupDriver();show('driver');toast('🚗 Жүргізуші режимі');
+function compTrip(ok,price,sy){
+  DB.ref("orders/"+ok).update({status:"completed"});
+  if(CK)DB.ref("chats/"+CK).off();
+  CK=null;toast("Сапар аяқталды! +"+price+" "+sy);showWt();
 }
-function goHistory(){ROLE=U.role;loadHistory();show('history')}
-function driverProfile(){
-  if(confirm(U.name+'\n'+U.phone+'\n\nШығу?'))logout();
+function rejOrd(key){DB.ref("orders/"+key).off();showWt()}
+function goP(){ROLE="passenger";U.role="passenger";saveSS(U);if(DB)DB.ref("users/"+U.id).update({role:"passenger",online:false});ONLINE=false;setupH();show("home-sc");toast("🙋 Жолаушы режимі")}
+function goD(){
+  if(!U){toast("Алдымен кіріңіз");return}
+  if(!U.carModel){toast("Алдымен машина деректерін толтырыңыз");openCM();return}
+  ROLE="driver";U.role="driver";saveSS(U);if(DB)DB.ref("users/"+U.id).update({role:"driver"});setupD();show("drv-sc");toast("🚗 Жүргізуші режимі");
 }
-
-function openDriverAdminChat(){
-  if(!U)return;
-  document.getElementById('admin-chat-modal').classList.add('open');
-  loadAdminChat();
-}
-
-// ── CAR ──
-function openCarModal(){
-  document.getElementById('car-model').value=U.carModel||'';
-  document.getElementById('car-color').value=U.carColor||'';
-  document.getElementById('car-plate').value=U.plate||'';
-  document.getElementById('car-license').value=U.license||'';
-  document.getElementById('car-modal').classList.add('open');
+function openCM(){
+  document.getElementById("ecm").value=U.carModel||"";document.getElementById("ecc").value=U.carColor||"";document.getElementById("ecp").value=U.plate||"";document.getElementById("ecl").value=U.license||"";
+  document.getElementById("cmo").classList.add("on");
 }
 function saveCar(){
-  var cm=document.getElementById('car-model').value.trim();
-  var cc=document.getElementById('car-color').value.trim();
-  var cp=document.getElementById('car-plate').value.trim();
-  var cl=document.getElementById('car-license').value.trim();
-  if(!cm||!cp){toast('Машина маркасы мен номерін толтырыңыз');return}
-  DB.ref('users/'+U.id).update({carModel:cm,carColor:cc,plate:cp,license:cl,car:cm+(cc?', '+cc:'')}).then(function(){
-    U.carModel=cm;U.carColor=cc;U.plate=cp;U.license=cl;U.car=cm+(cc?', '+cc:'');saveSess(U);
-    document.getElementById('car-modal').classList.remove('open');
-    setupDriver();toast('✅ Машина деректері сақталды!');
+  var cm=document.getElementById("ecm").value.trim();var cc=document.getElementById("ecc").value.trim();var cp=document.getElementById("ecp").value.trim();var cl=document.getElementById("ecl").value.trim();
+  if(!cm||!cp){toast("Машина маркасы мен номерін толтырыңыз");return}
+  DB.ref("users/"+U.id).update({carModel:cm,carColor:cc,plate:cp,license:cl,car:cm+(cc?", "+cc:"")}).then(function(){
+    U.carModel=cm;U.carColor=cc;U.plate=cp;U.license=cl;U.car=cm+(cc?", "+cc:"");saveSS(U);
+    document.getElementById("cmo").classList.remove("on");setupD();toast("✅ Машина деректері сақталды!");
   });
+}
+function drvOut(){if(confirm(U.name+"\n"+U.phone+"\n\nШығу?"))logout()}
+function doSOS(){
+  if(confirm("🆘 SOS сигналын жіберу?\n\n112 қоңырау шалынады!")){
+    window.location.href="tel:112";
+    if(U&&DB)DB.ref("sos_alerts").push({userId:U.id,userName:U.name,phone:U.phone,orderId:OID||null,time:Date.now()});
+    toast("🆘 SOS жіберілді!");
+  }
+}
+function shareRide(){
+  var text="🚕 Мен қазір такси ұстадым!\n\n📍 "+(FROM||"—")+"\n🏁 "+(TO||"—")+"\n\nABA TAKSI GO — aba-taksi.vercel.app";
+  if(navigator.share)navigator.share({title:"ABA TAKSI GO",text:text});
+  else if(navigator.clipboard)navigator.clipboard.writeText(text).then(function(){toast("📋 Көшірілді!")});
+}
+function shareRef(){
+  var code="ABA"+(U?U.id.slice(-4).toUpperCase():"0000");
+  if(navigator.share)navigator.share({title:"ABA TAKSI GO",text:"ABA TAKSI GO — aba-taksi.vercel.app\nПромокод: "+code});
+  else toast("Промокодыңыз: "+code);
+}
+function showReceipt(od){
+  document.getElementById("r-from").textContent=od.from||"—";
+  document.getElementById("r-to").textContent=od.to||"—";
+  document.getElementById("r-drv").textContent=od.driverName||"—";
+  document.getElementById("r-tar").textContent=od.tariff||"—";
+  document.getElementById("r-date").textContent=new Date(od.createdAt||Date.now()).toLocaleString("ru-RU");
+  document.getElementById("r-price").textContent=(od.price||0)+" "+(od.currency||gs());
+  // Kaspi QR секциясы — SET-те қосулы болса ғана
+  var ks=document.getElementById("kaspi-section");
+  if(ks)ks.style.display=SET.kaspi_qr?"block":"none";
+  document.getElementById("rcptmo").classList.add("on");
+}
+function shareReceipt(){
+  var text="🚕 ABA GROUP TAKSI GO — Чек\n\n"+
+    "📍 "+document.getElementById("r-from").textContent+"\n"+
+    "🏁 "+document.getElementById("r-to").textContent+"\n"+
+    "🚗 "+document.getElementById("r-drv").textContent+"\n"+
+    "💰 "+document.getElementById("r-price").textContent+"\n"+
+    "📅 "+document.getElementById("r-date").textContent+"\n\n"+
+    "aba-taksi.vercel.app";
+  if(navigator.share)navigator.share({title:"ABA TAKSI GO Чек",text:text});
+  else if(navigator.clipboard)navigator.clipboard.writeText(text).then(function(){toast("📋 Чек көшірілді!")});
+}
+function showPrv(){
+  var m=document.createElement("div");
+  m.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.92);display:flex;align-items:center;justify-content:center;z-index:500;padding:20px";
+  m.innerHTML="<div style='background:var(--d2);border-radius:18px;padding:24px;width:100%;max-width:320px;text-align:center'><div style='font-size:28px;margin-bottom:9px'>📜</div><div style='font-size:16px;font-weight:800;margin-bottom:7px'>Пайдаланушы келісімі</div><div style='font-size:12px;color:var(--m);margin-bottom:18px;line-height:1.6'>ABA Group TAKSI GO қызметін пайдалану арқылы сіз біздің <span style=\"color:var(--g)\">Пайдалану шарттарымызға</span> келісесіз.</div><button onclick='localStorage.setItem(\"aba_prv\",\"1\");this.closest(\"div\").parentNode.remove()' style='width:100%;background:var(--g);border:none;border-radius:9px;padding:12px;font-family:Manrope,sans-serif;font-weight:800;font-size:13px;color:var(--d);cursor:pointer;margin-bottom:7px'>✓ Келісемін</button><button onclick='logout()' style='width:100%;background:none;border:1px solid var(--d4);border-radius:9px;padding:10px;font-family:Manrope,sans-serif;font-size:12px;color:var(--m);cursor:pointer'>Бас тарту</button></div>";
+  document.body.appendChild(m);
 }
 </script>
 </body>

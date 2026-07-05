@@ -344,10 +344,6 @@ function adminLogout(){localStorage.removeItem('aba_admin_auth');document.getEle
 function showAdmin(){document.getElementById('login-screen').style.display='none';document.getElementById('admin-screen').style.display='block'}
 
 // ── INIT ──
-function initAdmin(){
-  loadUsers();loadOrders();loadArchive();
-  setTimeout(function(){renderStats()},1200);
-}
 
 // ── USERS ──
 function loadUsers(){
@@ -355,17 +351,22 @@ function loadUsers(){
     allUsers={};var drv=0,pass=0;
     snap.forEach(function(c){
       var u=c.val();
-      // Normalize role - user might have switched roles
+      if(!u||!u.name)return;
+      if(!u.id)u.id=c.key;
       allUsers[c.key]=u;
       if(u.role==='driver')drv++;
       else pass++;
     });
     document.getElementById('stat-drivers').textContent=drv;
     document.getElementById('stat-passengers').textContent=pass;
-    renderDrivers(Object.values(allUsers).filter(function(u){return u.role==='driver'}));
-    renderPassengers(Object.values(allUsers).filter(function(u){return u.role!=='driver'}));
+    // Барлық қолданушылар — рөліне қарай бөліп көрсет
+    var all=Object.values(allUsers);
+    renderDrivers(all.filter(function(u){return u.role==='driver'}));
+    renderPassengers(all.filter(function(u){return u.role!=='driver'}));
     renderChatUsers();
     renderStats();
+  },function(err){
+    toast('Firebase қатесі: '+err.message);
   });
 }
 
@@ -380,14 +381,16 @@ function renderDrivers(drivers){
   el.innerHTML=drivers.map(function(u){
     var statusClass=u.blocked?'badge-blocked':u.online?'badge-online':'badge-offline';
     var statusText=u.blocked?'🚫 Блок':u.online?'🟢 Онлайн':'⚫ Офлайн';
+    var verifyBadge=u.verified===false?'<span class="badge" style="background:rgba(255,165,0,.2);color:orange">⏳ Тексерілмеген</span>':'<span class="badge badge-online">✅ Расталды</span>';
     return '<div class="card">'+
       '<div class="card-header">'+
         '<div class="card-avatar">'+(u.photo?'<img src="'+u.photo+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">':u.name.slice(0,2).toUpperCase())+'</div>'+
         '<div class="card-info">'+
-          '<div class="card-name">'+u.name+' <span class="badge '+statusClass+'">'+statusText+'</span></div>'+
+          '<div class="card-name">'+u.name+' <span class="badge '+statusClass+'">'+statusText+'</span> '+verifyBadge+'</div>'+
           '<div class="card-sub">📞 '+u.phone+(u.carModel?' | 🚗 '+u.carModel:'')+(u.plate?' | '+u.plate:'')+'</div>'+
         '</div>'+
         '<div class="card-actions">'+
+          (u.verified===false?'<button class="btn-sm btn-unblock" onclick="verifyDriver(\''+u.id+'\',\''+u.name+'\')">✅ Растау</button>':'')+
           '<button class="btn-sm '+(u.blocked?'btn-unblock':'btn-block')+'" onclick="toggleBlock(\''+u.id+'\','+(!!u.blocked)+')">'+(u.blocked?'✅ Ашу':'🚫 Блок')+'</button>'+
           '<button class="btn-sm btn-delete" onclick="delUser(\''+u.id+'\',\''+u.name+'\')">🗑️</button>'+
         '</div>'+
@@ -401,6 +404,7 @@ function renderDrivers(drivers){
         (u.carModel?'<div class="detail-row"><span class="detail-label">Машина</span><span class="detail-val">'+(u.carModel||'')+(u.carColor?', '+u.carColor:'')+'</span></div>':'')+
         (u.plate?'<div class="detail-row"><span class="detail-label">Номер</span><span class="detail-val">'+u.plate+'</span></div>':'')+
         (u.license?'<div class="detail-row"><span class="detail-label">Куәлік №</span><span class="detail-val">'+u.license+'</span></div>':'')+
+        getDocStatus(u)+
       '</div>'+
     '</div>';
   }).join('');
@@ -415,6 +419,41 @@ function filterDrivers(q){
            (u.phone||'').replace(/\D/g,'').indexOf(q.replace(/\D/g,''))>=0||
            (u.carModel||'').toLowerCase().indexOf(q)>=0||
            (u.plate||'').toLowerCase().indexOf(q)>=0;
+  }));
+}
+
+function renderPassengers(passengers){
+  var el=document.getElementById('passengers-list');if(!el)return;
+  if(!passengers.length){el.innerHTML='<div class="empty">Жолаушылар жоқ</div>';return}
+  el.innerHTML=passengers.map(function(u){
+    // Жүргізуші де бола алатын жолаушы
+    var isAlsoDriver=u.carModel&&u.plate;
+    return '<div class="card">'+
+      '<div class="card-header">'+
+        '<div class="card-avatar">'+(u.photo?'<img src="'+u.photo+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">':(u.name||'?').slice(0,2).toUpperCase())+'</div>'+
+        '<div class="card-info">'+
+          '<div class="card-name">'+u.name+
+            ' <span class="badge '+(u.blocked?'badge-blocked':'badge-offline')+'">'+(u.blocked?'🚫 Блок':'🙋 Жолаушы')+'</span>'+
+            (isAlsoDriver?' <span class="badge badge-online" style="font-size:9px">🚗 Жүргізуші де</span>':'')+
+          '</div>'+
+          '<div class="card-sub">📞 '+u.phone+'</div>'+
+        '</div>'+
+        '<div class="card-actions">'+
+          '<button class="btn-sm '+(u.blocked?'btn-unblock':'btn-block')+'" onclick="toggleBlock(\''+u.id+'\','+(!!u.blocked)+')">'+(u.blocked?'✅ Ашу':'🚫 Блок')+'</button>'+
+          '<button class="btn-sm btn-delete" onclick="delUser(\''+u.id+'\',\''+u.name+'\')">🗑️</button>'+
+        '</div>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+
+function filterPassengers(q){
+  var all=Object.values(allUsers).filter(function(u){return u.role!=='driver'});
+  if(!q){renderPassengers(all);return}
+  q=q.toLowerCase();
+  renderPassengers(all.filter(function(u){
+    return u.name.toLowerCase().indexOf(q)>=0||
+           (u.phone||'').replace(/\D/g,'').indexOf(q.replace(/\D/g,''))>=0;
   }));
 }
 
@@ -471,6 +510,79 @@ function filterDrivers(q){renderDrivers(Object.values(allUsers).filter(function(
 function filterPassengers(q){renderPassengers(Object.values(allUsers).filter(function(u){return u.role!=='driver'&&(u.name.toLowerCase().indexOf(q.toLowerCase())>=0||(u.phone||'').indexOf(q)>=0)}))}
 
 // ── BLOCK / DELETE ──
+function getDocStatus(u){
+  if(!u.docs)return'';
+  var today=new Date();today.setHours(0,0,0,0);
+  var warn7=new Date(today);warn7.setDate(warn7.getDate()+7);
+  var docs=[
+    {key:'licExp',photo:'licPhoto',name:'🪪 Жүргізуші куәлігі'},
+    {key:'techExp',photo:'techPhoto',name:'🚗 Техосмотр'},
+    {key:'insExp',photo:'insPhoto',name:'🛡️ Сақтандыру'}
+  ];
+  var html='<div style="margin-top:10px;border-top:1px solid var(--dark4);padding-top:10px">';
+  html+='<div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">📋 Құжаттар</div>';
+  docs.forEach(function(doc){
+    var exp=u.docs[doc.key]||'';
+    var photo=u.docs[doc.photo]||'';
+    var color='var(--muted)';var icon='—';
+    if(exp){
+      var d=new Date(exp);d.setHours(0,0,0,0);
+      if(d<today){color='var(--danger)';icon='❌';}
+      else if(d<=warn7){color='orange';icon='⚠️';}
+      else{color='var(--success)';icon='✅';}
+    }
+    html+='<div style="margin-bottom:10px">';
+    html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">';
+    html+='<span style="font-size:12px;font-weight:600">'+doc.name+'</span>';
+    html+='<span style="font-size:12px;color:'+color+';font-weight:700">'+icon+' '+(exp||'Жоқ')+'</span>';
+    html+='</div>';
+    if(photo){
+      html+='<img src="'+photo+'" style="width:100%;border-radius:8px;max-height:150px;object-fit:cover;border:2px solid var(--dark4);cursor:pointer" onclick="this.style.maxHeight=this.style.maxHeight===\'none\'?\'150px\':\'none\'"/>';
+      html+='<div style="font-size:10px;color:var(--muted);margin-top:3px;text-align:center">👆 Үлкейту үшін басыңыз</div>';
+    } else {
+      html+='<div style="background:var(--dark3);border-radius:8px;padding:10px;text-align:center;font-size:12px;color:var(--muted)">📷 Фото жүктелмеген</div>';
+    }
+    html+='</div>';
+  });
+  html+='</div>';
+  return html;
+}
+
+function checkExpiry(){
+  // Барлық жүргізушілердің мерзімін тексер
+  var today=new Date();today.setHours(0,0,0,0);
+  var warn7=new Date(today);warn7.setDate(warn7.getDate()+7);
+  Object.values(allUsers).forEach(function(u){
+    if(u.role!=='driver'||!u.docs)return;
+    var docNames={licExp:"Жүргізуші куәлігі",techExp:"Техосмотр",insExp:"Сақтандыру"};
+    Object.keys(docNames).forEach(function(k){
+      if(!u.docs[k])return;
+      var d=new Date(u.docs[k]);d.setHours(0,0,0,0);
+      if(d<today){
+        // Мерзімі өткен — автоблок
+        DB.ref('users/'+u.id).update({verified:false});
+        DB.ref('admin_chats/'+u.id).push({
+          text:'🚫 '+docNames[k]+' мерзімі өтті ('+u.docs[k]+'). Жаңартып, Админге хабарласыңыз.',
+          from:'admin',senderName:'Жүйе',time:Date.now()
+        });
+      } else if(d<=warn7){
+        // 7 күн қалды — ескерту
+        DB.ref('admin_chats/'+u.id).push({
+          text:'⚠️ '+docNames[k]+' мерзімі аяқталуда: '+u.docs[k]+'. Жаңартуды ұмытпаңыз!',
+          from:'admin',senderName:'Жүйе',time:Date.now()
+        });
+      }
+    });
+  });
+}
+
+function verifyDriver(uid,name){
+  if(!confirm((name||'Жүргізуші')+' ді растайсыз ба?'))return;
+  DB.ref('users/'+uid).update({verified:true}).then(function(){
+    DB.ref('admin_chats/'+uid).push({text:'✅ Верификациядан өттіңіз! Енді тапсырыс қабылдай аласыз.',from:'admin',senderName:'Админ',time:Date.now()});
+    toast('✅ '+(name||'Жүргізуші')+' расталды!');
+  });
+}
 function toggleBlock(userId,isBlocked){DB.ref('users/'+userId).update({blocked:!isBlocked});toast(isBlocked?'✅ Блоктан шығарылды':'🚫 Блокталды')}
 function delUser(userId,name){if(confirm(name+' — өшіру керек пе?')){DB.ref('users/'+userId).remove();toast('🗑️ Өшірілді: '+name)}}
 
@@ -612,28 +724,25 @@ function downloadArchive(key){
 
 // ── CHAT ──
 function renderChatUsers(){
-  var el=document.getElementById('chat-user-list');
-  // If allUsers is empty, load from DB directly
-  if(!Object.keys(allUsers).length){
-    if(!DB){el.innerHTML='<div class="empty">Firebase жүктелуде...</div>';return}
-    DB.ref('users').once('value',function(snap){
-      snap.forEach(function(c){allUsers[c.key]=c.val()});
-      renderChatUsers();
+  var el=document.getElementById('chat-user-list');if(!el)return;
+  DB.ref('users').once('value',function(snap){
+    var users=[];
+    snap.forEach(function(c){
+      var u=c.val();
+      if(u&&u.name)users.push(u);
     });
-    return;
-  }
-  var users=Object.values(allUsers);
-  if(!users.length){el.innerHTML='<div class="empty">Қолданушылар жоқ</div>';return}
-  el.innerHTML=users.map(function(u){
-    return '<div class="chat-user-item '+(curChatUser===u.id?'active':'')+'" onclick="openChat(\''+u.id+'\',\''+u.name.replace(/'/g,"\\'")+'\')">'+
-      (u.photo?'<img src="'+u.photo+'" style="width:38px;height:38px;object-fit:cover;border-radius:50%">':
-        '<div style="width:38px;height:38px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--dark);font-weight:800;font-size:13px">'+u.name.slice(0,2).toUpperCase()+'</div>')+
-      '<div>'+
-        '<div style="font-size:13px;font-weight:700">'+u.name+'</div>'+
-        '<div style="font-size:11px;color:var(--muted)">'+(u.role==='driver'?'🚗 Жүргізуші':'🙋 Жолаушы')+' • '+u.phone+'</div>'+
-      '</div>'+
-    '</div>';
-  }).join('');
+    if(!users.length){el.innerHTML='<div class="empty">Қолданушылар жоқ</div>';return}
+    el.innerHTML=users.map(function(u){
+      return '<div class="chat-user-item '+(curChatUser===u.id?'active':'')+'" onclick="openChat(\''+u.id+'\',\''+u.name.replace(/'/g,"\\'")+'\')">'+
+        (u.photo?'<img src="'+u.photo+'" style="width:38px;height:38px;object-fit:cover;border-radius:50%">':
+          '<div style="width:38px;height:38px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--dark);font-weight:800;font-size:13px">'+u.name.slice(0,2).toUpperCase()+'</div>')+
+        '<div>'+
+          '<div style="font-size:13px;font-weight:700">'+u.name+'</div>'+
+          '<div style="font-size:11px;color:var(--muted)">'+(u.role==='driver'?'🚗 Жүргізуші':'🙋 Жолаушы')+' • '+u.phone+'</div>'+
+        '</div>'+
+      '</div>';
+    }).join('');
+  });
 }
 
 function openChat(userId,userName){
@@ -641,14 +750,22 @@ function openChat(userId,userName){
   document.getElementById('chat-box-wrap').style.display='block';
   document.getElementById('chat-box-title').textContent='💬 '+userName;
   renderChatUsers();
-  // Use 'admin_chats/userId' path - separate from order chats
+  // Stop previous listener
+  DB.ref('admin_chats').off();
+  // Listen to this user's chat
   DB.ref('admin_chats/'+userId).on('value',function(snap){
-    var el=document.getElementById('chat-messages');
+    var el=document.getElementById('chat-messages');if(!el)return;
     var msgs=[];snap.forEach(function(c){msgs.push(c.val())});
-    if(!msgs.length){el.innerHTML='<div style="text-align:center;color:var(--muted);font-size:13px;padding:20px">Хабар жоқ</div>';return}
+    if(!msgs.length){
+      el.innerHTML='<div style="text-align:center;color:var(--muted);font-size:13px;padding:20px">Хабар жоқ</div>';
+      return;
+    }
     el.innerHTML=msgs.map(function(m){
       var isAdmin=m.from==='admin';
-      return '<div class="chat-msg '+(isAdmin?'admin':'user')+'">'+'<div class="chat-bubble">'+m.text+'</div>'+'<div class="chat-time">'+(isAdmin?'👑 Админ':'👤 '+m.senderName)+' • '+new Date(m.time).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})+'</div></div>';
+      return '<div class="chat-msg '+(isAdmin?'admin':'user')+'">'
+        +'<div class="chat-bubble">'+m.text+'</div>'
+        +'<div class="chat-time">'+(isAdmin?'👑 Админ':'👤 '+( m.senderName||'Қолданушы'))+' • '+new Date(m.time).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})+'</div>'
+        +'</div>';
     }).join('');
     el.scrollTop=el.scrollHeight;
   });
@@ -681,7 +798,7 @@ function switchTab(name){
 function initAdmin(){
   loadUsers();loadOrders();loadArchive();loadCities();loadSettings();
   listenSOS();
-  setTimeout(function(){renderStats()},1200);
+  setTimeout(function(){renderStats();checkExpiry();},1500);
 }
 
 function listenSOS(){
@@ -886,7 +1003,7 @@ var SETTINGS_CONFIG=[
   {key:'referral',icon:'👥',name:'Реферал жүйесі',desc:'Достарды шақырса бонус алады'},
   {group:'📋 Заңдық'},
   {key:'privacy_policy',icon:'📜',name:'Privacy Policy',desc:'Кіргенде пайдаланушы келісімін растауы керек'},
-  {key:'driver_verify',icon:'🪪',name:'Жүргізуші верификациясы',desc:'Куәлік пен техпаспорт тексеруден өту міндетті'},
+  {key:'driver_verify',icon:'🪪',name:'Жүргізуші верификациясы',desc:'Куәлік пен техосмотр тексеруден өту міндетті'},
   {group:'🔔 Хабарландыру'},
   {key:'push_notify',icon:'🔔',name:'Push хабарландыру',desc:'Жаңа тапсырыс келгенде дыбыс және дірілдеу'},
   {key:'sms_verify',icon:'📱',name:'SMS верификация',desc:'Телефон нөмірін SMS арқылы растау'},
