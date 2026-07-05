@@ -1038,15 +1038,27 @@ function doSOS(){
     toast("🆘 SOS жіберілді!");
   }
 }
+function isMobileShareOK(){
+  return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) && !!navigator.share;
+}
+function shareText(text,toastMsg){
+  if(isMobileShareOK()){
+    navigator.share({title:"ABA TAKSI GO",text:text}).catch(function(){
+      if(navigator.clipboard)navigator.clipboard.writeText(text).then(function(){toast(toastMsg)}).catch(function(){});
+    });
+  } else if(navigator.clipboard){
+    navigator.clipboard.writeText(text).then(function(){toast(toastMsg)}).catch(function(){toast(toastMsg)});
+  } else {
+    toast(toastMsg);
+  }
+}
 function shareRide(){
   var text="🚕 Мен қазір такси ұстадым!\n\n📍 "+(FROM||"—")+"\n🏁 "+(TO||"—")+"\n\nABA TAKSI GO — aba-taksi.vercel.app";
-  if(navigator.share)navigator.share({title:"ABA TAKSI GO",text:text});
-  else if(navigator.clipboard)navigator.clipboard.writeText(text).then(function(){toast("📋 Көшірілді!")});
+  shareText(text,"📋 Көшірілді!");
 }
 function shareRef(){
   var code="ABA"+(U?U.id.slice(-4).toUpperCase():"0000");
-  if(navigator.share)navigator.share({title:"ABA TAKSI GO",text:"ABA TAKSI GO — aba-taksi.vercel.app\nПромокод: "+code});
-  else toast("Промокодыңыз: "+code);
+  shareText("ABA TAKSI GO — aba-taksi.vercel.app\nПромокод: "+code,"📋 Промокод көшірілді: "+code);
 }
 function showReceipt(od){
   document.getElementById("r-from").textContent=od.from||"—";
@@ -1068,8 +1080,7 @@ function shareReceipt(){
     "💰 "+document.getElementById("r-price").textContent+"\n"+
     "📅 "+document.getElementById("r-date").textContent+"\n\n"+
     "aba-taksi.vercel.app";
-  if(navigator.share)navigator.share({title:"ABA TAKSI GO Чек",text:text});
-  else if(navigator.clipboard)navigator.clipboard.writeText(text).then(function(){toast("📋 Чек көшірілді!")});
+  shareText(text,"📋 Чек көшірілді!");
 }
 function showPrv(){
   var m=document.createElement("div");
